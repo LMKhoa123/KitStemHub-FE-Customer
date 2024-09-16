@@ -1,4 +1,4 @@
-import Navbar from "../components/login/navbar/Navbar";
+import Navbar from "../../components/login/navbar/Navbar";
 
 function LoginPage() {
   return (
