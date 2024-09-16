@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* // when style but have too much class write here */
+
+.kt-menu-item {
+  @apply py-1 hover:text-gray-800 relative after:absolute after:bottom-0 after:left-0 after:bg-pink-200 after:h-0.5 after:w-0 hover:after:w-full after:transition-all after:ease-in-out after:duration-300;
+}
