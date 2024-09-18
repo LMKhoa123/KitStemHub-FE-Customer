@@ -64,7 +64,7 @@ function LoginInput() {
               <div>
                 <button
                   type="submit"
-                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600 focus:outline-none focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
+                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600  focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                 >
                   Create account
                 </button>
