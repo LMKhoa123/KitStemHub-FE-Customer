@@ -4,6 +4,7 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import ProfileInfo from "../../components/profile/profileinfo/ProfileInfo";
 
 function ProfilePage() {
   return (
@@ -31,6 +32,7 @@ function ProfilePage() {
           </>
         }
       />
+      <ProfileInfo />
     </>
   );
 }
