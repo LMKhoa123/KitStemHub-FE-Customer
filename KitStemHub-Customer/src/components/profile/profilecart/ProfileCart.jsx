@@ -1,4 +1,4 @@
-import CartMyProfile from "./tablecart/CartMyProfile";
+import CartMyProfile from "./cartmyprofile/CartMyProfile";
 
 function ProfileCart() {
   return (
