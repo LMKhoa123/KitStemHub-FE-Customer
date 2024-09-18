@@ -1,7 +1,7 @@
 function LoginInput() {
   return (
     <>
-      <div className="flex justify-center">
+      <main className="flex justify-center min-h-screen">
         <div className="hidden lg:flex items-center justify-center flex-1 max-w-md text-center">
           <img
             src="./arranging-files.svg"
@@ -102,7 +102,7 @@ function LoginInput() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </>
   );
 }
