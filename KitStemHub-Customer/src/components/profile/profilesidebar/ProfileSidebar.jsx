@@ -52,7 +52,7 @@ const items = [
   },
 ];
 
-function SidebarMenu() {
+function ProfileSidebar() {
   return (
     <Layout className="p-14 pl-16">
       <Sider width={200}>
@@ -67,4 +67,4 @@ function SidebarMenu() {
   );
 }
 
-export default SidebarMenu;
+export default ProfileSidebar;

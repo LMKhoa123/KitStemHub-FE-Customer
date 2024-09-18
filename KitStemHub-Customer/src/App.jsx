@@ -4,6 +4,7 @@ import ProfilePage from "./pages/profilepage/ProfilePage";
 import ProfileInfo from "./components/profile/profileinfo/ProfileInfo";
 import ProfileAddress from "./components/profile/profileaddress/ProfileAddress";
 import SignUpPage from "./pages/signuppage/SignUpPage";
+import ProfileCart from "./components/profile/profilecart/ProfileCart";
 
 function App() {
   const router = createBrowserRouter([
@@ -22,6 +23,10 @@ function App() {
         {
           path: "profileaddress", // Đường dẫn con: /profile/profileaddress
           element: <ProfileAddress />, // Thành phần ProfileAddress
+        },
+        {
+          path: "profilecart", // Đường dẫn con: /profile/profilecart
+          element: <ProfileCart />, // Thành phần ProfileCart
         },
       ],
     },

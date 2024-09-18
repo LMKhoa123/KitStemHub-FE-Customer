@@ -1,6 +1,6 @@
 import {} from "antd";
 
-function FormMyProfile() {
+function FormMyAddress() {
   return (
     <div className="container bg-white p-14 rounded-lg shadow-lg">
       <h1 className="mb-6 text-red-500 text-2xl font-medium">
@@ -131,4 +131,4 @@ function FormMyProfile() {
   );
 }
 
-export default FormMyProfile;
+export default FormMyAddress;

@@ -1,7 +1,7 @@
 import { Breadcrumb } from "antd";
 import { Content } from "antd/es/layout/layout";
 
-function NavProfile() {
+function ProfileNav() {
   return (
     <div className="flex justify-between items-center p-14">
       <Breadcrumb>
@@ -20,4 +20,4 @@ function NavProfile() {
   );
 }
 
-export default NavProfile;
+export default ProfileNav;
