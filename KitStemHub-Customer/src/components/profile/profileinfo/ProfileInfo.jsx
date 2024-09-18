@@ -7,20 +7,20 @@ const { Content } = Layout;
 
 function ProfileInfo() {
   return (
-    <Layout className="h-screen" style={{ minHeight: "100vh" }}>
-      <Content className="px-12 " style={{ overflowY: "auto" }}>
+    <Layout className="h-screen justify-center items-center min-h-screen">
+      <Content className="px-12 overflow-y-auto">
         {/* Nav profile */}
 
         <NavProfile />
         <div className="flex">
           {/* side bar */}
 
-          <div className="pr-2" style={{ maxWidth: "300px", flexShrink: 0 }}>
+          <div className="pr-2 max-w-xs shrink-0">
             <SidebarMenu />
           </div>
 
           {/* form profile */}
-          <div className="p-14" style={{ maxWidth: "800px", flexGrow: 1 }}>
+          <div className="p-14 max-w-4xl grow">
             <FormMyProfile />
           </div>
         </div>

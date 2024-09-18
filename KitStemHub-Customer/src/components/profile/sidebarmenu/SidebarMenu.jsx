@@ -54,7 +54,7 @@ const items = [
 
 function SidebarMenu() {
   return (
-    <Layout className="p-14 pl-32">
+    <Layout className="p-14 pl-16">
       <Sider width={200}>
         <Menu
           mode="inline"
