@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import Footer from "../../components/footer/Footer";
 import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 
 function ProfilePage() {
@@ -6,6 +7,7 @@ function ProfilePage() {
     <>
       <NavbarUser />
       <Outlet />
+      <Footer />
     </>
   );
 }

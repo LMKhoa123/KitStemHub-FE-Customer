@@ -1,7 +1,7 @@
 function LoginInput() {
   return (
     <>
-      <main className="flex justify-center min-h-screen">
+      <div className="flex justify-center">
         <div className="hidden lg:flex items-center justify-center flex-1 max-w-md text-center">
           <img
             src="./arranging-files.svg"
@@ -12,16 +12,27 @@ function LoginInput() {
         <div className="w-full bg-gray-100 lg:w-1/2 flex items-center justify-center">
           <div className="max-w-md w-full p-6 ">
             <h1 className="text-3xl font-semibold mb-6 text-black text-center">
-              Log in to KitStemHub
+              Create an account
             </h1>
             <h1 className="text-sm font-semibold mb-6 text-gray-500 text-center">
               Enter your details below
             </h1>
 
-            {/* <div className="mt-4 text-sm text-gray-600 text-center">
-              <p> With email</p>
-            </div> */}
             <form action="#" method="POST" className="space-y-4">
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
+                />
+              </div>
               <div>
                 <label
                   htmlFor="email"
@@ -53,14 +64,14 @@ function LoginInput() {
               <div>
                 <button
                   type="submit"
-                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
+                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600  focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                 >
-                  Login
+                  Create account
                 </button>
               </div>
             </form>
             <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
-              <div className="w-full  mb-2 lg:mb-0">
+              <div className="w-full lg:w-1/2 mb-2 lg:mb-0">
                 <button
                   type="button"
                   className="w-full flex justify-center items-center gap-2 bg-white text-sm text-gray-600 p-2 rounded-md hover:bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors duration-300"
@@ -87,22 +98,22 @@ function LoginInput() {
                       fill="#f14336"
                       d="m419.404 58.936-82.933 67.896C313.136 112.246 285.552 103.82 256 103.82c-66.729 0-123.429 42.957-143.965 102.724l-83.397-68.276h-.014C71.23 56.123 157.06 0 256 0c62.115 0 119.068 22.126 163.404 58.936z"
                     />
-                  </svg>{" "}
-                  Sign Up with Google{" "}
+                  </svg>
+                  Sign Up with Google
                 </button>
               </div>
             </div>
             <div className="mt-4 text-sm text-gray-600 text-center">
               <p>
-                <span className=" m-1">Already have an account?</span>
+                Already have an account?{" "}
                 <a href="#" className="text-red-400 hover:underline">
-                  Sign up here
+                  Login here
                 </a>
               </p>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

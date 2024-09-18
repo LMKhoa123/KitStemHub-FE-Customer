@@ -3,6 +3,7 @@ import LoginPage from "./pages/loginpage/LoginPage";
 import ProfilePage from "./pages/profilepage/ProfilePage";
 import ProfileInfo from "./components/profile/profileinfo/ProfileInfo";
 import ProfileAddress from "./components/profile/profileaddress/ProfileAddress";
+import SignUpPage from "./pages/signuppage/SignUpPage";
 
 function App() {
   const router = createBrowserRouter([
@@ -23,6 +24,10 @@ function App() {
           element: <ProfileAddress />, // Thành phần ProfileAddress
         },
       ],
+    },
+    {
+      path: "/signuppage",
+      element: <SignUpPage />,
     },
   ]);
   return <RouterProvider router={router} />;
