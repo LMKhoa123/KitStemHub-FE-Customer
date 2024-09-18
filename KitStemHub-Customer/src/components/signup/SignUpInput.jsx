@@ -64,14 +64,14 @@ function LoginInput() {
               <div>
                 <button
                   type="submit"
-                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600 focus:outline-none focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
+                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                 >
                   Create account
                 </button>
               </div>
             </form>
             <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
-              <div className="w-full lg:w-1/2 mb-2 lg:mb-0">
+              <div className="w-full mb-2 lg:mb-0">
                 <button
                   type="button"
                   className="w-full flex justify-center items-center gap-2 bg-white text-sm text-gray-600 p-2 rounded-md hover:bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors duration-300"
