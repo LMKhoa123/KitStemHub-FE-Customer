@@ -1,6 +1,6 @@
 import { Layout } from "antd";
-import SidebarMenu from "./sidebarmenu/SidebarMenu";
-import NavProfile from "./navprofile/NavProfile";
+import SidebarMenu from "../sidebarmenu/SidebarMenu";
+import NavProfile from "../navprofile/NavProfile";
 import FormMyProfile from "./formprofilemanagement/FormMyProfile";
 
 const { Content } = Layout;
