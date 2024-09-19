@@ -1,7 +1,7 @@
 import { Layout } from "antd";
-import SidebarMenu from "../sidebarmenu/SidebarMenu";
-import NavProfile from "../navprofile/NavProfile";
-import FormMyProfile from "./formprofilemanagement/FormMyProfile";
+import FormMyProfile from "./formmyaddress/FormMyAddress";
+import ProfileNav from "../profilenav/ProfileNav";
+import ProfileSidebar from "../profilesidebar/ProfileSidebar";
 
 const { Content } = Layout;
 
@@ -11,12 +11,12 @@ function ProfileAddress() {
       <Content className="px-12 overflow-y-auto">
         {/* Nav profile */}
 
-        <NavProfile />
+        <ProfileNav />
         <div className="flex">
           {/* side bar */}
 
           <div className="pr-2 max-w-xs shrink-0">
-            <SidebarMenu />
+            <ProfileSidebar />
           </div>
 
           {/* form profile */}
