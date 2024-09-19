@@ -3,7 +3,7 @@ import { Content } from "antd/es/layout/layout";
 
 function ProfileNav() {
   return (
-    <div className="flex justify-between items-center p-14">
+    <div className="flex justify-between shrink p-14">
       <Breadcrumb>
         <Breadcrumb.Item>Home</Breadcrumb.Item>
         <Breadcrumb.Item>My Account</Breadcrumb.Item>

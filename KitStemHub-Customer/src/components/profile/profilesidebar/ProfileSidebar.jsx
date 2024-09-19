@@ -54,7 +54,7 @@ const items = [
 
 function ProfileSidebar() {
   return (
-    <Layout className="p-14 pl-16">
+    <Layout className="shrink p-14 pl-14">
       <Sider width={200}>
         <Menu
           mode="inline"

@@ -1,29 +1,31 @@
 import { Layout } from "antd";
-import FormMyProfile from "./formmyaddress/FormMyAddress";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
+import FormMyProfile from "../profileinfo/formmyprofile/FormMyProfile";
 
 const { Content } = Layout;
 
 function ProfileAddress() {
   return (
-    <Layout className="h-screen justify-center items-center min-h-screen">
-      <Content className="px-12 overflow-y-auto">
+    <Layout className="">
+      <Content className="px-12">
         {/* Nav profile */}
 
         <ProfileNav />
-        <div className="flex">
-          {/* side bar */}
+        <Layout className="">
+          <Content className="flex justify-center flex-wrap">
+            {/* side bar */}
 
-          <div className="pr-2 max-w-xs shrink-0">
-            <ProfileSidebar />
-          </div>
+            <div className="pr-2 max-w-xs">
+              <ProfileSidebar />
+            </div>
 
-          {/* form profile */}
-          <div className="p-14 max-w-4xl grow">
-            <FormMyProfile />
-          </div>
-        </div>
+            {/* form profile */}
+            <div className="p-14 max-w-4xl">
+              <FormMyProfile />
+            </div>
+          </Content>
+        </Layout>
       </Content>
     </Layout>
   );

@@ -1,6 +1,4 @@
-import { Layout, Table } from "antd";
-import ProfileNav from "../../profilenav/ProfileNav";
-import ProfileSidebar from "../../profilesidebar/ProfileSidebar";
+import { Table } from "antd";
 import { CloudDownloadOutlined } from "@ant-design/icons";
 
 function ProfileMyLab() {
@@ -72,26 +70,11 @@ function ProfileMyLab() {
     },
   ];
   return (
-    <Layout className="h-screen min-h-screen px-12 overflow-y-auto">
-      {/* Nav profile */}
+    <div className="p-13 max-w-3xl rounded">
+      {/* form profile */}
 
-      <div className="pl-[310px] pr-[310px]">
-        <ProfileNav />
-      </div>
-
-      <div className="flex justify-center">
-        {/* side bar */}
-
-        <div className="pr-2 max-w-xs shrink-0">
-          <ProfileSidebar />
-        </div>
-
-        {/* form profile */}
-        <div className="p-14 max-w-4xl grow">
-          <Table dataSource={dataSource} columns={columns} />
-        </div>
-      </div>
-    </Layout>
+      <Table dataSource={dataSource} columns={columns} />
+    </div>
   );
 }
 

@@ -1,6 +1,4 @@
-import { Layout, Table } from "antd";
-import ProfileNav from "../../profilenav/ProfileNav";
-import ProfileSidebar from "../../profilesidebar/ProfileSidebar";
+import { Table } from "antd";
 
 function CartMyProfile() {
   const dataSource = [
@@ -83,26 +81,11 @@ function CartMyProfile() {
     },
   ];
   return (
-    <Layout className="h-screen min-h-screen px-12 overflow-y-auto">
-      {/* Nav profile */}
+    <div className="bg-white p-14 max-w-3xl shadow-lg rounded mb-6">
+      {/* form profile */}
 
-      <div className="pl-[310px] pr-[310px]">
-        <ProfileNav />
-      </div>
-
-      <div className="flex justify-center">
-        {/* side bar */}
-
-        <div className="pr-2 max-w-xs shrink-0">
-          <ProfileSidebar />
-        </div>
-
-        {/* form profile */}
-        <div className="p-14 max-w-4xl grow">
-          <Table dataSource={dataSource} columns={columns} />
-        </div>
-      </div>
-    </Layout>
+      <Table dataSource={dataSource} columns={columns} />
+    </div>
   );
 }
 
