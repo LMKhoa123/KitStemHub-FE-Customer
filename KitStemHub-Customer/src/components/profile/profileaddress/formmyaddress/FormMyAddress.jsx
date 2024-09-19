@@ -2,7 +2,7 @@ import {} from "antd";
 
 function FormMyAddress() {
   return (
-    <div className="container bg-white p-14 rounded-lg shadow-lg">
+    <div className=" bg-white p-14 rounded-lg shadow-lg">
       <h1 className="mb-6 text-red-500 text-2xl font-medium">
         Edit Your Profile
       </h1>

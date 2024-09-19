@@ -2,7 +2,7 @@ import {} from "antd";
 
 function FormMyProfile() {
   return (
-    <div className="container bg-white p-14 rounded-lg shadow-lg">
+    <div className="bg-white p-14 rounded-lg shadow-lg max-w-4xl">
       <h1 className="mb-6 text-red-500 text-2xl font-medium">
         Edit Your Profile
       </h1>
@@ -23,7 +23,7 @@ function FormMyProfile() {
                 placeholder="Jane"
               />
             </div>
-            <div className="w-full  px-3">
+            <div className="w-full mb-6 px-3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 htmlFor="grid-last-name"
@@ -33,7 +33,7 @@ function FormMyProfile() {
               <input
                 className="appearance-none block w-64 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                 id="grid-last-name"
-                type="text"
+                type="email"
                 placeholder="name@example.com"
               />
             </div>
