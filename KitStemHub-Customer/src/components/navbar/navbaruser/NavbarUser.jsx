@@ -1,14 +1,11 @@
-import {
-  HeartOutlined,
-  ShoppingCartOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import Navbar from "../../login/navbar/Navbar";
+import { HeartOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import NavbarEx from "../navbarEx/NavbarEx";
+import DropdownUser from "../../dropdownUser/DropdownUser";
 
 function NavbarUser() {
   return (
     <>
-      <Navbar
+      <NavbarEx
         childrenItem={
           <>
             <ul className="lg:flex hidden lg:justify-between lg:items-center text-gray-400 lg:gap-4 text-md font-normal">
@@ -24,7 +21,7 @@ function NavbarUser() {
               </li>
               <li className="hover:text-gray-800 transition p-4 text-xl">
                 <a href="#" className="">
-                  <UserOutlined />
+                  <DropdownUser />
                 </a>
               </li>
             </ul>

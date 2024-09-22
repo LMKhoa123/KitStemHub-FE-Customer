@@ -6,12 +6,21 @@ import ProfileAddress from "./components/profile/profileaddress/ProfileAddress";
 import SignUpPage from "./pages/signuppage/SignUpPage";
 import ProfileCart from "./components/profile/profilecart/ProfileCart";
 import ProfileLab from "./components/profile/profilelab/ProfileLab";
+import HomePageUser from "./pages/homepage/HomePageUser";
+import HomePageRegister from "./pages/homepage/HomePageRegister";
 
 function App() {
   const router = createBrowserRouter([
     {
-      path: "/loginpage",
+      path: "/login",
       element: <LoginPage />,
+    },
+    {
+      path: "/home",
+      children: [
+        { path: "user", element: <HomePageUser /> },
+        { path: "register", element: <HomePageRegister /> },
+      ],
     },
     {
       path: "/profile", // Đường dẫn cho ProfilePage
@@ -36,7 +45,7 @@ function App() {
       ],
     },
     {
-      path: "/signuppage",
+      path: "/signup",
       element: <SignUpPage />,
     },
   ]);
