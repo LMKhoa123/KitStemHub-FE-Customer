@@ -1,4 +1,74 @@
-function LoginInput() {
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+import { Button, Form, Input, Modal } from "antd";
+import { useNavigate } from "react-router-dom";
+import { auth, googleProvider } from "../../config/firebase";
+import api from "../../config/axios";
+
+function SignUpInput() {
+  const navigate = useNavigate();
+  const handleLoginGoogle = () => {
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        console.log(credential);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const handleOnFinish = async (values) => {
+    try {
+      const response = await api.post("User/Register", values, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      // console.log(response.data);
+      if (response.data.status === "success") {
+        const userEmail = values.email;
+        const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
+        // Hiển thị modal
+        Modal.info({
+          title: "Xác nhận đăng nhập",
+          content: (
+            <div>
+              <p>Vui lòng kiểm tra email của bạn để xác nhận đăng nhập.</p>
+              <p>
+                <a href={gmailLink} target="_blank" rel="noopener noreferrer">
+                  Nhấp vào đây để mở Gmail
+                </a>
+              </p>
+            </div>
+          ),
+          onOk() {
+            window.open(gmailLink, "_blank");
+          },
+        });
+        navigate("/login");
+      }
+    } catch (err) {
+      if (err.response) {
+        console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
+        console.log("Thông điệp lỗi:", err.response.data); // Thông báo chi tiết từ server
+        alert(
+          // Dấu ?. là cú pháp Optional Chaining trong JavaScript, cho phép kiểm tra xem thuộc tính có tồn tại hay không mà không gây lỗi nếu thuộc tính đó không tồn tại.
+          err.response.data.errors?.Password ||
+            err.response.data.details?.unavailableUsername ||
+            err.response.data.errors?.Email
+        );
+      } else if (err.request) {
+        console.log("Không có phản hồi từ server:", err.request);
+        alert(
+          "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        console.log("Lỗi khi tạo yêu cầu:", err.message);
+        alert(`Lỗi khi tạo yêu cầu: ${err.message}`);
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex justify-center min-h-screen">
@@ -18,63 +88,70 @@ function LoginInput() {
               Enter your details below
             </h1>
 
-            <form action="#" method="POST" className="space-y-4">
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email or Phone Number
-                </label>
-                <input
-                  type="text"
-                  id="email"
-                  name="email"
-                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
-                />
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600  focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
+            <Form
+              className="space-y-4"
+              labelCol={{
+                span: 24,
+              }}
+              wrapperCol={{
+                span: 24,
+              }}
+              style={{
+                maxWidth: 600,
+              }}
+              initialValues={{
+                remember: true,
+              }}
+              onFinish={handleOnFinish}
+              // onFinishFailed={handleOnFinishFailed}
+              autoComplete="true"
+            >
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your email!",
+                  },
+                ]}
+                className="mb-1"
+              >
+                <Input className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300" />
+              </Form.Item>
+
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your password!",
+                  },
+                ]}
+              >
+                <Input.Password className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300" />
+              </Form.Item>
+              <Form.Item
+                wrapperCol={{
+                  span: 24,
+                }}
+              >
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="w-full !py-4 bg-red-400 text-white hover:!bg-red-600 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                 >
                   Create account
-                </button>
-              </div>
-            </form>
+                </Button>
+              </Form.Item>
+            </Form>
             <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
               <div className="w-full mb-2 lg:mb-0">
                 <button
                   type="button"
                   className="w-full flex justify-center items-center gap-2 bg-white text-sm text-gray-600 p-2 rounded-md hover:bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors duration-300"
+                  onClick={handleLoginGoogle}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +176,7 @@ function LoginInput() {
                       d="m419.404 58.936-82.933 67.896C313.136 112.246 285.552 103.82 256 103.82c-66.729 0-123.429 42.957-143.965 102.724l-83.397-68.276h-.014C71.23 56.123 157.06 0 256 0c62.115 0 119.068 22.126 163.404 58.936z"
                     />
                   </svg>
-                  Sign Up with Google
+                  Sign In with Google
                 </button>
               </div>
             </div>
@@ -118,4 +195,4 @@ function LoginInput() {
   );
 }
 
-export default LoginInput;
+export default SignUpInput;
