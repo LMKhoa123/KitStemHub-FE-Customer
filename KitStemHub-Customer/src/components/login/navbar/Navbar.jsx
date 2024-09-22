@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { MenuOutlined } from "@ant-design/icons";
 import { Input, Menu, Drawer } from "antd";
+import { Link } from "react-router-dom";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
@@ -66,11 +67,13 @@ function Navbar({ childrenItem }) {
                 About
               </a>
             </li>
-            <li className="kt-menu-item">
-              <a href="#" className="">
-                Sign Up
-              </a>
-            </li>
+            <Link to={"/signuppage"}>
+              <li className="kt-menu-item">
+                <a href="#" className="">
+                  Sign Up
+                </a>
+              </li>
+            </Link>
           </ul>
 
           {/* Desktop Search */}
