@@ -18,22 +18,37 @@ function LoginInput() {
       });
   };
   const handleOnFinish = async (values) => {
-    // console.log("Success", values);
+    // console.log("Values gửi đến máy chủ:", values);
+
     try {
       // /gửi request đến server vaf kèm values cua  form
-      const response = await api.post("User/Login", values);
+
+      const response = await api.post("User/Login", values, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       console.log(response.data);
-      const { token } = response.data;
-      localStorage.setItem("token", token); //need to save in an other place
-      navigate("/");
+      const { accessToken } = response.data.details;
+      // console.log(accessToken);
+      localStorage.setItem("token", accessToken); //need to save in an other place
+      // console.log(localStorage.getItem("token"));
+
+      // Gửi yêu cầu đến một API private
+      const privateResponse = await api.put("User/UpdateProfile", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
+        },
+      });
+      console.log(privateResponse.data); // Xử lý dữ liệu từ API private
+      navigate("/profile/profileaddress");
     } catch (err) {
-      console.log(err);
       alert(err.response.data);
     }
   };
-  const handleOnFinishFailed = (errorInfo) => {
-    console.log("Failed", errorInfo);
-  };
+  // const handleOnFinishFailed = (errorInfo) => {
+  //   console.log("Failed", errorInfo);
+  // };
 
   return (
     <>
@@ -69,7 +84,7 @@ function LoginInput() {
                 remember: true,
               }}
               onFinish={handleOnFinish}
-              onFinishFailed={handleOnFinishFailed}
+              // onFinishFailed={handleOnFinishFailed}
               autoComplete="true"
             >
               <Form.Item
