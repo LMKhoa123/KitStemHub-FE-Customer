@@ -1,4 +1,40 @@
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../../config/firebase";
+import { Button, Form, Input } from "antd";
+import api from "../../../config/axios";
+import { useNavigate } from "react-router-dom";
+
 function LoginInput() {
+  const navigate = useNavigate();
+  const handleLoginGoogle = () => {
+    signInWithPopup(auth, googleProvider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        console.log(credential);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  const handleOnFinish = async (values) => {
+    // console.log("Success", values);
+    try {
+      // /gửi request đến server vaf kèm values cua  form
+      const response = await api.post("User/Login", values);
+      console.log(response.data);
+      const { token } = response.data;
+      localStorage.setItem("token", token); //need to save in an other place
+      navigate("/");
+    } catch (err) {
+      console.log(err);
+      alert(err.response.data);
+    }
+  };
+  const handleOnFinishFailed = (errorInfo) => {
+    console.log("Failed", errorInfo);
+  };
+
   return (
     <>
       <main className="flex justify-center min-h-screen">
@@ -18,52 +54,71 @@ function LoginInput() {
               Enter your details below
             </h1>
 
-            {/* <div className="mt-4 text-sm text-gray-600 text-center">
-              <p> With email</p>
-            </div> */}
-            <form action="#" method="POST" className="space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
+            <Form
+              className="space-y-4"
+              labelCol={{
+                span: 24,
+              }}
+              wrapperCol={{
+                span: 24,
+              }}
+              style={{
+                maxWidth: 600,
+              }}
+              initialValues={{
+                remember: true,
+              }}
+              onFinish={handleOnFinish}
+              onFinishFailed={handleOnFinishFailed}
+              autoComplete="true"
+            >
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your email!",
+                  },
+                ]}
+                className="mb-1"
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your password!",
+                  },
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+
+              <Form.Item
+                wrapperCol={{
+                  span: 24,
+                }}
+              >
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="w-full bg-red-400 text-white hover:!bg-red-600 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
                 >
-                  Email or Phone Number
-                </label>
-                <input
-                  type="text"
-                  id="email"
-                  name="email"
-                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  className="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
-                />
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className="w-full bg-red-400 text-white p-2 rounded-md hover:bg-red-600 focus:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
-                >
-                  Login
-                </button>
-              </div>
-            </form>
-            <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Form>
+            <div className="mt-4 flex flex-col lg:flex-row items-center justify-between w-full">
               <div className="w-full  mb-2 lg:mb-0">
                 <button
                   type="button"
                   className="w-full flex justify-center items-center gap-2 bg-white text-sm text-gray-600 p-2 rounded-md hover:bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors duration-300"
+                  onClick={handleLoginGoogle}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
