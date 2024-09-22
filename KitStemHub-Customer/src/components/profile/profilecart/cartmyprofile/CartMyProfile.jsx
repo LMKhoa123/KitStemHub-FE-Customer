@@ -1,12 +1,25 @@
-import { Table } from "antd";
+import { InputNumber, Space, Table } from "antd";
 
 function CartMyProfile() {
+  const onChange = (value) => {
+    console.log("changed", value);
+  };
   const dataSource = [
     {
       key: "1",
       donhang: "Mike",
       ngay: 32,
-      soluong: "10 Downing Street",
+      soluong: (
+        <Space wrap>
+          <InputNumber
+            size="large"
+            min={1}
+            max={100000}
+            defaultValue={1}
+            onChange={onChange}
+          />
+        </Space>
+      ),
       trangthai: (
         <span className="p-1 bg-green-600 rounded-lg text-white block text-center w-40 shadow-xl">
           Thành công
@@ -22,7 +35,17 @@ function CartMyProfile() {
       key: "1",
       donhang: "Mike",
       ngay: 32,
-      soluong: "10 Downing Street",
+      soluong: (
+        <Space wrap>
+          <InputNumber
+            size="large"
+            min={1}
+            max={100000}
+            defaultValue={1}
+            onChange={onChange}
+          />
+        </Space>
+      ),
       trangthai: (
         <span className="p-1 bg-red-600 rounded-lg text-white block text-center w-40 shadow-xl">
           Thất bại
@@ -38,7 +61,17 @@ function CartMyProfile() {
       key: "1",
       donhang: "Mike",
       ngay: 32,
-      soluong: "10 Downing Street",
+      soluong: (
+        <Space wrap>
+          <InputNumber
+            size="large"
+            min={1}
+            max={100000}
+            defaultValue={1}
+            onChange={onChange}
+          />
+        </Space>
+      ),
       trangthai: (
         <span className="p-1 bg-slate-600 rounded-lg text-white block text-center w-40 shadow-xl">
           Đang giao
