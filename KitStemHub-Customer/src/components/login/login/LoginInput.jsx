@@ -22,33 +22,48 @@ function LoginInput() {
 
     try {
       // /gửi request đến server vaf kèm values cua  form
-
       const response = await api.post("User/Login", values, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(response.data);
+      // console.log(response.data);
       const { accessToken } = response.data.details;
       // console.log(accessToken);
-      localStorage.setItem("token", accessToken); //need to save in an other place
+      localStorage.setItem("token", accessToken);
+
       // console.log(localStorage.getItem("token"));
 
-      // Gửi yêu cầu đến một API private
-      const privateResponse = await api.put("User/UpdateProfile", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
-        },
-      });
-      console.log(privateResponse.data); // Xử lý dữ liệu từ API private
-      navigate("/profile/profileaddress");
+      // Gửi yêu cầu đến một API private(này của page khác)
+      // const privateResponse = await api.put("User/UpdateProfile", {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
+      //   },
+      // });
+      // console.log(privateResponse.data); // Xử lý dữ liệu từ API private
+
+      navigate("/");
     } catch (err) {
-      alert(err.response.data);
+      if (err.response) {
+        console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
+        console.log("Thông điệp lỗi:", err.response.data); // Thông báo chi tiết từ server
+        alert(
+          // Dấu ?. là cú pháp Optional Chaining trong JavaScript, cho phép kiểm tra xem thuộc tính có tồn tại hay không mà không gây lỗi nếu thuộc tính đó không tồn tại.
+          err.response.data.errors?.Email ||
+            err.response.data.details?.invalidCredentials ||
+            "Có lỗi xảy ra, vui lòng thử lại."
+        );
+      } else if (err.request) {
+        console.log("Không có phản hồi từ server:", err.request);
+        alert(
+          "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        console.log("Lỗi khi tạo yêu cầu:", err.message);
+        alert(`Lỗi khi tạo yêu cầu: ${err.message}`);
+      }
     }
   };
-  // const handleOnFinishFailed = (errorInfo) => {
-  //   console.log("Failed", errorInfo);
-  // };
 
   return (
     <>
@@ -84,7 +99,6 @@ function LoginInput() {
                 remember: true,
               }}
               onFinish={handleOnFinish}
-              // onFinishFailed={handleOnFinishFailed}
               autoComplete="true"
             >
               <Form.Item

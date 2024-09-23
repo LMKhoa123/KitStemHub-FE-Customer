@@ -1,6 +1,8 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
-import { Button, Form, Input } from "antd";
+
+import { Button, Form, Input, Modal } from "antd";
+
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../config/firebase";
 import api from "../../config/axios";
@@ -19,28 +21,56 @@ function SignUpInput() {
   };
   const handleOnFinish = async (values) => {
     try {
-      // const response = await api.post("User/Register", values, {
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
+
       const response = await api.post("User/Register", values, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add this line
         },
       });
-      console.log(response.data);
-      const { token } = response.data;
-      if (token) {
-        // Store token securely (consider using cookies or secure storage)
-        localStorage.setItem("token", token); // Replace this with secure storage if possible
-        navigate("/loginpage");
-      } else {
-        throw new Error("Token not found in response.");
+      // console.log(response.data);
+      if (response.data.status === "success") {
+        const userEmail = values.email;
+        const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
+        // Hiển thị modal
+        Modal.info({
+          title: "Xác nhận đăng nhập",
+          content: (
+            <div>
+              <p>Vui lòng kiểm tra email của bạn để xác nhận đăng nhập.</p>
+              <p>
+                <a href={gmailLink} target="_blank" rel="noopener noreferrer">
+                  Nhấp vào đây để mở Gmail
+                </a>
+              </p>
+            </div>
+          ),
+          onOk() {
+            window.open(gmailLink, "_blank");
+          },
+        });
+        navigate("/login");
       }
     } catch (err) {
-      alert(err.response.data);
+      if (err.response) {
+        console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
+        console.log("Thông điệp lỗi:", err.response.data); // Thông báo chi tiết từ server
+        alert(
+          // Dấu ?. là cú pháp Optional Chaining trong JavaScript, cho phép kiểm tra xem thuộc tính có tồn tại hay không mà không gây lỗi nếu thuộc tính đó không tồn tại.
+          err.response.data.errors?.Password ||
+            err.response.data.details?.unavailableUsername ||
+            err.response.data.errors?.Email
+        );
+      } else if (err.request) {
+        console.log("Không có phản hồi từ server:", err.request);
+        alert(
+          "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        console.log("Lỗi khi tạo yêu cầu:", err.message);
+        alert(`Lỗi khi tạo yêu cầu: ${err.message}`);
+      }
+
+   
     }
   };
 

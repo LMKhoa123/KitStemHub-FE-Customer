@@ -12,6 +12,10 @@ import HomePageRegister from "./pages/homepage/HomePageRegister";
 function App() {
   const router = createBrowserRouter([
     {
+      path: "/",
+      element: <HomePageRegister />,
+    },
+    {
       path: "/login",
       element: <LoginPage />,
     },
