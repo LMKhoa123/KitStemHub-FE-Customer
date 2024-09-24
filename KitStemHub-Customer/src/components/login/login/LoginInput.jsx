@@ -2,10 +2,10 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../config/firebase";
 import { Button, Form, Input } from "antd";
 import api from "../../../config/axios";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 function LoginInput() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const handleLoginGoogle = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
@@ -17,21 +17,18 @@ function LoginInput() {
         console.log(error);
       });
   };
+
   const handleOnFinish = async (values) => {
     // console.log("Values gửi đến máy chủ:", values);
 
     try {
       // /gửi request đến server vaf kèm values cua  form
-      const response = await api.post("User/Login", values, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.post("User/Login", values);
       // console.log(response.data);
-      const { accessToken } = response.data.details;
+      const { accessToken, refreshToken } = response.data.details;
       // console.log(accessToken);
       localStorage.setItem("token", accessToken);
-
+      localStorage.setItem("refreshToken", refreshToken);
       // console.log(localStorage.getItem("token"));
 
       // Gửi yêu cầu đến một API private(này của page khác)
@@ -42,15 +39,15 @@ function LoginInput() {
       // });
       // console.log(privateResponse.data); // Xử lý dữ liệu từ API private
 
-      navigate("/");
+      // navigate("/");
     } catch (err) {
       if (err.response) {
         console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
         console.log("Thông điệp lỗi:", err.response.data); // Thông báo chi tiết từ server
         alert(
           // Dấu ?. là cú pháp Optional Chaining trong JavaScript, cho phép kiểm tra xem thuộc tính có tồn tại hay không mà không gây lỗi nếu thuộc tính đó không tồn tại.
-          err.response.data.errors?.Email ||
-            err.response.data.details?.invalidCredentials ||
+          err.response.data.details.errors?.email ||
+            err.response.data.details.errors?.invalidCredentials ||
             "Có lỗi xảy ra, vui lòng thử lại."
         );
       } else if (err.request) {
