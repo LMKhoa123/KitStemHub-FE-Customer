@@ -34,7 +34,7 @@ function LoginInput() {
       localStorage.setItem("refreshToken", refreshToken);
       console.log(localStorage.getItem("refreshToken"));
       console.log(localStorage.getItem("token"));
-      navigate("/api");
+      navigate("/");
     } catch (err) {
       if (err.response) {
         console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
