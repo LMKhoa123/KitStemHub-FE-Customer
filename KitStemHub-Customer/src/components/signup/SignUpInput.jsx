@@ -1,6 +1,5 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
-
 import { Button, Form, Input, Modal } from "antd";
 
 import { useNavigate } from "react-router-dom";
@@ -21,8 +20,7 @@ function SignUpInput() {
   };
   const handleOnFinish = async (values) => {
     try {
-
-      const response = await api.post("User/Register", values, {
+      const response = await api.post("Register", values, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -69,8 +67,6 @@ function SignUpInput() {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
         alert(`Lỗi khi tạo yêu cầu: ${err.message}`);
       }
-
-   
     }
   };
 

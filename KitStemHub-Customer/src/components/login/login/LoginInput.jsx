@@ -2,10 +2,10 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../config/firebase";
 import { Button, Form, Input } from "antd";
 import api from "../../../config/axios";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function LoginInput() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const handleLoginGoogle = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
@@ -23,23 +23,18 @@ function LoginInput() {
 
     try {
       // /gửi request đến server vaf kèm values cua  form
-      const response = await api.post("User/Login", values);
-      // console.log(response.data);
+      const response = await api.post("Login", values);
+      console.log(response.data);
+      // console.log(localStorage.length); // 2
+      // localStorage.clear();
+      // console.log(localStorage.length); // 0
       const { accessToken, refreshToken } = response.data.details;
-      // console.log(accessToken);
+
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
-      // console.log(localStorage.getItem("token"));
-
-      // Gửi yêu cầu đến một API private(này của page khác)
-      // const privateResponse = await api.put("User/UpdateProfile", {
-      //   headers: {
-      //     Authorization: `Bearer ${localStorage.getItem("token")}`, // Gửi token trong header
-      //   },
-      // });
-      // console.log(privateResponse.data); // Xử lý dữ liệu từ API private
-
-      // navigate("/");
+      console.log(localStorage.getItem("refreshToken"));
+      console.log(localStorage.getItem("token"));
+      navigate("/api");
     } catch (err) {
       if (err.response) {
         console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
