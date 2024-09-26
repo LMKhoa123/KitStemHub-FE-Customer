@@ -5,6 +5,7 @@ import {
   LinkedinOutlined,
   TwitterOutlined,
 } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
@@ -23,18 +24,13 @@ function Footer() {
 
         <div className="account text-center md:text-left">
           <h2 className="text-lg font-semibold mb-2">Account</h2>
-          <a
-            href="#my-account"
+          <Link
+            to="/profile/profileinfo"
             className="block hover:text-pretty mb-1 kt-footer-item "
           >
             My Account
-          </a>
-          <a
-            href="#login-register"
-            className="block hover:text-pretty mb-1 kt-footer-item"
-          >
-            Login/Register
-          </a>
+          </Link>
+
           <a
             href="#cart"
             className="block hover:text-pretty mb-1 kt-footer-item"
@@ -47,12 +43,12 @@ function Footer() {
           >
             WishList
           </a>
-          <a
-            href="#shop"
+          <Link
+            to="/home/user"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
             Shop
-          </a>
+          </Link>
         </div>
 
         <div className="quickLink text-center md:text-left">
