@@ -2,19 +2,55 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../config/firebase";
 import { Button, Form, Input } from "antd";
 import api from "../../../config/axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function LoginInput() {
   const navigate = useNavigate();
+
   const handleLoginGoogle = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         // This gives you a Google Access Token. You can use it to access the Google API.
         const credential = GoogleAuthProvider.credentialFromResult(result);
-        console.log(credential);
+        // console.log(credential);
+        const accessToken = credential.accessToken; // Access Token from Google
+        // console.log("acccessToken" + accessToken);
+        const idToken = credential.idToken; // Get the ID Token from the result
+        // console.log("idToke" + idToken);
+        const pendingToken = credential.pendingToken; // Pending Token (optional, depends on Google)
+        // console.log("pending" + pendingToken);
+        const user = result.user; // Thông tin người dùng
+        if (user) {
+          api
+            .post("LoginWithGoogle", { pendingToken, idToken, accessToken })
+            .then((response) => {
+              console.log(response.data);
+              toast.success("User logged in Successfully!", {
+                position: "top-center",
+                autoClose: 1500,
+              });
+
+              // Lưu trữ thông tin vào localStorage
+              localStorage.setItem("token", response.data.details.accessToken); // Save server's access token
+              localStorage.setItem(
+                "refreshToken",
+                response.data.details.refreshToken
+              ); // Save refresh token
+              // console.log(localStorage.getItem("token"));
+              // console.log(localStorage.getItem("refreshToken"));
+              setTimeout(() => {
+                navigate("/"); // Chuyển hướng sang trang homepage
+              }, 1500); // Chờ 1.5 giây để đảm bảo người dùng thấy thông báo
+            });
+        }
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Error during Google login:", error);
+        toast.error("Google login failed!", {
+          position: "top-center",
+        });
       });
   };
 
@@ -32,9 +68,15 @@ function LoginInput() {
 
       localStorage.setItem("token", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
-      console.log(localStorage.getItem("refreshToken"));
-      console.log(localStorage.getItem("token"));
-      navigate("/");
+
+      toast.success("User logged in Successfully!", {
+        position: "top-center",
+        autoClose: 1500,
+      });
+
+      setTimeout(() => {
+        navigate("/"); // Chuyển hướng sang trang homepage
+      }, 1500); // Chờ 1.5 giây để đảm bảo người dùng thấy thông báo
     } catch (err) {
       if (err.response) {
         console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
@@ -164,21 +206,23 @@ function LoginInput() {
                       d="m419.404 58.936-82.933 67.896C313.136 112.246 285.552 103.82 256 103.82c-66.729 0-123.429 42.957-143.965 102.724l-83.397-68.276h-.014C71.23 56.123 157.06 0 256 0c62.115 0 119.068 22.126 163.404 58.936z"
                     />
                   </svg>{" "}
-                  Sign Up with Google{" "}
+                  Sign Up with Google
                 </button>
               </div>
             </div>
             <div className="mt-4 text-sm text-gray-600 text-center">
               <p>
                 <span className=" m-1">Already have an account?</span>
-                <a href="#" className="text-red-400 hover:underline">
+                <Link to="/signup" className="text-red-400 hover:underline">
                   Sign up here
-                </a>
+                </Link>
               </p>
             </div>
           </div>
         </div>
       </main>
+      {/* Toast container needs to be rendered outside any function */}
+      <ToastContainer />
     </>
   );
 }

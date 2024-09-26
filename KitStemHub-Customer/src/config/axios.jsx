@@ -40,10 +40,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken1 = localStorage.getItem("refreshToken");
-        console.log(refreshToken1);
+        const currentRefreshToken = localStorage.getItem("refreshToken");
+        console.log(currentRefreshToken);
         const response = await axios.post(
-          `http://54.66.193.22:5000/api/Users/RefreshToken/${refreshToken1}`
+          `http://54.66.193.22:5000/api/Users/RefreshToken/${currentRefreshToken}`
         );
         console.log("ggggg" + response.data);
         const { accessToken, refreshToken } = response.data.details;
