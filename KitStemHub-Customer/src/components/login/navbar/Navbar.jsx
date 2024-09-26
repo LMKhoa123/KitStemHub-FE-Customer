@@ -1,31 +1,67 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MenuOutlined } from "@ant-design/icons";
 import { Input, Menu, Drawer } from "antd";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
 
 const items = [
   {
-    label: "Home",
+    label: (
+      <NavLink
+        to="/"
+        exact
+        className={({ isActive }) => (isActive ? " font-bold " : "")}
+      >
+        Home
+      </NavLink>
+    ),
     key: "home",
   },
   {
-    label: "Contact Us",
+    label: (
+      <NavLink
+        to="/contact"
+        exact
+        className={({ isActive }) => (isActive ? " font-bold " : "")}
+      >
+        Contact Us
+      </NavLink>
+    ),
     key: "contact",
   },
   {
-    label: "About Us",
+    label: (
+      <NavLink to="/about" className="text-gray-800 hover:text-red-500">
+        About
+      </NavLink>
+    ),
     key: "about",
   },
   {
-    label: "Login",
+    label: (
+      <NavLink
+        to="/login"
+        exact
+        className={({ isActive }) => (isActive ? " font-bold " : "")}
+      >
+        Login
+      </NavLink>
+    ),
     key: "login",
   },
   {
-    label: "Sign In",
-    key: "signin",
+    label: (
+      <NavLink
+        to="/signup"
+        exact
+        className={({ isActive }) => (isActive ? " font-bold " : "")}
+      >
+        Sign Up
+      </NavLink>
+    ),
+    key: "signup",
   },
 ];
 // eslint-disable-next-line react/prop-types
@@ -52,28 +88,71 @@ function Navbar({ childrenItem }) {
             id="kt-menu"
             className="basis-2/6 hidden lg:flex lg:items-center lg:justify-between text-md font-normal text-gray-400"
           >
-            <li className="kt-menu-item">
-              <a href="#" className="">
+            <li className="">
+              <NavLink
+                to="/"
+                exact
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-red-500 font-bold border-b-2 border-pink-300"
+                    : "kt-menu-item"
+                }
+              >
                 Home
-              </a>
+              </NavLink>
             </li>
-            <li className="kt-menu-item">
-              <a href="#" className="">
+            <li className="">
+              <NavLink
+                to="/contact"
+                exact
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-red-500 font-bold border-b-2 border-pink-300"
+                    : "kt-menu-item"
+                }
+              >
                 Contact
-              </a>
+              </NavLink>
             </li>
-            <li className="kt-menu-item">
-              <a href="#" className="">
-                About
-              </a>
+            <li className="">
+              <NavLink
+                to="/aboutUs"
+                exact
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-red-500 font-bold border-b-2 border-pink-300"
+                    : "kt-menu-item"
+                }
+              >
+                About Us
+              </NavLink>
             </li>
-            <Link to={"/signuppage"}>
-              <li className="kt-menu-item">
-                <a href="#" className="">
-                  Sign Up
-                </a>
-              </li>
-            </Link>
+            <li className="">
+              <NavLink
+                to="/login"
+                exact
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-red-500 font-bold border-b-2 border-pink-300"
+                    : "kt-menu-item"
+                }
+              >
+                Login In
+              </NavLink>
+            </li>
+            <li className="">
+              <NavLink
+                to="/signup"
+                exact
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-red-500 font-bold border-b-2 border-pink-300"
+                    : "kt-menu-item"
+                }
+              >
+                Sign Up
+              </NavLink>
+            </li>
           </ul>
 
           {/* Desktop Search */}
