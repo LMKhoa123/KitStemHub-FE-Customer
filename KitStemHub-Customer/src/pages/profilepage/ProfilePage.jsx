@@ -4,7 +4,7 @@ import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 
 function ProfilePage() {
   return (
-    <div className="container mx-auto shrink h-screen">
+    <div className="w-full h-screen">
       <NavbarUser />
       <Outlet />
       <Footer />

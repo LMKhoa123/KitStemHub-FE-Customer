@@ -7,7 +7,7 @@ const { Content } = Layout;
 
 function ProfileLab() {
   return (
-    <Layout className="">
+    <Layout className="h-screen">
       <Content className="px-12">
         {/* Nav profile */}
         <ProfileNav />
