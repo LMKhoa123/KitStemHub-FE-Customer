@@ -6,7 +6,7 @@ import ProfileSidebar from "../profilesidebar/ProfileSidebar";
 
 function ProfileCart() {
   return (
-    <Layout className="h-screen">
+    <Layout className="">
       <Content className="px-11">
         {/* Nav profile */}
         <ProfileNav />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../../../config/axios";
+import Swal from "sweetalert2";
 
 function FormMyProfile() {
   const [profileData, setProfileData] = useState({
@@ -12,52 +13,121 @@ function FormMyProfile() {
     addressStreet: "",
     address: "",
   });
+  const [isUpdated, setIsUpdated] = useState(false);
 
   // Fetch profile data
   const fetchProfile = async () => {
     try {
       const response = await api.get("Profile");
       console.log("Lấy dữ liệu thành công", response.data);
+
       setProfileData({
-        firstName: response.data.details.profile.firstName || "",
-        lastName: response.data.details.profile.lastName || "",
-        userName: response.data.details.profile.userName || "",
-        address: response.data.details.profile.address || "",
+        firstName: response.data.details.data.userProfileDTO.firstName || "",
+        lastName: response.data.details.data.userProfileDTO.lastName || "",
+        userName: response.data.details.data.userProfileDTO.userName || "",
+        city: response.data.details.data.userProfileDTO.city || "",
+        district: response.data.details.data.userProfileDTO.district || "",
+        ward: response.data.details.data.userProfileDTO.ward || "",
+        addressStreet:
+          response.data.details.data.userProfileDTO.addressStreet || "",
+        address: response.data.details.data.userProfileDTO.address || "",
       });
     } catch (error) {
       console.log("Lấy dữ liệu thất bại", error);
     }
   };
 
-  // const fetchEmail = async () => {
-  //   try {
-  //     const response = await api.
-  //   } catch (error) {
-
-  //   }
-  // }
-
   // Update profile data (PUT request)
   const updateProfile = async () => {
-    const combinedAddress = `${profileData.addressStreet}, ${profileData.ward}, ${profileData.district}, ${profileData.city}`;
+    // Xử lý các giá trị undefined hoặc null và chuyển thành chuỗi rỗng
+    const cleanData = {
+      firstName: profileData.firstName || "",
+      lastName: profileData.lastName || "",
+      city: profileData.city || "",
+      district: profileData.district || "",
+      ward: profileData.ward || "",
+      addressStreet: profileData.addressStreet || "",
+      address: profileData.address || "",
+    };
+    // Tạo địa chỉ từ các phần không rỗng
+    const combinedAddress = [
+      cleanData.addressStreet,
+      cleanData.ward,
+      cleanData.district,
+      cleanData.city,
+    ]
+      .filter((part) => part) // Loại bỏ các phần trống
+      .join(", ");
 
     const updatedProfile = {
-      ...profileData,
+      ...cleanData,
       address: combinedAddress, // Set the full address
     };
 
     try {
       const response = await api.put("Profile", updatedProfile);
       console.log("Profile updated successfully", response.data);
-      setProfileData(response.data);
+      Swal.fire({
+        title: "Do you want to save the changes?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Save",
+        denyButtonText: `Don't save`,
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          setProfileData(response.data);
+          setIsUpdated(true);
+          Swal.fire("Saved!", "", "success");
+        } else if (result.isDenied) {
+          Swal.fire("Changes are not saved", "", "info");
+        }
+      });
     } catch (error) {
       console.log("Error updating profile", error);
     }
   };
 
+  // Reset profile data (clear fields except userName)
+  const resetProfileData = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setProfileData((prevData) => ({
+          ...prevData,
+          firstName: "",
+          lastName: "",
+          city: "",
+          district: "",
+          ward: "",
+          addressStreet: "",
+        }));
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+  };
+
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (isUpdated) {
+      fetchProfile(); // Gọi lại fetchProfile để lấy dữ liệu mới
+      setIsUpdated(false); // Reset lại cờ isUpdated
+    }
+  }, [isUpdated]);
 
   return (
     <div className="bg-white p-14 rounded-lg shadow-lg max-w-4xl">
@@ -201,7 +271,9 @@ function FormMyProfile() {
 
             <div className="flex justify-end">
               <div className="mr-3 p-3 font-medium">
-                <a href="#">Cancel</a>
+                <a href="#" onClick={resetProfileData}>
+                  Delete All
+                </a>
               </div>
               <div
                 className="flex bg-red-600 justify-center align-middle p-3 rounded-lg text-white font-medium w-32"
