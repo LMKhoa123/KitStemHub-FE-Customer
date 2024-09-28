@@ -46,8 +46,8 @@ function LoginInput() {
             });
         }
       })
-      .catch((error) => {
-        console.log("Error during Google login:", error);
+      .catch(() => {
+        // console.log("Error during Google login:", error);
         toast.error("Google login failed!", {
           position: "top-center",
         });
@@ -60,7 +60,7 @@ function LoginInput() {
     try {
       // /gửi request đến server vaf kèm values cua  form
       const response = await api.post("Login", values);
-      console.log(response.data);
+      // console.log(response.data);
       // console.log(localStorage.length); // 2
       // localStorage.clear();
       // console.log(localStorage.length); // 0
@@ -79,22 +79,26 @@ function LoginInput() {
       }, 1500); // Chờ 1.5 giây để đảm bảo người dùng thấy thông báo
     } catch (err) {
       if (err.response) {
-        console.log("Lỗi từ phía server:", err.response.status); // Mã lỗi HTTP (ví dụ: 401 Unauthorized)
-        console.log("Thông điệp lỗi:", err.response.data); // Thông báo chi tiết từ server
-        alert(
-          // Dấu ?. là cú pháp Optional Chaining trong JavaScript, cho phép kiểm tra xem thuộc tính có tồn tại hay không mà không gây lỗi nếu thuộc tính đó không tồn tại.
-          err.response.data.details.errors?.email ||
-            err.response.data.details.errors?.invalidCredentials ||
-            "Có lỗi xảy ra, vui lòng thử lại."
-        );
+        const error = err.response.data.details?.errors || {};
+        console.log("Lỗi từ phía server:", err.response.status); // HTTP status code
+        console.log("Thông điệp lỗi:", err.response.data); // Detailed message from server
+
+        // Display error messages using toast
+        if (error.email) {
+          toast.error(error.email);
+        } else if (error.invalidCredentials) {
+          toast.error(error.invalidCredentials);
+        } else {
+          toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+        }
       } else if (err.request) {
         console.log("Không có phản hồi từ server:", err.request);
-        alert(
+        toast.error(
           "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
         );
       } else {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
-        alert(`Lỗi khi tạo yêu cầu: ${err.message}`);
+        toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
       }
     }
   };
