@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MenuOutlined } from "@ant-design/icons";
 import { Input, Menu, Drawer } from "antd";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
@@ -75,7 +75,7 @@ function Navbar({ childrenItem }) {
   };
 
   return (
-    <div className="content-wrapper max-w-screen-2xl text-base mx-auto px-8 border-b h-24">
+    <div className="content-wrapper max-w-screen-2xl text-base mx-auto px-8 border-b h-24 ">
       <header className="py-6 mx-10">
         <nav className="flex flex-row justify-between items-center">
           {/* Logo */}
@@ -137,20 +137,7 @@ function Navbar({ childrenItem }) {
                     : "kt-menu-item"
                 }
               >
-                Login In
-              </NavLink>
-            </li>
-            <li className="">
-              <NavLink
-                to="/signup"
-                exact
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-red-500 font-bold border-b-2 border-pink-300"
-                    : "kt-menu-item"
-                }
-              >
-                Sign Up
+                Log In
               </NavLink>
             </li>
           </ul>

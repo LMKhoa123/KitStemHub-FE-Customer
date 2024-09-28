@@ -1,12 +1,12 @@
 import Footer from "../../components/footer/Footer";
-import LoginInput from "../../components/login/login/LoginInput";
+import AuthForm from "../../components/login/login/AuthForm";
 import Navbar from "../../components/login/navbar/Navbar";
 
 function LoginPage() {
   return (
     <>
       <Navbar />
-      <LoginInput />
+      <AuthForm />
       <Footer />
     </>
   );
