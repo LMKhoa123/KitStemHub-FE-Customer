@@ -3,7 +3,7 @@ import LoginPage from "./pages/loginpage/LoginPage";
 import ProfilePage from "./pages/profilepage/ProfilePage";
 import ProfileInfo from "./components/profile/profileinfo/ProfileInfo";
 import ProfileAddress from "./components/profile/profileaddress/ProfileAddress";
-import SignUpPage from "./pages/signuppage/SignUpPage";
+
 import ProfileCart from "./components/profile/profilecart/ProfileCart";
 import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
@@ -47,10 +47,6 @@ function App() {
           element: <ProfileLab />, // Thành phần ProfileLab
         },
       ],
-    },
-    {
-      path: "/signup",
-      element: <SignUpPage />,
     },
   ]);
   return <RouterProvider router={router} />;
