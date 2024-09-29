@@ -5,61 +5,37 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Space } from "antd";
+import { useNavigate } from "react-router-dom";
 function DropdownUser() {
+  const navigate = useNavigate();
+
+  const handleNavigate = (path) => () => {
+    navigate(path);
+  };
   const items = [
     {
       key: "1",
       icon: <UserOutlined />,
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
-        >
-          Manage my account
-        </a>
-      ),
+      label: "Manage my account",
+      onClick: handleNavigate("/profile/profileinfo"),
     },
     {
       key: "2",
       icon: <ShoppingOutlined />,
 
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.aliyun.com"
-        >
-          My order
-        </a>
-      ),
+      label: "My order",
     },
     {
       key: "3",
       icon: <CloseCircleOutlined />,
 
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          My cancellations
-        </a>
-      ),
+      label: "My cancellations",
     },
     {
       key: "4",
       icon: <LoginOutlined />,
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          Logout
-        </a>
-      ),
+      label: "Logout",
+      onClick: handleNavigate("/home/register"),
     },
   ];
 

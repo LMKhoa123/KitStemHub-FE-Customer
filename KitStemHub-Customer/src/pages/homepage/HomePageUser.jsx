@@ -4,7 +4,7 @@ import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 
 function HomePageUser() {
   return (
-    <div className="container mx-auto shrink h-screen">
+    <div className="shrink h-screen">
       <NavbarUser />
       <HomeUser />
       <Footer />

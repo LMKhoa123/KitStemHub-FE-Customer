@@ -4,7 +4,7 @@ import Navbar from "../../components/login/navbar/Navbar";
 
 function HomePageRegister() {
   return (
-    <div className="container mx-auto shrink h-screen">
+    <div className="shrink h-screen">
       <Navbar />
       <HomeRegister />
       <Footer />

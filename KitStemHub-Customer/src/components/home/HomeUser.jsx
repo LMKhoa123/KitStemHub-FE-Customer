@@ -1,8 +1,30 @@
+import { useState } from "react";
 import HomeCarousel from "./homeCarousel/HomeCarousel";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
 import HomeSidebar from "./homeSidebar/HomeSidebar";
 
-function HomeUser() {
+function HomeRegister() {
+  // Dữ liệu sản phẩm giả định (có 24 sản phẩm)
+  const products = Array.from({ length: 24 }, (v, i) => ({
+    id: i + 1,
+    image:
+      "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+  }));
+
+  // Trạng thái quản lý số lượng sản phẩm hiển thị (mặc định là 8 sản phẩm)
+  const [itemsToShow, setItemsToShow] = useState(8);
+  const [expanded, setExpanded] = useState(false); // Trạng thái toggle hiển thị/thu lại sản phẩm
+
+  // Hàm xử lý toggle
+  const handleToggleProducts = () => {
+    if (expanded) {
+      setItemsToShow(8); // Thu gọn lại về 8 sản phẩm
+    } else {
+      setItemsToShow(products.length); // Hiển thị tất cả sản phẩm
+    }
+    setExpanded(!expanded); // Đổi trạng thái toggle
+  };
+
   return (
     <>
       {/* nav home page */}
@@ -12,28 +34,33 @@ function HomeUser() {
           <HomeSidebar />
         </div>
         {/* carousel */}
-        <div className="w-3/4 ">
+        <div className="w-3/4">
           <HomeCarousel />
         </div>
       </div>
 
-      {/* our product  */}
-      <div className="mt-10 ml-36 mr-20">
-        <div className="flex mb-5">
+      {/* our product */}
+      <div className="flex flex-col mt-16 px-60">
+        <div className="flex mb-5 items-center">
           <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
           <h3 className="text-rose-600 font-medium flex items-center">
             Our Products
           </h3>
         </div>
         <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
-        {/* carousel product*/}
-        <div className="mb-48">
-          <HomeProductCarousel />
+
+        {/* carousel product */}
+        <div className="mb-32">
+          <HomeProductCarousel products={products} itemsToShow={itemsToShow} />
         </div>
+
         {/* button */}
         <div className="flex justify-center mb-20">
-          <button className=" w-44 flex justify-center items-center bg-red-500 text-white font-medium h-10 rounded-sm">
-            View all products
+          <button
+            onClick={handleToggleProducts}
+            className="w-44 flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 text-white font-medium h-10 rounded-full shadow-lg hover:from-yellow-400 hover:to-red-500 transition-all duration-300"
+          >
+            {expanded ? "Show Less Products" : "View All Products"}
           </button>
         </div>
       </div>
@@ -56,10 +83,9 @@ function HomeUser() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  {" "}
-                  <path stroke="none" d="M0 0h24v24H0z" />{" "}
-                  <circle cx={7} cy={17} r={2} />{" "}
-                  <circle cx={17} cy={17} r={2} />{" "}
+                  <path stroke="none" d="M0 0h24v24H0z" />
+                  <circle cx={7} cy={17} r={2} />
+                  <circle cx={17} cy={17} r={2} />
                   <path d="M5 17h-2v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5" />
                 </svg>
               </div>
@@ -70,6 +96,7 @@ function HomeUser() {
             Free delivery for all orders over $140
           </p>
         </div>
+
         {/* 24/7 Customer Service */}
         <div className="text-center">
           <div className="flex justify-center items-center mb-4">
@@ -86,11 +113,10 @@ function HomeUser() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  {" "}
-                  <path stroke="none" d="M0 0h24v24H0z" />{" "}
-                  <rect x={4} y={13} rx={2} width={4} height={6} />{" "}
-                  <rect x={16} y={13} rx={2} width={4} height={6} />{" "}
-                  <path d="M4 15v-3a8 8 0 0 1 16 0v3" />{" "}
+                  <path stroke="none" d="M0 0h24v24H0z" />
+                  <rect x={4} y={13} rx={2} width={4} height={6} />
+                  <rect x={16} y={13} rx={2} width={4} height={6} />
+                  <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
                   <path d="M18 19a6 3 0 0 1 -6 3" />
                 </svg>
               </div>
@@ -99,6 +125,7 @@ function HomeUser() {
           <h3 className="font-bold text-lg">24/7 CUSTOMER SERVICE</h3>
           <p className="text-gray-500">Friendly 24/7 customer support</p>
         </div>
+
         {/* Money Back Guarantee */}
         <div className="text-center">
           <div className="flex justify-center items-center mb-4">
@@ -128,4 +155,4 @@ function HomeUser() {
   );
 }
 
-export default HomeUser;
+export default HomeRegister;
