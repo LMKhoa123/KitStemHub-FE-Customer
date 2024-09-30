@@ -1,85 +1,34 @@
-import {
-  CloseCircleOutlined,
-  LoginOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Dropdown, Space } from "antd";
-function DropdownUser() {
-  const items = [
-    {
-      key: "1",
-      icon: <UserOutlined />,
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.antgroup.com"
-        >
-          Manage my account
-        </a>
-      ),
-    },
-    {
-      key: "2",
-      icon: <ShoppingOutlined />,
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { Dropdown, Menu } from "antd";
+import PropTypes from "prop-types";
 
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.aliyun.com"
-        >
-          My order
-        </a>
-      ),
-    },
-    {
-      key: "3",
-      icon: <CloseCircleOutlined />,
-
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          My cancellations
-        </a>
-      ),
-    },
-    {
-      key: "4",
-      icon: <LoginOutlined />,
-      label: (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href="https://www.luohanacademy.com"
-        >
-          Logout
-        </a>
-      ),
-    },
-  ];
+function DropdownUser({ onLogout }) {
+  const menu = (
+    <Menu>
+      <Menu.Item key="profile" icon={<UserOutlined />}>
+        Hồ sơ
+      </Menu.Item>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={onLogout}>
+        Đăng xuất
+      </Menu.Item>
+    </Menu>
+  );
 
   return (
-    <Space direction="vertical">
-      <Space wrap>
-        <Dropdown
-          menu={{
-            items,
-          }}
-          placement="bottomRight"
-          arrow={{
-            pointAtCenter: true,
-          }}
-        >
-          <UserOutlined />
-        </Dropdown>
-      </Space>
-    </Space>
+    <Dropdown
+      overlay={menu}
+      placement="bottomRight"
+      arrow={{ pointAtCenter: true }}
+    >
+      <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
+        <UserOutlined />
+      </a>
+    </Dropdown>
   );
 }
+
+DropdownUser.propTypes = {
+  onLogout: PropTypes.func.isRequired,
+};
 
 export default DropdownUser;
