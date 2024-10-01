@@ -1,45 +1,18 @@
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { Dropdown, Menu } from "antd";
+import PropTypes from "prop-types";
 
-import {
-  CloseCircleOutlined,
-  LoginOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Dropdown, Space } from "antd";
-import { useNavigate } from "react-router-dom";
-function DropdownUser() {
-  const navigate = useNavigate();
-
-  const handleNavigate = (path) => () => {
-    navigate(path);
-  };
-  const items = [
-    {
-      key: "1",
-      icon: <UserOutlined />,
-      label: "Manage my account",
-      onClick: handleNavigate("/profile/profileinfo"),
-    },
-    {
-      key: "2",
-      icon: <ShoppingOutlined />,
-
-      label: "My order",
-    },
-    {
-      key: "3",
-      icon: <CloseCircleOutlined />,
-
-      label: "My cancellations",
-    },
-    {
-      key: "4",
-      icon: <LoginOutlined />,
-      label: "Logout",
-      onClick: handleNavigate("/home/register"),
-    },
-  ];
-
+function DropdownUser({ onLogout }) {
+  const menu = (
+    <Menu>
+      <Menu.Item key="profile" icon={<UserOutlined />}>
+        Hồ sơ
+      </Menu.Item>
+      <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={onLogout}>
+        Đăng xuất
+      </Menu.Item>
+    </Menu>
+  );
   return (
     <Dropdown
       overlay={menu}
