@@ -1,3 +1,4 @@
+
 import {
   CloseCircleOutlined,
   LoginOutlined,
@@ -40,22 +41,20 @@ function DropdownUser() {
   ];
 
   return (
-    <Space direction="vertical">
-      <Space wrap>
-        <Dropdown
-          menu={{
-            items,
-          }}
-          placement="bottomRight"
-          arrow={{
-            pointAtCenter: true,
-          }}
-        >
-          <UserOutlined />
-        </Dropdown>
-      </Space>
-    </Space>
+    <Dropdown
+      overlay={menu}
+      placement="bottomRight"
+      arrow={{ pointAtCenter: true }}
+    >
+      <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
+        <UserOutlined />
+      </a>
+    </Dropdown>
   );
 }
+
+DropdownUser.propTypes = {
+  onLogout: PropTypes.func.isRequired,
+};
 
 export default DropdownUser;
