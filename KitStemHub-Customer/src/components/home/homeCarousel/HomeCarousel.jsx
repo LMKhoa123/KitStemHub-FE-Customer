@@ -17,7 +17,7 @@ function HomeCarousel() {
         dynamicBullets: true,
       }}
       modules={[Pagination, Autoplay]}
-      className="carousel h-full w-5/6"
+      className="carousel h-full w-3/4"
     >
       <SwiperSlide>
         <img
