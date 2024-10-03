@@ -1,6 +1,6 @@
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 
 function DropdownUser({ onLogout }) {
   const menu = (
@@ -25,9 +25,9 @@ function DropdownUser({ onLogout }) {
     </Dropdown>
   );
 }
-
-DropdownUser.propTypes = {
-  onLogout: PropTypes.func.isRequired,
-};
+//không cần thiết
+// DropdownUser.propTypes = {
+//   onLogout: PropTypes.func.isRequired,
+// };
 
 export default DropdownUser;
