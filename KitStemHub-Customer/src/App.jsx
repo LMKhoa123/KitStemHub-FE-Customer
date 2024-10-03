@@ -16,6 +16,7 @@ import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
+import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -40,54 +41,17 @@ const PublicRoute = ({ children }) => {
 function App() {
   const isLoggedIn = () => !!localStorage.getItem("token");
   console.log(isLoggedIn());
-  // const router = createBrowserRouter([
-  //   {
-  //     path: "/",
-  //     element: <HomePageRegister />,
-  //   },
-  //   {
-  //     path: "/login",
-  //     element: <LoginPage />,
-  //   },
-  //   {
-  //     path: "/home",
-  //     children: [
-  //       { path: "user", element: <HomePageUser /> },
-  //       { path: "register", element: <HomePageRegister /> },
-  //     ],
-  //   },
-  //   {
-  //     path: "/profile", // Đường dẫn cho ProfilePage
-  //     element: <ProfilePage />, // Sử dụng ProfilePage làm layout
-  //     children: [
-  //       {
-  //         path: "profileinfo", // Đường dẫn con: /profile/profileinfo
-  //         element: <ProfileInfo />, // Thành phần ProfileInfo
-  //       },
-  //       {
-  //         path: "profileaddress", // Đường dẫn con: /profile/profileaddress
-  //         element: <ProfileAddress />, // Thành phần ProfileAddress
-  //       },
-  //       {
-  //         path: "profilecart", // Đường dẫn con: /profile/profilecart
-  //         element: <ProfileCart />, // Thành phần ProfileCart
-  //       },
-  //       {
-  //         path: "profilelab", // Đường dẫn con: /profile/profilelab
-  //         element: <ProfileLab />, // Thành phần ProfileLab
-  //       },
-  //     ],
-  //   },
-  // ]);
-  // return <RouterProvider router={router} />;
+
   return (
     <AuthProvider>
+      {/* {/* children trong AuthProvider đại diện cho toàn bộ nội dung của ứng dụng được bao bọc bởi AuthProvider đảm bảo rằng tất cả các components con đều có thể truy cập vào context xác thực. */}
       <Router>
         <Routes>
           <Route
             path="/login"
             element={
               <PublicRoute>
+                {/* //children */}
                 <AuthPage />
               </PublicRoute>
             }
@@ -97,6 +61,7 @@ function App() {
             path="/home"
             element={
               <ProtectedRoute>
+                {/* //children */}
                 <HomePageUser />
               </ProtectedRoute>
             }
@@ -105,6 +70,7 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
+                {/* //children */}
                 <ProfilePage />
               </ProtectedRoute>
             }
@@ -123,6 +89,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/productdetail" element={<ProductDetailPage />} />
         </Routes>
       </Router>
     </AuthProvider>

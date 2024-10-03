@@ -9,6 +9,7 @@ import Loading from "../../Loading";
 function NavbarUser() {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
+  // loading này được sử dụng để chỉ ra trạng thái đang xử lý logout.
   const [loading, setLoading] = useState(false);
 
   const handleLogout = useCallback(async () => {

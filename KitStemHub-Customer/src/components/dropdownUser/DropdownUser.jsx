@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 
 function DropdownUser({ onLogout, onProfile }) {
   const menu = (
@@ -26,9 +26,9 @@ function DropdownUser({ onLogout, onProfile }) {
     </Dropdown>
   );
 }
-
-DropdownUser.propTypes = {
-  onLogout: PropTypes.func.isRequired,
-};
+//không cần thiết
+// DropdownUser.propTypes = {
+//   onLogout: PropTypes.func.isRequired,
+// };
 
 export default DropdownUser;
