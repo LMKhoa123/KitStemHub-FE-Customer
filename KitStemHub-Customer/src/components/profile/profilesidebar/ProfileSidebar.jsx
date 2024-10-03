@@ -28,14 +28,14 @@ function ProfileSidebar() {
           label: (
             <MenuItem label="Thông tin tài khoản" className="text-gray-500" />
           ),
-          onClick: handleNavigate("/profile/profileinfo"),
+          onClick: handleNavigate("/profile"),
         },
         {
           key: "2",
           label: (
             <MenuItem label="Địa chỉ giao hàng" className="text-gray-500" />
           ),
-          onClick: handleNavigate("/profile/profileaddress"),
+          onClick: handleNavigate("/profile/address"),
         },
       ],
     },
@@ -49,12 +49,12 @@ function ProfileSidebar() {
           label: (
             <MenuItem label="Đơn hàng của bạn" className="text-gray-500" />
           ),
-          onClick: handleNavigate("/profile/profilecart"),
+          onClick: handleNavigate("/profile/cart"),
         },
         {
           key: "4",
           label: <MenuItem label="Bài Lab đã tải" className="text-gray-500" />,
-          onClick: handleNavigate("/profile/profilelab"),
+          onClick: handleNavigate("/profile/lab"),
         },
       ],
     },
