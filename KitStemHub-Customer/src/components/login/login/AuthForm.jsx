@@ -137,7 +137,7 @@ function LoginInput() {
 
   return (
     <div
-      className={`${styles.container} ${isSignUpMode ? styles.signUpMode : ""}`}
+      className={`${styles.container} ${isSignUpMode ? styles.signUpMode : ""} `}
     >
       <div className={styles.formsContainer}>
         <div className={styles.signinSignup}>
@@ -151,7 +151,7 @@ function LoginInput() {
             style={{
               maxWidth: 600,
             }}
-            className={`${styles.signInForm} ${isSignUpMode ? styles.hidden : ""}`}
+            className={`${styles.signInForm} ${isSignUpMode ? styles.hidden : ""} ml-10`}
             initialValues={{
               remember: true,
             }}
