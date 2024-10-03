@@ -1,4 +1,5 @@
 import { Input } from "antd";
+import { NavLink } from "react-router-dom";
 const { Search } = Input;
 const onSearch = (value, _e, info) => console.log(info && info.source, value);
 
@@ -13,19 +14,13 @@ function NavbarEx({ childrenItem }) {
           </div>
           <ul className=" basis-2/6 flex items-center justify-between text-md font-normal text-gray-400">
             <li className="kt-menu-item">
-              <a href="#" className="">
-                Home
-              </a>
+              <NavLink to="/home">Home</NavLink>
             </li>
             <li className="kt-menu-item">
-              <a href="#" className="">
-                Contact
-              </a>
+              <NavLink to="/contact">Contact</NavLink>
             </li>
             <li className="kt-menu-item">
-              <a href="#" className="">
-                About
-              </a>
+              <NavLink to="about">About</NavLink>
             </li>
           </ul>
           <Search

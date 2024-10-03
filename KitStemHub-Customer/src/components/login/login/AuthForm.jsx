@@ -6,57 +6,62 @@ import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import the CSS
+import "react-toastify/dist/ReactToastify.css";
+import Loading from "../../Loading";
+import { useAuth } from "../../../context/AuthContext";
+
 function LoginInput() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useAuth();
 
-  const handleLoginGoogle = () => {
-    signInWithPopup(auth, googleProvider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        // console.log(credential);
-        const accessToken = credential.accessToken; // Access Token from Google
-        // console.log("acccessToken" + accessToken);
-        const idToken = credential.idToken; // Get the ID Token from the result
-        // console.log("idToke" + idToken);
-        const pendingToken = credential.pendingToken; // Pending Token (optional, depends on Google)
-        // console.log("pending" + pendingToken);
-        const user = result.user; // Thông tin người dùng
-        if (user) {
-          api
-            .post("LoginWithGoogle", { pendingToken, idToken, accessToken })
-            .then((response) => {
-              console.log(response.data);
-              toast.success("User logged in Successfully!", {
-                position: "top-center",
-                autoClose: 1500,
-              });
-
-              // Lưu trữ thông tin vào localStorage
-              localStorage.setItem("token", response.data.details.accessToken); // Save server's access token
-              localStorage.setItem(
-                "refreshToken",
-                response.data.details.refreshToken
-              ); // Save refresh token
-              // console.log(localStorage.getItem("token"));
-              // console.log(localStorage.getItem("refreshToken"));
-              setTimeout(() => {
-                navigate("/"); // Chuyển hướng sang trang homepage
-              }, 1500); // Chờ 1.5 giây để đảm bảo người dùng thấy thông báo
+  const handleLoginGoogle = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      // console.log(credential);
+      const accessToken = credential.accessToken; // Access Token from Google
+      // console.log("acccessToken" + accessToken);
+      const idToken = credential.idToken; // Get the ID Token from the result
+      // console.log("idToke" + idToken);
+      const pendingToken = credential.pendingToken; // Pending Token (optional, depends on Google)
+      // console.log("pending" + pendingToken);
+      const user = result.user; // Thông tin người dùng
+      if (user) {
+        api
+          .post("LoginWithGoogle", { pendingToken, idToken, accessToken })
+          .then((response) => {
+            console.log(response.data);
+            toast.success("User logged in Successfully!", {
+              position: "top-center",
+              autoClose: 1500,
             });
-        }
-      })
-      .catch(() => {
-        // console.log("Error during Google login:", error);
-        toast.error("Google login failed!", {
-          position: "top-center",
-        });
-      });
+
+            // Lưu trữ thông tin vào localStorage
+            localStorage.setItem("token", response.data.details.accessToken); // Save server's access token
+            localStorage.setItem(
+              "refreshToken",
+              response.data.details.refreshToken
+            ); // Save refresh token
+            // console.log(localStorage.getItem("token"));
+            // console.log(localStorage.getItem("refreshToken"));
+            setIsLoggedIn(true);
+            navigate("/home");
+          });
+      }
+    } catch (error) {
+      // console.log("Error during Google login:", error);
+      toast.error("Google login failed!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOnFinish = async (values) => {
+    setLoading(true);
     try {
       const response = await api.post(
         isSignUpMode ? "Register" : "Login",
@@ -70,9 +75,8 @@ function LoginInput() {
         position: "top-center",
         autoClose: 1500,
       });
-      setTimeout(() => {
-        navigate("/"); // Chuyển hướng sang trang homepage
-      }, 1500); // Chờ 1.5 giây để đảm bảo người dùng thấy thông báo
+      setIsLoggedIn(true);
+      navigate("/home");
       if (isSignUpMode && response.data.status === "success") {
         const userEmail = values.email;
         const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
@@ -122,8 +126,14 @@ function LoginInput() {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
         toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
       }
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div
