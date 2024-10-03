@@ -1,7 +1,7 @@
 import { Layout } from "antd";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
-import FormMyProfile from "../profileinfo/formmyprofile/FormMyProfile";
+import FormMyAddress from "./formmyaddress/FormMyAddress";
 
 const { Content } = Layout;
 
@@ -22,7 +22,7 @@ function ProfileAddress() {
 
             {/* form profile */}
             <div className="p-14 max-w-4xl">
-              <FormMyProfile />
+              <FormMyAddress />
             </div>
           </Content>
         </Layout>

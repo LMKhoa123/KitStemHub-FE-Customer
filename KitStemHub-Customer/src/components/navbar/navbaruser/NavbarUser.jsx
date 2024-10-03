@@ -23,6 +23,10 @@ function NavbarUser() {
     navigate("/");
   }, [navigate, setIsLoggedIn]);
 
+  const handleNavigate = (path) => () => {
+    navigate(path);
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -38,11 +42,14 @@ function NavbarUser() {
           </li>
           <li className="hover:text-gray-800 transition p-4 text-xl">
             <a href="#" className="">
-              <ShoppingCartOutlined />
+              <ShoppingCartOutlined onClick={handleNavigate("/cart")} />
             </a>
           </li>
           <li className="hover:text-gray-800 transition p-4 text-xl">
-            <DropdownUser onLogout={handleLogout} />
+            <DropdownUser
+              onLogout={handleLogout}
+              onProfile={handleNavigate("/profile")}
+            />
           </li>
         </ul>
       }

@@ -268,20 +268,6 @@ function FormMyProfile() {
                 }
               />
             </div>
-
-            <div className="flex justify-end">
-              <div className="mr-3 p-3 font-medium">
-                <a href="#" onClick={resetProfileData}>
-                  Delete All
-                </a>
-              </div>
-              <div
-                className="flex bg-red-600 justify-center align-middle p-3 rounded-lg text-white font-medium w-32"
-                onClick={updateProfile}
-              >
-                <a>Save Changes</a>
-              </div>
-            </div>
           </div>
         </form>
       </div>
@@ -293,7 +279,7 @@ function FormMyProfile() {
           Thông tin Địa chỉ
         </label>
         <input
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="appearance-none block w-full text-xl text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4"
           id="address"
           type="text"
           value={profileData.address}
@@ -302,6 +288,20 @@ function FormMyProfile() {
           }
           disabled
         />
+      </div>
+
+      <div className="flex justify-end">
+        <div className="mr-3 p-3 font-medium">
+          <a href="#" onClick={resetProfileData}>
+            Delete All
+          </a>
+        </div>
+        <div
+          className="flex bg-red-600 justify-center align-middle p-3 rounded-lg text-white font-medium w-32"
+          onClick={updateProfile}
+        >
+          <a>Save Changes</a>
+        </div>
       </div>
     </div>
   );

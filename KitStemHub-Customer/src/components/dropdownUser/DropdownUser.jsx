@@ -1,11 +1,12 @@
+/* eslint-disable react/prop-types */
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import { Dropdown, Menu } from "antd";
 // import PropTypes from "prop-types";
 
-function DropdownUser({ onLogout }) {
+function DropdownUser({ onLogout, onProfile }) {
   const menu = (
     <Menu>
-      <Menu.Item key="profile" icon={<UserOutlined />}>
+      <Menu.Item key="profile" icon={<UserOutlined />} onClick={onProfile}>
         Hồ sơ
       </Menu.Item>
       <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={onLogout}>

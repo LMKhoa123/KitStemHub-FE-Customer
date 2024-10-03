@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   BrowserRouter as Router,
   Route,
@@ -14,6 +15,7 @@ import ProfileCart from "./components/profile/profilecart/ProfileCart";
 import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
+import CartPage from "./pages/cartpage/CartPage";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
 
 const ProtectedRoute = ({ children }) => {
@@ -78,6 +80,15 @@ function App() {
             <Route path="cart" element={<ProfileCart />} />
             <Route path="lab" element={<ProfileLab />} />
           </Route>
+
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/productdetail" element={<ProductDetailPage />} />
         </Routes>
       </Router>
