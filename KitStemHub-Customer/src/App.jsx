@@ -17,6 +17,7 @@ import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
+import CheckOutPage from "./pages/checkoutpage/CheckOutPage";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -90,6 +91,7 @@ function App() {
             }
           />
           <Route path="/productdetail" element={<ProductDetailPage />} />
+          <Route path="/checkout" element={<CheckOutPage />} />
         </Routes>
       </Router>
     </AuthProvider>
