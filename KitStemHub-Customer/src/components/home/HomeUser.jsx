@@ -1,70 +1,79 @@
-import { useState } from "react";
+// import HomeCarousel from "./homeCarousel/HomeCarousel";
 import HomeCarousel from "./homeCarousel/HomeCarousel";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
 import HomeSidebar from "./homeSidebar/HomeSidebar";
 
-function HomeRegister() {
+function HomeUser() {
   // Dữ liệu sản phẩm giả định (có 24 sản phẩm)
-  const products = Array.from({ length: 24 }, (v, i) => ({
-    id: i + 1,
-    image:
-      "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-  }));
-
-  // Trạng thái quản lý số lượng sản phẩm hiển thị (mặc định là 8 sản phẩm)
-  const [itemsToShow, setItemsToShow] = useState(8);
-  const [expanded, setExpanded] = useState(false); // Trạng thái toggle hiển thị/thu lại sản phẩm
-
-  // Hàm xử lý toggle
-  const handleToggleProducts = () => {
-    if (expanded) {
-      setItemsToShow(8); // Thu gọn lại về 8 sản phẩm
-    } else {
-      setItemsToShow(products.length); // Hiển thị tất cả sản phẩm
-    }
-    setExpanded(!expanded); // Đổi trạng thái toggle
-  };
+  const products = [
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$5.50",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$3.00",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$10.00",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$5.30",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$15.70",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$8.00",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$7.50",
+    },
+    {
+      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
+      price: "$12.20",
+    },
+  ];
 
   return (
     <>
+      <HomeCarousel />
+
       {/* nav home page */}
-      <div className="flex h-72 mt-7">
+      <div className="flex h-screen mt-16">
         {/* side bar */}
-        <div className="flex justify-end w-1/3">
+        <div className="flex justify-end w-1/4">
           <HomeSidebar />
         </div>
-        {/* carousel */}
-        <div className="w-3/4">
-          <HomeCarousel />
+
+        {/* our product */}
+        <div className="flex flex-col ml-20 w-3/5">
+          <div className="flex mb-5 items-center">
+            <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
+            <h3 className="text-rose-600 font-medium flex items-center">
+              Our Products
+            </h3>
+          </div>
+          <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
+
+          {/* carousel product */}
+          <div className="mb-32">
+            <HomeProductCarousel products={products} />
+            {/* button */}
+          </div>
+
+          <div className="flex justify-center mb-20">
+            <button className="w-44 flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 text-white font-medium h-10 rounded-full shadow-lg hover:from-yellow-400 hover:to-red-500 transition-all duration-300">
+              Show All Product
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* our product */}
-      <div className="flex flex-col mt-16 px-60">
-        <div className="flex mb-5 items-center">
-          <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
-          <h3 className="text-rose-600 font-medium flex items-center">
-            Our Products
-          </h3>
-        </div>
-        <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
-
-        {/* carousel product */}
-        <div className="mb-32">
-          <HomeProductCarousel products={products} itemsToShow={itemsToShow} />
-        </div>
-
-        {/* button */}
-        <div className="flex justify-center mb-20">
-          <button
-            onClick={handleToggleProducts}
-            className="w-44 flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 text-white font-medium h-10 rounded-full shadow-lg hover:from-yellow-400 hover:to-red-500 transition-all duration-300"
-          >
-            {expanded ? "Show Less Products" : "View All Products"}
-          </button>
-        </div>
-      </div>
-
       {/* service */}
       <div className="flex justify-around mb-16">
         {/* Free and Fast Delivery */}
@@ -155,4 +164,4 @@ function HomeRegister() {
   );
 }
 
-export default HomeRegister;
+export default HomeUser;
