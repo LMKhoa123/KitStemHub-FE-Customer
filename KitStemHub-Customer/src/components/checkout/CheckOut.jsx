@@ -90,7 +90,7 @@ const CheckOut = () => {
           </Radio.Group>
 
           <Select
-            className="w-1/2"
+            className="w-1/2 flex justify-start"
             defaultValue="free"
             placeholder="Select shipping"
             size="large"
@@ -158,8 +158,8 @@ const CheckOut = () => {
             onChange={(e) => setPaymentMethod(e.target.value)}
             value={paymentMethod}
           >
-            <Radio value="bank" className="block">
-              Bank Transfer
+            <Radio value="bank" className="flex ">
+              <img src="vnpayImage.svg" alt="" className="w-16 h-16" />
             </Radio>
             <Radio value="cash" className="block">
               Cash on delivery
