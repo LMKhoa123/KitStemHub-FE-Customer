@@ -32,7 +32,7 @@ function LoginInput() {
       const user = result.user; // Thông tin người dùng
       if (user) {
         api
-          .post("LoginWithGoogle", { pendingToken, idToken, accessToken })
+          .post("users/loginWithGoogle", { pendingToken, idToken, accessToken })
           .then((response) => {
             console.log(response.data);
             toast.success("User logged in Successfully!", {
@@ -64,7 +64,7 @@ function LoginInput() {
     setLoading(true);
     try {
       const response = await api.post(
-        isSignUpMode ? "Register" : "Login",
+        isSignUpMode ? "users/register" : "users/login",
         values
       );
       const { accessToken, refreshToken } = response.data.details;

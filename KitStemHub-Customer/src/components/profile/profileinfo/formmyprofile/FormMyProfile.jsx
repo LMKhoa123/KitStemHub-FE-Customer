@@ -18,7 +18,7 @@ function FormMyProfile() {
   // Fetch profile data
   const fetchProfile = async () => {
     try {
-      const response = await api.get("Profile");
+      const response = await api.get("users/profile");
       console.log("Lấy dữ liệu thành công", response.data);
 
       setProfileData({
@@ -65,7 +65,7 @@ function FormMyProfile() {
     };
 
     try {
-      const response = await api.put("Profile", updatedProfile);
+      const response = await api.put("users/profile", updatedProfile);
       console.log("Profile updated successfully", response.data);
       Swal.fire({
         title: "Do you want to save the changes?",
