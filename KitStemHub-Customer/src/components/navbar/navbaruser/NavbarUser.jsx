@@ -45,7 +45,7 @@ function NavbarUser() {
               <ShoppingCartOutlined onClick={handleNavigate("/cart")} />
             </a>
           </li>
-          <li className="hover:text-gray-800 transition p-4 text-xl">
+          <li className="hover:text-gray-800 transition p-4 text-xl cursor-pointer">
             <DropdownUser
               onLogout={handleLogout}
               onProfile={handleNavigate("/profile")}

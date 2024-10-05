@@ -101,14 +101,16 @@ function HomeSidebar() {
     console.log("click", e);
   };
   return (
-    <Menu
-      onClick={onClick}
-      style={{
-        width: 256,
-      }}
-      mode="vertical"
-      items={items}
-    />
+    <>
+      <Menu
+        onClick={onClick}
+        style={{
+          width: 256,
+        }}
+        mode="vertical"
+        items={items}
+      />
+    </>
   );
 }
 

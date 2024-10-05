@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
+    "@nextui-org/card": "^2.0.34",
+    "@nextui-org/react": "^2.4.8",
     "@sweetalert2/themes": "^5.0.18",
     "antd": "^5.20.6",
     "axios": "^1.7.7",
