@@ -66,12 +66,6 @@ function HomeUser() {
             <HomeProductCarousel products={products} />
             {/* button */}
           </div>
-
-          <div className="flex justify-center mb-20">
-            <button className="w-44 flex justify-center items-center bg-gradient-to-r from-pink-500 to-red-500 text-white font-medium h-10 rounded-full shadow-lg hover:from-yellow-400 hover:to-red-500 transition-all duration-300">
-              Show All Product
-            </button>
-          </div>
         </div>
       </div>
       {/* service */}
