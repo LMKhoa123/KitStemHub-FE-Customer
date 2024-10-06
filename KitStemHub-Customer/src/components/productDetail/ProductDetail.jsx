@@ -8,6 +8,7 @@ import {
   Tag,
   message,
   Select,
+  Spin,
 } from "antd";
 import {
   HeartOutlined,
@@ -26,6 +27,7 @@ const ProductDetail = () => {
   const [kitDetail, setKitDetail] = useState(null);
   const [packageDetail, setPackageDetail] = useState(null);
   const [packages, setPackages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     fetchKitDetail();
@@ -34,13 +36,13 @@ const ProductDetail = () => {
   const fetchKitDetail = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`packages/1/labs`);
+      const response = await api.get(`kits/1/packages`);
       console.log(response.data);
       if (response.data && response.data.status === "success") {
         const packageData = response.data.details.data.package;
-        setKitDetail(packageData.kit);
-        setPackageDetail(packageData);
-        setPackages([packageData]); // For now, we only have one package
+        setKitDetail(packageData[0].kit); //  the kit details are the same for all packages
+        setPackageDetail(packageData[0]); // Set the first package as default
+        setPackages(packageData); // Store all packages
       } else {
         throw new Error("Unexpected response structure");
       }
@@ -52,19 +54,63 @@ const ProductDetail = () => {
     }
   };
 
+  const handleQuantityChange = (value) => {
+    setQuantity((prevQuantity) => {
+      const newQuantity = prevQuantity + value;
+      return newQuantity > 0 ? newQuantity : 1;
+    });
+  };
+
+  const handleAddToCart = async () => {
+    if (!packageDetail) {
+      message.error("Please select a package before adding to cart");
+      return;
+    }
+    try {
+      const response = await api.post("carts", {
+        "package-id": packageDetail.id,
+        "package-quantity": quantity,
+      });
+
+      if (response.data && response.data.status === "success") {
+        message.success(`Đã thêm ${quantity} vào giỏ hàng`);
+        setQuantity(1); // Reset số lượng sau khi thêm vào giỏ hàng
+      } else {
+        throw new Error("Không thể thêm vào giỏ hàng");
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      message.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
+    }
+  };
+
   const handlePackageSelect = (packageId) => {
     const selected = packages.find((pkg) => pkg.id === packageId);
     setPackageDetail(selected);
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </div>
+    );
   }
 
   if (!kitDetail) {
     return <div>No kit details available</div>;
   }
 
+  //test_image_click
+  const images = [
+    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-1-1.jpg",
+    "https://nshopvn.com/wp-content/uploads/2023/05/bo-kit-hoc-lap-trinh-arduino-uno-r3-pro-kit-jjcd-6.jpg",
+    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-3-1.jpg",
+    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-4-1.jpg",
+  ];
+  const handleThumbnailClick = (index) => {
+    setSelectedImage(index);
+  };
   return (
     <div className="container mx-auto px-4">
       <Breadcrumb className="py-4 text-sm">
@@ -77,12 +123,15 @@ const ProductDetail = () => {
         <div className="md:w-1/2">
           <div className="flex gap-4">
             <div className="w-1/5">
-              {[1, 2, 3, 4].map((item) => (
+              {images.map((image, index) => (
                 <img
-                  key={item}
-                  src={`https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-1-1.jpg`}
-                  alt={`Thumbnail ${item}`}
-                  className="w-full mb-2 rounded cursor-pointer hover:opacity-75 transition"
+                  key={index}
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  className={`w-full mb-2 rounded cursor-pointer hover:opacity-75 transition ${
+                    selectedImage === index ? "border-2 border-red-500" : ""
+                  }`}
+                  onClick={() => handleThumbnailClick(index)}
                 />
               ))}
             </div>
@@ -90,8 +139,8 @@ const ProductDetail = () => {
               <TransformWrapper>
                 <TransformComponent>
                   <img
-                    src="https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-1-1.jpg"
-                    alt="Your product"
+                    src={images[selectedImage]}
+                    alt="Selected product"
                     className="w-full rounded-lg"
                   />
                 </TransformComponent>
@@ -109,12 +158,14 @@ const ProductDetail = () => {
               className="text-yellow-400 text-sm"
             />
             <span className="ml-2 text-gray-600 text-sm">(100 Reviews)</span>
-            <span className="ml-2 text-green-500 text-sm">
+            <span
+              className={`ml-2 text-sm ${kitDetail.status ? "text-green-500" : "text-red-500"}`}
+            >
               {kitDetail.status ? "In Stock" : "Out of Stock"}
             </span>
           </div>
           <p className="text-2xl font-bold text-red-600 mb-4">
-            ${(kitDetail.purchaseCost / 1000).toFixed(2)}
+            {kitDetail["purchase-cost"].toLocaleString("vi-VN")} ₫
           </p>
           <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
 
@@ -140,7 +191,7 @@ const ProductDetail = () => {
               <p className="text-sm mb-2">Name: {packageDetail.name}</p>
               <p className="text-sm mb-2">Level: {packageDetail.level.name}</p>
               <p className="text-sm mb-2">
-                Price: ${(packageDetail.price / 1000).toFixed(2)}
+                Price: {packageDetail.price.toLocaleString("vi-VN")} ₫
               </p>
               <p className="text-sm">
                 Status: {packageDetail.status ? "Available" : "Unavailable"}
@@ -150,16 +201,21 @@ const ProductDetail = () => {
 
           <div className="flex items-center gap-4 mb-6 mt-6">
             <div className="flex border rounded">
-              <button className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white">
+              <button
+                className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
+                onClick={() => handleQuantityChange(-1)}
+              >
                 -
               </button>
               <input
                 type="text"
                 value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
                 className="w-12 text-center"
               />
-              <button className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white">
+              <button
+                className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
+                onClick={() => handleQuantityChange(1)}
+              >
                 +
               </button>
             </div>
@@ -167,8 +223,9 @@ const ProductDetail = () => {
               type="primary"
               size="large"
               className="bg-red-500 hover:bg-red-600 border-none"
+              onClick={handleAddToCart}
             >
-              Buy Now
+              Add To Cart
             </Button>
             <Tooltip title="Add to Wishlist">
               <Button
@@ -187,7 +244,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Lab Exercises Section */}
-      {packageDetail && (
+      {packageDetail && packageDetail["package-labs"] && (
         <div className="mt-16 mb-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center">
             <span className="bg-blue-500 text-white px-4 py-2 rounded-l-full flex items-center">
@@ -197,7 +254,7 @@ const ProductDetail = () => {
           </h2>
           <List
             itemLayout="horizontal"
-            dataSource={packageDetail.packageLabs}
+            dataSource={packageDetail["package-labs"]}
             renderItem={(lab) => (
               <List.Item className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow duration-300">
                 <List.Item.Meta
@@ -210,10 +267,10 @@ const ProductDetail = () => {
                       <div className="flex items-center gap-4">
                         <Tag color="blue">{lab.level.name}</Tag>
                         <span className="text-sm text-gray-500">
-                          Price: ${(lab.price / 1000).toFixed(2)}
+                          Price: {lab.price.toLocaleString("vi-VN")} ₫
                         </span>
                         <span className="text-sm text-gray-500">
-                          Max Support Times: {lab.maxSupportTimes}
+                          Max Support Times: {lab["max-support-times"]}
                         </span>
                       </div>
                     </div>
