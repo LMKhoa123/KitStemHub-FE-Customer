@@ -18,6 +18,9 @@ import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
 import CheckOutPage from "./pages/checkoutpage/CheckOutPage";
+import { ToastContainer } from "react-toastify";
+import React from "react";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -40,13 +43,21 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-  const isLoggedIn = () => !!localStorage.getItem("token");
-  console.log(isLoggedIn());
-
   return (
     <AuthProvider>
-      {/* {/* children trong AuthProvider đại diện cho toàn bộ nội dung của ứng dụng được bao bọc bởi AuthProvider đảm bảo rằng tất cả các components con đều có thể truy cập vào context xác thực. */}
       <Router>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           <Route
             path="/login"
@@ -81,7 +92,6 @@ function App() {
             <Route path="cart" element={<ProfileCart />} />
             <Route path="lab" element={<ProfileLab />} />
           </Route>
-
           <Route
             path="/cart"
             element={

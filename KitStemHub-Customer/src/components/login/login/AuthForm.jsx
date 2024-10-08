@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
 import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
+import { toast } from "react-toastify";
 
 function LoginInput() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
@@ -43,20 +44,20 @@ function LoginInput() {
 
             setIsLoggedIn(true);
 
-            message.success(response.data.details.message, 1.5, () => {
-              navigate("/home");
+            toast.success(response.data.details.message, {
+              onClose: () => navigate("/home"),
             });
           } else {
-            message.error("Đăng nhập không thành công. Vui lòng thử lại.");
+            toast.error("Đăng nhập không thành công. Vui lòng thử lại.");
           }
         } catch (error) {
           // console.error("Error during server communication:", error);
-          message.error("Lỗi kết nối với server. Vui lòng thử lại sau.");
+          toast.error("Lỗi kết nối với server. Vui lòng thử lại sau.");
         }
       }
     } catch (error) {
       // console.error("Error during Google login:", error);
-      message.error("Đăng nhập Google thất bại!");
+      toast.error("Đăng nhập Google thất bại!");
     } finally {
       setLoading(false);
     }
@@ -73,13 +74,9 @@ function LoginInput() {
       if (isSignUpMode) {
         // Xử lý khi đăng ký
         if (response.data.status === "success") {
-          message.success(
-            "Đăng ký thành công! Vui lòng đăng nhập.",
-            1.5,
-            () => {
-              setIsSignUpMode(false); // Chuyển sang chế độ đăng nhập
-            }
-          );
+          toast.success("Đăng ký thành công! Vui lòng đăng nhập.", {
+            onClose: () => setIsSignUpMode(false),
+          });
 
           // const userEmail = values.email;
           // const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
@@ -100,7 +97,7 @@ function LoginInput() {
           //   },
           // });
         } else {
-          message.error("Đăng ký không thành công. Vui lòng thử lại.");
+          toast.error("Đăng ký không thành công. Vui lòng thử lại.");
         }
       } else {
         // Xử lý khi đăng nhập
@@ -110,33 +107,48 @@ function LoginInput() {
 
         setIsLoggedIn(true);
 
-        message.success("Đăng nhập thành công!", 1.5, () => {
-          navigate("/home");
+        // Sử dụng Promise để đảm bảo toast hiển thị trước khi chuyển trang
+        await new Promise((resolve) => {
+          toast.success("Đăng nhập thành công!", {
+            onClose: resolve,
+            autoClose: 2000, // Đặt thời gian hiển thị toast là 2 giây
+          });
         });
+
+        // Chuyển hướng sau khi toast đã đóng
+        navigate("/home");
       }
     } catch (err) {
       if (err.response) {
-        const error = err.response.data.details?.errors || {};
-        console.log("Lỗi từ phía server:", err.response.status);
-        console.log("Thông điệp lỗi:", err.response.data);
+        const { status, data } = err.response;
+        console.log("Lỗi từ phía server:", status);
+        console.log("Thông điệp lỗi:", data);
 
-        if (error.email) {
-          message.error(error.email);
-        } else if (error.invalidCredentials) {
-          message.error(error.invalidCredentials);
-        } else if (error.unavailableUsername) {
-          message.error(error.unavailableUsername);
+        if (status === 401) {
+          // Xử lý lỗi đăng nhập không thành công
+          toast.error(
+            data.details.errors.invalidCredentials || "Đăng nhập thất bại!"
+          );
+        } else if (data.details && data.details.errors) {
+          const errors = data.details.errors;
+          if (errors.email) {
+            toast.error(errors.email);
+          } else if (errors.unavailableUsername) {
+            toast.error(errors.unavailableUsername);
+          } else {
+            toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+          }
         } else {
-          message.error("Có lỗi xảy ra, vui lòng thử lại.");
+          toast.error("Có lỗi xảy ra, vui lòng thử lại.");
         }
       } else if (err.request) {
         console.log("Không có phản hồi từ server:", err.request);
-        message.error(
+        toast.error(
           "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
         );
       } else {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
-        message.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
+        toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
       }
     } finally {
       setLoading(false);
