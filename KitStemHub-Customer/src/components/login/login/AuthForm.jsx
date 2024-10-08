@@ -46,6 +46,7 @@ function LoginInput() {
 
             toast.success(response.data.details.message, {
               onClose: () => navigate("/home"),
+              autoClose: 1500,
             });
           } else {
             toast.error("Đăng nhập không thành công. Vui lòng thử lại.");
@@ -77,26 +78,10 @@ function LoginInput() {
           toast.success("Đăng ký thành công! Vui lòng đăng nhập.", {
             onClose: () => setIsSignUpMode(false),
           });
-
-          // const userEmail = values.email;
-          // const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
-          // Modal.info({
-          //   title: "Xác nhận đăng ký",
-          //   content: (
-          //     <div>
-          //       <p>Vui lòng kiểm tra email của bạn để xác nhận tài khoản.</p>
-          //       <p>
-          //         <a href={gmailLink} target="_blank" rel="noopener noreferrer">
-          //           Nhấp vào đây để mở Gmail
-          //         </a>
-          //       </p>
-          //     </div>
-          //   ),
-          //   onOk() {
-          //     window.open(gmailLink, "_blank");
-          //   },
-          // });
+          // Các comment về Modal và Gmail link có thể giữ nguyên
         } else {
+          const error = response.data.details?.errors || {};
+          console.log(error);
           toast.error("Đăng ký không thành công. Vui lòng thử lại.");
         }
       } else {
@@ -107,48 +92,45 @@ function LoginInput() {
 
         setIsLoggedIn(true);
 
-        // Sử dụng Promise để đảm bảo toast hiển thị trước khi chuyển trang
         await new Promise((resolve) => {
           toast.success("Đăng nhập thành công!", {
             onClose: resolve,
-            autoClose: 2000, // Đặt thời gian hiển thị toast là 2 giây
+            autoClose: 1500,
           });
         });
 
-        // Chuyển hướng sau khi toast đã đóng
         navigate("/home");
       }
     } catch (err) {
+      console.log(err);
       if (err.response) {
-        const { status, data } = err.response;
-        console.log("Lỗi từ phía server:", status);
-        console.log("Thông điệp lỗi:", data);
+        const error = err.response.data.details?.errors || {};
+        // console.log("Lỗi từ phía server:", err.response.status);
+        // console.log("Thông điệp lỗi:", err.response.data);
+        // console.log("Chi tiết lỗi:", err.response.data.details);
 
-        if (status === 401) {
-          // Xử lý lỗi đăng nhập không thành công
-          toast.error(
-            data.details.errors.invalidCredentials || "Đăng nhập thất bại!"
-          );
-        } else if (data.details && data.details.errors) {
-          const errors = data.details.errors;
-          if (errors.email) {
-            toast.error(errors.email);
-          } else if (errors.unavailableUsername) {
-            toast.error(errors.unavailableUsername);
-          } else {
-            toast.error("Có lỗi xảy ra, vui lòng thử lại.");
-          }
-        } else {
-          toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+        if (error.email) {
+          toast.error(error.email, {
+            autoClose: 1500,
+          });
         }
       } else if (err.request) {
         console.log("Không có phản hồi từ server:", err.request);
-        toast.error(
-          "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
-        );
+        await new Promise((resolve) => {
+          toast.error(
+            "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng.",
+            {
+              onClose: resolve,
+            }
+          );
+        });
       } else {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
-        toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
+        await new Promise((resolve) => {
+          toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`, {
+            onClose: resolve,
+          });
+        });
       }
     } finally {
       setLoading(false);
