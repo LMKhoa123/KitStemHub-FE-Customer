@@ -10,18 +10,15 @@ import {
   Select,
   Spin,
 } from "antd";
-import {
-  HeartOutlined,
-  ShoppingCartOutlined,
-  ExperimentOutlined,
-} from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
+import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
 
 const { Option } = Select;
 
 const ProductDetail = () => {
+  const { kitId } = useParams(); // Lấy KitId từ URL
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [kitDetail, setKitDetail] = useState(null);
@@ -29,20 +26,25 @@ const ProductDetail = () => {
   const [packages, setPackages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Fetch dữ liệu khi component mount hoặc KitId thay đổi
   useEffect(() => {
-    fetchKitDetail();
-  }, []);
+    if (kitId) {
+      fetchKitDetail();
+    }
+  }, [kitId]); // Chạy lại khi KitId thay đổi
 
+  // Hàm fetch chi tiết Kit từ API
   const fetchKitDetail = async () => {
-    setLoading(true);
+    setLoading(true); // Hiển thị loading trong khi fetch
     try {
-      const response = await api.get(`kits/1/packages`);
-      console.log(response.data);
+      console.log(kitId);
+      const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
+      console.log(response);
       if (response.data && response.data.status === "success") {
-        const packageData = response.data.details.data.package;
-        setKitDetail(packageData[0].kit); //  the kit details are the same for all packages
-        setPackageDetail(packageData[0]); // Set the first package as default
-        setPackages(packageData); // Store all packages
+        const kitData = response.data.details.data.package[0].kit; // Lấy dữ liệu kit từ package đầu tiên
+        setKitDetail(kitData); // Lưu chi tiết của kit vào state
+        setPackages(response.data.details.data.package); // Lưu danh sách các package
+        setPackageDetail(response.data.details.data.package[0]); // Mặc định chọn package đầu tiên
       } else {
         throw new Error("Unexpected response structure");
       }
@@ -50,7 +52,7 @@ const ProductDetail = () => {
       console.error("Error fetching kit details:", error);
       message.error("Failed to fetch kit details");
     } finally {
-      setLoading(false);
+      setLoading(false); // Tắt loading khi đã fetch xong
     }
   };
 
@@ -101,21 +103,18 @@ const ProductDetail = () => {
     return <div>No kit details available</div>;
   }
 
-  //test_image_click
-  const images = [
-    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-1-1.jpg",
-    "https://nshopvn.com/wp-content/uploads/2023/05/bo-kit-hoc-lap-trinh-arduino-uno-r3-pro-kit-jjcd-6.jpg",
-    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-3-1.jpg",
-    "https://nshopvn.com/wp-content/uploads/2024/08/r5xc-comboxedieukhientuxacocameragiamsat-4-1.jpg",
-  ];
+  // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
+  const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
+
   const handleThumbnailClick = (index) => {
     setSelectedImage(index);
   };
+
   return (
     <div className="container mx-auto px-4">
       <Breadcrumb className="py-4 text-sm">
         <Breadcrumb.Item>Kits</Breadcrumb.Item>
-        <Breadcrumb.Item>{kitDetail.category.name}</Breadcrumb.Item>
+        <Breadcrumb.Item>{kitDetail["category"].name}</Breadcrumb.Item>
         <Breadcrumb.Item>{kitDetail.name}</Breadcrumb.Item>
       </Breadcrumb>
 
@@ -211,6 +210,7 @@ const ProductDetail = () => {
                 type="text"
                 value={quantity}
                 className="w-12 text-center"
+                readOnly
               />
               <button
                 className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
@@ -281,62 +281,6 @@ const ProductDetail = () => {
           />
         </div>
       )}
-
-      {/* //relative item part 
-      <div className="mt-16 mb-12">
-        <h2 className="text-2xl font-bold mb-6 flex items-center">
-          <span className="bg-red-500 text-white px-4 py-2 rounded-l-full">
-            Related Item
-          </span>
-          <span className="flex-grow border-t-2 border-red-500 ml-4"></span>
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {relatedItems.map((item) => (
-            <Link to={`/product/${item.id}`} key={item.id} className="block">
-              <div className="bg-white rounded-lg shadow-md relative overflow-hidden group">
-                {item.discount && (
-                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full z-10">
-                    -{item.discount}%
-                  </span>
-                )}
-                <div className="relative aspect-w-1 aspect-h-1 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover object-center transform group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 text-sm truncate">
-                    {item.name}
-                  </h3>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-red-500 font-bold">
-                      ${item.price}
-                    </span>
-                    {item.oldPrice && (
-                      <span className="text-gray-400 line-through text-sm">
-                        ${item.oldPrice}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center">
-                    <Rate
-                      disabled
-                      defaultValue={item.rating}
-                      className="text-yellow-400 text-xs"
-                    />
-                    <span className="ml-2 text-gray-500 text-xs">
-                      ({item.reviews})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div> */}
     </div>
   );
 };

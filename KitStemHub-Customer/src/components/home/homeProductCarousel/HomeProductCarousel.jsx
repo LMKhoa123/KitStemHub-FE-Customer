@@ -14,6 +14,10 @@ function HomeProductCarousel({ searchTerm }) {
   const [pageSize, setPageSize] = useState(20); // Số lượng sản phẩm trên mỗi trang
   const navigate = useNavigate(); // Khởi tạo navigate để điều hướng
 
+  const handleProductClick = (kitId) => {
+    navigate(`/productdetail/${kitId}`); // Điều hướng đúng đến URL
+  };
+
   // Hàm mở notification
   const openNotificationWithIcon = (type, message) => {
     notification[type]({
@@ -89,7 +93,7 @@ function HomeProductCarousel({ searchTerm }) {
                 <Card
                   key={index}
                   className="shadow-xl cursor-pointer w-64 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative group rounded-xl overflow-hidden"
-                  onClick={() => navigate(`/productdetail/${item.id}`)} // Điều hướng đến trang chi tiết sản phẩm
+                  onClick={() => handleProductClick(item.id)} // Truyền kitId khi click
                 >
                   {/* Hiển thị ảnh sản phẩm */}
                   <img

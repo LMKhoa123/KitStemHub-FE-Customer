@@ -90,7 +90,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/productdetail" element={<ProductDetailPage />} />
+          <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckOutPage />} />
         </Routes>
       </Router>
