@@ -3,46 +3,10 @@ import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
 import HomeSidebar from "./homeSidebar/HomeSidebar";
 
 function HomeRegister() {
-  // Dữ liệu sản phẩm giả định (có 24 sản phẩm)
-  const products = [
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$5.50",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$3.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$10.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$5.30",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$15.70",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$8.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$7.50",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$12.20",
-    },
-  ];
-
   return (
     <>
       {/* nav home page */}
-      <div className="flex h-screen mt-16">
+      <div className="flex mt-16">
         {/* side bar */}
         <div className="flex justify-end w-1/4">
           <HomeSidebar />
@@ -59,9 +23,8 @@ function HomeRegister() {
           <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
 
           {/* carousel product */}
-          <div className="mb-32">
-            <HomeProductCarousel products={products} />
-            {/* button */}
+          <div className="flex-grow mb-16">
+            <HomeProductCarousel />
           </div>
         </div>
       </div>

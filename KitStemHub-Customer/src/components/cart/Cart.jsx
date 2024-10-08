@@ -11,7 +11,7 @@ function Cart() {
         <div className="pl-64">
           <CartNav />
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center h-screen">
           <CartContent />
         </div>
       </div>

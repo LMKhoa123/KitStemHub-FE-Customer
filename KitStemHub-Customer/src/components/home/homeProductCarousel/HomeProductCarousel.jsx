@@ -1,107 +1,161 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Spin, Card, Pagination, notification } from "antd";
+import api from "../../../config/axios";
+import { useNavigate } from "react-router-dom";
 import { EyeOutlined, HeartOutlined } from "@ant-design/icons";
-import { Card, CardFooter, Button } from "@nextui-org/react";
-import CartModal from "../../cart/cartmodal/CartModal";
 
-function HomeProductCarousel({ products }) {
-  const [productStates, setProductStates] = useState(
-    products.map(() => ({
-      isAddedToCart: false,
-      isHeartClicked: false,
-      isEyeClicked: false,
-    }))
-  );
+function HomeProductCarousel({ searchTerm }) {
+  const [dataSource, setDataSource] = useState([]); // Dữ liệu sản phẩm
+  const [filteredData, setFilteredData] = useState([]); // Dữ liệu sau khi lọc
+  const [loading, setLoading] = useState(true); // Trạng thái loading
+  const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
+  const [totalPages, setTotalPages] = useState(0); // Tổng số trang
+  const [pageSize, setPageSize] = useState(20); // Số lượng sản phẩm trên mỗi trang
+  const navigate = useNavigate(); // Khởi tạo navigate để điều hướng
 
-  // State để điều khiển mở/đóng modal
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  const toggleState = (index, stateType) => {
-    setProductStates((prevStates) => {
-      const newStates = [...prevStates];
-      newStates[index][stateType] = !newStates[index][stateType];
-      return newStates;
+  // Hàm mở notification
+  const openNotificationWithIcon = (type, message) => {
+    notification[type]({
+      message: message,
     });
-
-    // Đặt lại trạng thái sau 1.5 giây
-    setTimeout(() => {
-      setProductStates((prevStates) => {
-        const newStates = [...prevStates];
-        newStates[index][stateType] = false;
-        return newStates;
-      });
-    }, 1000);
   };
 
-  const handleAddToCart = (index) => {
-    toggleState(index, "isAddedToCart");
-    setModalOpen(true); // Mở modal khi bấm "Add to Cart"
+  // Hàm fetch dữ liệu sản phẩm từ API
+  const fetchProducts = async (page = 1) => {
+    try {
+      setLoading(true); // Bật trạng thái loading
+      const response = await api.get("kits", {
+        params: {
+          page: page - 1, // Nếu API bắt đầu từ 0
+          pageSize: pageSize, // Số lượng sản phẩm mỗi trang
+        },
+      });
+
+      const products = response.data.details.data.kits;
+      const totalPages = response.data.details.data["total-pages"];
+      const currentPage = response.data.details.data["current-page"];
+
+      // Cập nhật dữ liệu sản phẩm và trạng thái
+      setDataSource(products);
+      setFilteredData(products); // Khởi tạo filteredData ban đầu
+      setTotalPages(totalPages); // Cập nhật tổng số trang
+      setCurrentPage(currentPage); // Cập nhật trang hiện tại
+      setLoading(false); // Tắt trạng thái loading
+    } catch (error) {
+      console.error("Error fetching kits:", error);
+      setLoading(false); // Tắt trạng thái loading nếu có lỗi
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts(currentPage); // Gọi API khi component mount hoặc trang thay đổi
+  }, [currentPage]);
+
+  // Lọc sản phẩm dựa trên từ khóa tìm kiếm
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = dataSource.filter((product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredData(filtered);
+
+      // Hiển thị thông báo và khôi phục lại danh sách nếu không có sản phẩm phù hợp
+      if (filtered.length === 0) {
+        openNotificationWithIcon("info", "Không tìm thấy sản phẩm nào.");
+      }
+    } else {
+      setFilteredData(dataSource); // Nếu không có từ khóa, hiển thị tất cả sản phẩm
+    }
+  }, [searchTerm, dataSource]);
+
+  // Hàm xử lý thay đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Cập nhật trang hiện tại
   };
 
   return (
     <>
-      {/* Cart Modal */}
-      <CartModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Spin size="large" /> {/* Thêm hiệu ứng loading xoay */}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          {/* Hiển thị các sản phẩm */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-14 mb-10">
+            {filteredData.length > 0 ? (
+              filteredData.map((item, index) => (
+                <Card
+                  key={index}
+                  className="shadow-xl cursor-pointer w-64 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative group rounded-xl overflow-hidden"
+                  onClick={() => navigate(`/productdetail/${item.id}`)} // Điều hướng đến trang chi tiết sản phẩm
+                >
+                  {/* Hiển thị ảnh sản phẩm */}
+                  <img
+                    className="object-cover w-full h-auto"
+                    height={200}
+                    src={
+                      item["kit-images"]?.[0]?.url
+                        ? item["kit-images"][0].url
+                        : "default-image-url" // Sử dụng ảnh mặc định nếu không có ảnh
+                    }
+                    alt={item.name || "Product Image"}
+                    onError={(e) => {
+                      e.target.src = "default-image-url"; // Hiển thị ảnh mặc định nếu không load được
+                    }}
+                  />
 
-      <div className="gap-14 grid grid-cols-2 sm:grid-cols-4">
-        {products.map((item, index) => (
-          <Card
-            key={index}
-            isFooterBlurred
-            className="shadow-xl cursor-pointer w-64 transform transition-all duration-300 hover:shadow-2xl hover:scale-105 relative group rounded-xl overflow-hidden"
-          >
-            <img
-              className="object-cover w-full h-auto"
-              height={200}
-              src={item.img}
-              alt={item.name} // Đảm bảo ảnh có thuộc tính alt cho SEO và truy cập
-            />
+                  {/* Hiển thị tên sản phẩm */}
+                  <div className="text-center font-semibold mt-2">
+                    {item.name}
+                  </div>
 
-            {/* Biểu tượng Heart và Eye */}
-            <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-              <div
-                className={`p-2 transition-all duration-300 ease-in-out ${
-                  productStates[index].isHeartClicked
-                    ? "bg-gradient-to-r from-pink-500 to-red-500 scale-110"
-                    : "bg-black/50"
-                } hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-10 h-10`}
-                onClick={() => toggleState(index, "isHeartClicked")}
-              >
-                <HeartOutlined
-                  className="text-white"
-                  style={{ fontSize: "18px" }}
-                />
+                  {/* Hiển thị giá sản phẩm */}
+                  <div className="text-center text-gray-600 mt-1">
+                    {item["purchase-cost"].toLocaleString()} VND
+                  </div>
+
+                  {/* Biểu tượng Heart và Eye */}
+                  <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                    <div
+                      className="p-2 transition-all duration-300 ease-in-out bg-black/50 hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-10 h-10"
+                      onClick={() => console.log("Heart Clicked")}
+                    >
+                      <HeartOutlined
+                        className="text-white"
+                        style={{ fontSize: "18px" }}
+                      />
+                    </div>
+                    <div
+                      className="p-2 transition-all duration-300 ease-in-out bg-black/50 hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-10 h-10"
+                      onClick={() => console.log("Eye Clicked")}
+                    >
+                      <EyeOutlined
+                        className="text-white"
+                        style={{ fontSize: "18px" }}
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center text-gray-500">
+                No products found.
               </div>
-              <div
-                className={`p-2 transition-all duration-300 ease-in-out ${
-                  productStates[index].isEyeClicked
-                    ? "bg-gradient-to-r from-pink-500 to-red-500 scale-110"
-                    : "bg-black/50"
-                } hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-10 h-10`}
-                onClick={() => toggleState(index, "isEyeClicked")}
-              >
-                <EyeOutlined
-                  className="text-white"
-                  style={{ fontSize: "18px" }}
-                />
-              </div>
-            </div>
+            )}
+          </div>
 
-            <CardFooter className="absolute bottom-0 left-0 right-0 py-0 px-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex justify-center">
-              <Button
-                className={`text-tiny text-white w-full h-10 transform transition-transform duration-300 ease-in-out ${
-                  productStates[index].isAddedToCart
-                    ? "bg-gradient-to-r from-pink-500 to-red-500 scale-105"
-                    : "bg-black/50"
-                } hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-lg`}
-                onClick={() => handleAddToCart(index)} // Mở modal khi bấm "Add to Cart"
-              >
-                {productStates[index].isAddedToCart ? "Added" : "Add to Cart"}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+          {/* Phân trang */}
+          <Pagination
+            total={totalPages * pageSize} // Tổng số sản phẩm (tổng số trang * số lượng trên mỗi trang)
+            current={currentPage} // Trang hiện tại
+            pageSize={pageSize} // Số sản phẩm mỗi trang
+            onChange={handlePageChange} // Hàm xử lý khi thay đổi trang
+            className="mt-4"
+          />
+        </div>
+      )}
     </>
   );
 }
