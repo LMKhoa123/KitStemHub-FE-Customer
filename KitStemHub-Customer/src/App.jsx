@@ -17,10 +17,10 @@ import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
 import CheckOutPage from "./pages/checkoutpage/CheckOutPage";
-import ProductDetailPageUser from "./pages/productdetailpage/ProductDetailPageUser";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
+import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -89,10 +89,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/productdetail/:kitId"
-            element={<ProductDetailPageUser />}
-          />
+          <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckOutPage />} />
         </Routes>
       </Router>

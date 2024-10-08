@@ -45,7 +45,16 @@ function LoginInput() {
             setIsLoggedIn(true);
 
             toast.success(response.data.details.message, {
-              onClose: () => navigate("/home"),
+              onClose: () => {
+                // Kiểm tra nếu có URL trước đó để điều hướng sau khi login
+                const redirectUrl = localStorage.getItem("redirectAfterLogin");
+                if (redirectUrl) {
+                  navigate(redirectUrl);
+                  localStorage.removeItem("redirectAfterLogin"); // Xóa URL sau khi điều hướng
+                } else {
+                  navigate("/home");
+                }
+              },
               autoClose: 1500,
             });
           } else {
@@ -99,7 +108,14 @@ function LoginInput() {
           });
         });
 
-        navigate("/home");
+        // Kiểm tra nếu có URL trước đó để điều hướng sau khi login
+        const redirectUrl = localStorage.getItem("redirectAfterLogin");
+        if (redirectUrl) {
+          navigate(redirectUrl);
+          localStorage.removeItem("redirectAfterLogin"); // Xóa URL sau khi điều hướng
+        } else {
+          navigate("/home"); // Điều hướng mặc định nếu không có URL nào trước đó
+        }
       }
     } catch (err) {
       console.log(err);
