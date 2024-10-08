@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -22,39 +20,43 @@ function LoginInput() {
       const result = await signInWithPopup(auth, googleProvider);
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      // console.log(credential);
-      const accessToken = credential.accessToken; // Access Token from Google
-      // console.log("acccessToken" + accessToken);
-      const idToken = credential.idToken; // Get the ID Token from the result
-      // console.log("idToke" + idToken);
-      const pendingToken = credential.pendingToken; // Pending Token (optional, depends on Google)
-      // console.log("pending" + pendingToken);
-      const user = result.user; // Thông tin người dùng
-      if (user) {
-        api
-          .post("users/loginWithGoogle", { pendingToken, idToken, accessToken })
-          .then((response) => {
-            console.log(response.data);
-            toast.success("User logged in Successfully!", {
-              position: "top-center",
-              autoClose: 1500,
-            });
+      const accessToken = credential.accessToken;
+      const idToken = credential.idToken;
+      const pendingToken = credential.pendingToken;
+      const user = result.user;
 
-            // Lưu trữ thông tin vào localStorage
-            localStorage.setItem("token", response.data.details.accessToken); // Save server's access token
+      if (user) {
+        try {
+          const response = await api.post("users/loginwithgoogle", {
+            "pending-token": pendingToken,
+            "id-token": idToken,
+            "access-token": accessToken,
+          });
+
+          if (response.data.status === "success") {
+            console.log(response.data);
+            localStorage.setItem("token", response.data.details.accessToken);
             localStorage.setItem(
               "refreshToken",
               response.data.details.refreshToken
-            ); // Save refresh token
-            // console.log(localStorage.getItem("token"));
-            // console.log(localStorage.getItem("refreshToken"));
+            );
+
             setIsLoggedIn(true);
-            navigate("/home");
-          });
+
+            message.success(response.data.details.message, 1.5, () => {
+              navigate("/home");
+            });
+          } else {
+            message.error("Đăng nhập không thành công. Vui lòng thử lại.");
+          }
+        } catch (error) {
+          // console.error("Error during server communication:", error);
+          message.error("Lỗi kết nối với server. Vui lòng thử lại sau.");
+        }
       }
     } catch (error) {
-      // console.log("Error during Google login:", error);
-      toast.error("Google login failed!");
+      // console.error("Error during Google login:", error);
+      message.error("Đăng nhập Google thất bại!");
     } finally {
       setLoading(false);
     }
@@ -67,64 +69,74 @@ function LoginInput() {
         isSignUpMode ? "users/register" : "users/login",
         values
       );
-      const { accessToken, refreshToken } = response.data.details;
-      localStorage.setItem("token", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
 
-      toast.success("User logged in Successfully!", {
-        position: "top-center",
-        autoClose: 1500,
-      });
-      setIsLoggedIn(true);
-      navigate("/home");
-      if (isSignUpMode && response.data.status === "success") {
-        const userEmail = values.email;
-        const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
-        Modal.info({
-          title: "Xác nhận đăng nhập",
-          content: (
-            <div>
-              <p>Vui lòng kiểm tra email của bạn để xác nhận đăng nhập.</p>
-              <p>
-                <a href={gmailLink} target="_blank" rel="noopener noreferrer">
-                  Nhấp vào đây để mở Gmail
-                </a>
-              </p>
-            </div>
-          ),
-          onOk() {
-            window.open(gmailLink, "_blank");
-          },
+      if (isSignUpMode) {
+        // Xử lý khi đăng ký
+        if (response.data.status === "success") {
+          message.success(
+            "Đăng ký thành công! Vui lòng đăng nhập.",
+            1.5,
+            () => {
+              setIsSignUpMode(false); // Chuyển sang chế độ đăng nhập
+            }
+          );
+
+          // const userEmail = values.email;
+          // const gmailLink = `https://mail.google.com/mail/u/0/#search/${userEmail}`;
+          // Modal.info({
+          //   title: "Xác nhận đăng ký",
+          //   content: (
+          //     <div>
+          //       <p>Vui lòng kiểm tra email của bạn để xác nhận tài khoản.</p>
+          //       <p>
+          //         <a href={gmailLink} target="_blank" rel="noopener noreferrer">
+          //           Nhấp vào đây để mở Gmail
+          //         </a>
+          //       </p>
+          //     </div>
+          //   ),
+          //   onOk() {
+          //     window.open(gmailLink, "_blank");
+          //   },
+          // });
+        } else {
+          message.error("Đăng ký không thành công. Vui lòng thử lại.");
+        }
+      } else {
+        // Xử lý khi đăng nhập
+        const { accessToken, refreshToken } = response.data.details;
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        setIsLoggedIn(true);
+
+        message.success("Đăng nhập thành công!", 1.5, () => {
+          navigate("/home");
         });
-        navigate("/login");
       }
     } catch (err) {
-      //chuaw bắt signup
       if (err.response) {
         const error = err.response.data.details?.errors || {};
-        console.log("Lỗi từ phía server:", err.response.status); // HTTP status code
-        console.log("Thông điệp lỗi:", err.response.data); // Detailed message from server
+        console.log("Lỗi từ phía server:", err.response.status);
+        console.log("Thông điệp lỗi:", err.response.data);
 
-        // Display error messages using toast
         if (error.email) {
-          toast.error(error.email);
+          message.error(error.email);
         } else if (error.invalidCredentials) {
-          toast.error(error.invalidCredentials);
+          message.error(error.invalidCredentials);
         } else if (error.unavailableUsername) {
-          toast.error(error.unavailableUsername);
-        } else if (error.password) {
-          toast.error(error.password);
+          message.error(error.unavailableUsername);
         } else {
-          toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+          message.error("Có lỗi xảy ra, vui lòng thử lại.");
         }
       } else if (err.request) {
         console.log("Không có phản hồi từ server:", err.request);
-        toast.error(
+        message.error(
           "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng."
         );
       } else {
         console.log("Lỗi khi tạo yêu cầu:", err.message);
-        toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
+        message.error(`Lỗi khi tạo yêu cầu: ${err.message}`);
       }
     } finally {
       setLoading(false);
@@ -170,7 +182,7 @@ function LoginInput() {
               ]}
             >
               <Input
-                placeholder="Username"
+                placeholder="user@example.com"
                 prefix={<i className="fas fa-user"></i>}
               />
             </Form.Item>
@@ -337,14 +349,13 @@ function LoginInput() {
           </Form>
         </div>
       </div>
-
       <div className={styles.panelsContainer}>
         <div className={`${styles.panel} ${styles.leftPanel}`}>
           <div className={styles.content}>
             <h3>New here?</h3>
             <p>
-              Let's create an account to join our community and get access to
-              exclusive content.
+              Let&apos;s create an account to join our community and get access
+              to exclusive content.
             </p>
 
             <Button
@@ -372,8 +383,6 @@ function LoginInput() {
           <img src="./register.svg" className={styles.image} alt="" />
         </div>
       </div>
-      {/* Toast container needs to be rendered outside any function */}
-      <ToastContainer />
     </div>
   );
 }
