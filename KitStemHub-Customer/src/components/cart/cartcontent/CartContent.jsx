@@ -1,7 +1,18 @@
 import { DeleteOutlined } from "@ant-design/icons";
-import { Table, Button, Card, InputNumber, Checkbox, Popconfirm } from "antd";
+import {
+  Table,
+  Button,
+  Card,
+  InputNumber,
+  Checkbox,
+  Popconfirm,
+  Select,
+  Modal,
+} from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const { Option } = Select;
 
 function CartContent() {
   const navigate = useNavigate();
@@ -14,6 +25,9 @@ function CartContent() {
       subtotal: 1160,
       imageUrl:
         "https://storage.googleapis.com/a1aa/image/R6miveWxuO3PR6vhzWMLOu87RmVZjNRzAe7VYZj9wdML2OkTA.jpg",
+      package: "Package 1",
+      availablePackages: ["Package 1", "Package 2", "Package 3"], // Danh sách các package có sẵn
+      labs: ["Lab 1", "Lab 2", "Lab 3"], // Bài lab liên quan đến package
     },
     {
       key: "2",
@@ -23,12 +37,17 @@ function CartContent() {
       subtotal: 1920,
       imageUrl:
         "https://storage.googleapis.com/a1aa/image/ttAIhIY1ttoaJR9pWjGuX0SN6ASfwsgOaEOujSRHJPeM2OkTA.jpg",
+      package: "Package 1",
+      availablePackages: ["Package 1", "Package 2"], // Danh sách các package có sẵn
+      labs: ["Lab A", "Lab B"], // Bài lab liên quan đến package
     },
   ]);
 
-  const [point, setPoint] = useState(false); // Sử dụng điểm
+  const [point, setPoint] = useState(false);
   const [subtotal, setSubtotal] = useState(3080);
   const [total, setTotal] = useState(3080);
+  const [labModalVisible, setLabModalVisible] = useState(false);
+  const [selectedLabs, setSelectedLabs] = useState([]);
 
   const handleNavigate = (path) => () => {
     navigate(path);
@@ -58,13 +77,27 @@ function CartContent() {
     setSubtotal(newSubtotal);
 
     // Nếu người dùng sử dụng điểm thì giảm giá
-    const discount = point ? 1000 : 0; // Giảm 10 đơn vị khi sử dụng điểm
+    const discount = point ? 1000 : 0;
     setTotal(newSubtotal - discount);
   };
 
   const handlePointChange = (e) => {
     setPoint(e.target.checked);
-    updateTotals(cartItems); // Cập nhật tổng giá khi người dùng chọn/deselect điểm
+    updateTotals(cartItems);
+  };
+
+  // Hàm xử lý khi thay đổi package
+  const handlePackageChange = (value, record) => {
+    const newCartItems = cartItems.map((item) =>
+      item.key === record.key ? { ...item, package: value } : item
+    );
+    setCartItems(newCartItems);
+  };
+
+  // Hàm mở modal hiển thị các bài lab liên quan
+  const handleViewLabs = (labs) => {
+    setSelectedLabs(labs);
+    setLabModalVisible(true);
   };
 
   const columns = [
@@ -72,7 +105,7 @@ function CartContent() {
       title: "Product",
       dataIndex: "product",
       key: "product",
-      width: "30%",
+      width: "20%",
       render: (text, record) => (
         <div className="flex items-center">
           <img src={record.imageUrl} alt={text} className="w-12 h-auto mr-4" />
@@ -84,14 +117,14 @@ function CartContent() {
       title: "Price",
       dataIndex: "price",
       key: "price",
-      width: "25%",
+      width: "10%",
       render: (price) => `$${price}`,
     },
     {
       title: "Quantity",
       dataIndex: "quantity",
       key: "quantity",
-      width: "25%",
+      width: "15%",
       render: (quantity, record) => (
         <InputNumber
           size="large"
@@ -107,30 +140,55 @@ function CartContent() {
       title: "Subtotal",
       dataIndex: "subtotal",
       key: "subtotal",
-      width: "25%",
+      width: "15%",
       render: (subtotal) => `$${subtotal}`,
+    },
+    {
+      title: "Package",
+      key: "package",
+      width: "20%",
+      render: (text, record) => (
+        <Select
+          defaultValue={record.package}
+          style={{ width: 150 }}
+          onChange={(value) => handlePackageChange(value, record)}
+        >
+          {record.availablePackages.map((pkg) => (
+            <Option key={pkg} value={pkg}>
+              {pkg}
+            </Option>
+          ))}
+        </Select>
+      ),
+    },
+    {
+      title: "Labs",
+      key: "labs",
+      width: "10%",
+      render: (_, record) => (
+        <Button onClick={() => handleViewLabs(record.labs)}>View Labs</Button>
+      ),
     },
     {
       title: "",
       key: "action",
+      width: "10%",
       render: (_, record) => (
-        <div className="flex gap-5 text-xl">
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa sản phẩm này?"
-            onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <DeleteOutlined
-              style={{
-                cursor: "pointer",
-                color: "red",
-                transition: "color 0.3s, transform 0.3s",
-              }}
-              className="hover:text-red-700 hover:scale-110"
-            />
-          </Popconfirm>
-        </div>
+        <Popconfirm
+          title="Bạn có chắc chắn muốn xóa sản phẩm này?"
+          onConfirm={() => handleDelete(record)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <DeleteOutlined
+            style={{
+              cursor: "pointer",
+              color: "red",
+              transition: "color 0.3s, transform 0.3s",
+            }}
+            className="hover:text-red-700 hover:scale-110"
+          />
+        </Popconfirm>
       ),
     },
   ];
@@ -188,6 +246,20 @@ function CartContent() {
           </Button>
         </Card>
       </div>
+
+      {/* Modal to show labs */}
+      <Modal
+        title="Labs"
+        visible={labModalVisible}
+        onCancel={() => setLabModalVisible(false)}
+        footer={null}
+      >
+        <ul>
+          {selectedLabs.map((lab, index) => (
+            <li key={index}>{lab}</li>
+          ))}
+        </ul>
+      </Modal>
     </div>
   );
 }
