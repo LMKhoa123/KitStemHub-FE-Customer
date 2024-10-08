@@ -16,8 +16,8 @@ import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
-import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
 import CheckOutPage from "./pages/checkoutpage/CheckOutPage";
+import ProductDetailPageUser from "./pages/productdetailpage/ProductDetailPageUser";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -89,7 +89,10 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
+          <Route
+            path="/productdetail/:kitId"
+            element={<ProductDetailPageUser />}
+          />
           <Route path="/checkout" element={<CheckOutPage />} />
         </Routes>
       </Router>
