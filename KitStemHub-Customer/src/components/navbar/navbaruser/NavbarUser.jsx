@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useCallback, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import Loading from "../../Loading";
+import { Badge } from "antd";
 
 function NavbarUser() {
   const navigate = useNavigate();
@@ -41,9 +42,16 @@ function NavbarUser() {
             </a>
           </li>
           <li className="hover:text-gray-800 transition p-4 text-xl">
-            <a href="#" className="">
-              <ShoppingCartOutlined onClick={handleNavigate("/cart")} />
-            </a>
+            <Badge
+              count={99}
+              overflowCount={10}
+              className="scale-75" // Giảm kích thước của Badge
+            >
+              <ShoppingCartOutlined
+                onClick={handleNavigate("/cart")}
+                className="text-2xl" // Điều chỉnh kích thước biểu tượng
+              />
+            </Badge>
           </li>
           <li className="hover:text-gray-800 transition p-4 text-xl cursor-pointer">
             <DropdownUser

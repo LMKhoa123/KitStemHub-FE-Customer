@@ -1,51 +1,23 @@
-// import HomeCarousel from "./homeCarousel/HomeCarousel";
+import { useState } from "react";
+import Search from "antd/es/input/Search";
 import HomeCarousel from "./homeCarousel/HomeCarousel";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
 import HomeSidebar from "./homeSidebar/HomeSidebar";
 
 function HomeUser() {
-  // Dữ liệu sản phẩm giả định (có 24 sản phẩm)
-  const products = [
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$5.50",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$3.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$10.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$5.30",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$15.70",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$8.00",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$7.50",
-    },
-    {
-      img: "https://nshopvn.com/wp-content/uploads/2024/03/bai-tap-phu-cam-bien-vat-can-ajkt-1-600x600.jpg",
-      price: "$12.20",
-    },
-  ];
+  const [searchTerm, setSearchTerm] = useState(""); // Trạng thái từ khóa tìm kiếm
+
+  // Hàm xử lý thay đổi từ khóa tìm kiếm
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value); // Cập nhật từ khóa tìm kiếm liên tục khi nhập
+  };
 
   return (
     <>
       <HomeCarousel />
 
       {/* nav home page */}
-      <div className="flex h-screen mt-16">
+      <div className="flex mt-16">
         {/* side bar */}
         <div className="flex justify-end w-1/4">
           <HomeSidebar />
@@ -53,23 +25,34 @@ function HomeUser() {
 
         {/* our product */}
         <div className="flex flex-col ml-20 w-3/5">
-          <div className="flex mb-5 items-center">
-            <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
-            <h3 className="text-rose-600 font-medium flex items-center">
-              Our Products
-            </h3>
+          <div className="flex justify-between">
+            <div className="flex mb-5 items-center">
+              <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
+              <h3 className="text-rose-600 font-medium flex items-center">
+                Our Products
+              </h3>
+            </div>
+            <div className="flex mb-5 items-center">
+              <Search
+                placeholder="What are you looking for?"
+                onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
+                enterButton
+                className="search-product w-full"
+              />
+            </div>
           </div>
           <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
 
           {/* carousel product */}
-          <div className="mb-32">
-            <HomeProductCarousel products={products} />
-            {/* button */}
+          <div className="flex-grow mb-16">
+            <HomeProductCarousel searchTerm={searchTerm} />{" "}
+            {/* Truyền searchTerm vào */}
           </div>
         </div>
       </div>
-      {/* service */}
-      <div className="flex justify-around mb-16">
+
+      {/* service section */}
+      <div className="flex justify-around py-16">
         {/* Free and Fast Delivery */}
         <div className="text-center">
           <div className="flex justify-center items-center mb-4">
