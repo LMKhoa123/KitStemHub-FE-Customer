@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
@@ -372,8 +372,6 @@ function LoginInput() {
           <img src="./register.svg" className={styles.image} alt="" />
         </div>
       </div>
-      {/* Toast container needs to be rendered outside any function */}
-      <ToastContainer />
     </div>
   );
 }
