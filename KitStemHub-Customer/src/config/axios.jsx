@@ -1,7 +1,8 @@
 import axios from "axios";
-// const baseUrl = "https://54.66.193.22:5000/api/";
+import { toast } from "react-toastify";
+const baseUrl = "https://54.66.193.22:5000/api/";
 
-const baseUrl = "http://54.66.193.22:5001/api/";
+// const baseUrl = "http://54.66.193.22:5001/api/";
 
 const config = {
   baseUrl: baseUrl,
@@ -39,15 +40,20 @@ api.interceptors.response.use(
     // it means the token has expired and we need to refresh it
     if (error.response.status === 401 && !originalRequest._retry) {
       console.log("Token expired or unauthorized - 401 error");
+      // toast.error(error.response.data.details.errors.invalidCredentials);
+      toast.error(error.response.data.details.errors.invalidCredentials, {
+        autoClose: 1500,
+      });
+
       originalRequest._retry = true;
 
       try {
         const currentRefreshToken = localStorage.getItem("refreshToken");
         console.log(currentRefreshToken);
         const response = await axios.post(
-          `http://54.66.193.22:5001/api/Users/RefreshToken/${currentRefreshToken}`
+          // `http://54.66.193.22:5001/api/users/refreshtoken/${currentRefreshToken}`
 
-          // `https://54.66.193.22:5000/api/Users/RefreshToken/${currentRefreshToken}`
+          `https://54.66.193.22:5000/api/Users/RefreshToken/${currentRefreshToken}`
         );
         console.log("ggggg" + response.data);
         const { accessToken, refreshToken } = response.data.details;
