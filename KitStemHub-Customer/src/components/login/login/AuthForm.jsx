@@ -22,11 +22,11 @@ function LoginInput() {
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const accessToken = credential.accessToken;
-      console.log("acc " + accessToken);
+      // console.log("acc " + accessToken);
       const idToken = credential.idToken;
-      console.log("id " + idToken);
+      // console.log("id " + idToken);
       const pendingToken = credential.pendingToken;
-      console.log(pendingToken);
+      // console.log(pendingToken);
       const user = result.user;
 
       if (user) {
