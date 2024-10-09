@@ -51,18 +51,6 @@ const items = [
     ),
     key: "login",
   },
-  {
-    label: (
-      <NavLink
-        to="/signup"
-        exact
-        className={({ isActive }) => (isActive ? " font-bold " : "")}
-      >
-        Sign Up
-      </NavLink>
-    ),
-    key: "signup",
-  },
 ];
 // eslint-disable-next-line react/prop-types
 function Navbar({ childrenItem }) {

@@ -10,7 +10,7 @@ import {
   Select,
   Spin,
 } from "antd";
-import { useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
+import { useNavigate, useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
 import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
@@ -25,6 +25,7 @@ const ProductDetail = () => {
   const [packageDetail, setPackageDetail] = useState(null);
   const [packages, setPackages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const navigate = useNavigate();
 
   // Fetch dữ liệu khi component mount hoặc KitId thay đổi
   useEffect(() => {
@@ -39,7 +40,6 @@ const ProductDetail = () => {
     try {
       console.log(kitId);
       const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
-      console.log(response);
       if (response.data && response.data.status === "success") {
         const kitData = response.data.details.data.package[0].kit; // Lấy dữ liệu kit từ package đầu tiên
         setKitDetail(kitData); // Lưu chi tiết của kit vào state
@@ -64,11 +64,23 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
+    const token = localStorage.getItem("token");
+
+    // Kiểm tra nếu không có token -> điều hướng về trang login
+    if (!token) {
+      message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
+      navigate("/login");
+      return; // Dừng tiếp tục xử lý khi không có token
+    }
+
     if (!packageDetail) {
       message.error("Please select a package before adding to cart");
       return;
     }
+
     try {
+      // Gọi API để thêm vào giỏ hàng
       const response = await api.post("carts", {
         "package-id": packageDetail.id,
         "package-quantity": quantity,
@@ -81,8 +93,33 @@ const ProductDetail = () => {
         throw new Error("Không thể thêm vào giỏ hàng");
       }
     } catch (error) {
-      console.error("Lỗi khi thêm vào giỏ hàng:", error);
-      message.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
+      if (error.response) {
+        // Trường hợp có response từ server nhưng có lỗi
+        const status = error.response.status;
+        console.error("Lỗi từ server:", error.response);
+
+        if (status === 401) {
+          // Bắt lỗi 401 và điều hướng đến trang login
+          console.error(
+            "Token đã hết hạn hoặc chưa đăng nhập, điều hướng về trang login"
+          );
+          localStorage.removeItem("token");
+          message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
+          localStorage.setItem("redirectAfterLogin", window.location.pathname);
+          navigate("/login");
+        } else if (status === 404) {
+          message.error("Không tìm thấy package này, vui lòng thử lại.");
+        } else {
+          // Nếu lỗi khác ngoài 401 và 404, hiển thị chi tiết lỗi
+          const errorMessage =
+            error.response.data?.message || "Đã xảy ra lỗi, vui lòng thử lại.";
+          message.error(`Không thể thêm vào giỏ hàng: ${errorMessage}`);
+        }
+      } else {
+        // Trường hợp không có response (lỗi kết nối, server không phản hồi, v.v.)
+        console.error("Lỗi khi thêm vào giỏ hàng:", error);
+        message.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
+      }
     }
   };
 
@@ -158,7 +195,9 @@ const ProductDetail = () => {
             />
             <span className="ml-2 text-gray-600 text-sm">(100 Reviews)</span>
             <span
-              className={`ml-2 text-sm ${kitDetail.status ? "text-green-500" : "text-red-500"}`}
+              className={`ml-2 text-sm ${
+                kitDetail.status ? "text-green-500" : "text-red-500"
+              }`}
             >
               {kitDetail.status ? "In Stock" : "Out of Stock"}
             </span>

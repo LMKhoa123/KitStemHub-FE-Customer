@@ -16,10 +16,11 @@ import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
 import HomePageRegister from "./pages/homepage/HomePageRegister";
 import CartPage from "./pages/cartpage/CartPage";
-import ProductDetailPage from "./pages/productdetailpage/ProductDetailPage";
 import CheckOutPage from "./pages/checkoutpage/CheckOutPage";
 import { ToastContainer } from "react-toastify";
+
 import "react-toastify/dist/ReactToastify.css";
+import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -42,24 +43,10 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-  const isLoggedIn = () => !!localStorage.getItem("token");
-  console.log(isLoggedIn());
-
   return (
     <AuthProvider>
       <Router>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+        <ToastContainer position="top-right" />
         <Routes>
           <Route
             path="/login"
