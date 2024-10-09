@@ -7,11 +7,9 @@ function FormMyProfile() {
     firstName: "",
     lastName: "",
     userName: "",
-    city: "",
-    district: "",
-    ward: "",
-    addressStreet: "",
+    phoneNumber: "", // Thêm phoneNumber vào state
     address: "",
+    points: 0,
   });
   const [isUpdated, setIsUpdated] = useState(false);
 
@@ -22,15 +20,17 @@ function FormMyProfile() {
       console.log("Lấy dữ liệu thành công", response.data);
 
       setProfileData({
-        firstName: response.data.details.data.userProfileDTO.firstName || "",
-        lastName: response.data.details.data.userProfileDTO.lastName || "",
-        userName: response.data.details.data.userProfileDTO.userName || "",
-        city: response.data.details.data.userProfileDTO.city || "",
-        district: response.data.details.data.userProfileDTO.district || "",
-        ward: response.data.details.data.userProfileDTO.ward || "",
-        addressStreet:
-          response.data.details.data.userProfileDTO.addressStreet || "",
-        address: response.data.details.data.userProfileDTO.address || "",
+        firstName:
+          response.data.details.data["user-profile-dto"]["first-name"] || "",
+        lastName:
+          response.data.details.data["user-profile-dto"]["last-name"] || "",
+        userName:
+          response.data.details.data["user-profile-dto"]["user-name"] || "",
+        phoneNumber:
+          response.data.details.data["user-profile-dto"]["phone-number"] || "", // Lấy phoneNumber từ API
+        address:
+          response.data.details.data["user-profile-dto"]["address"] || "",
+        points: response.data.details.data["user-profile-dto"]["points"] || 0,
       });
     } catch (error) {
       console.log("Lấy dữ liệu thất bại", error);
@@ -39,33 +39,23 @@ function FormMyProfile() {
 
   // Update profile data (PUT request)
   const updateProfile = async () => {
-    // Xử lý các giá trị undefined hoặc null và chuyển thành chuỗi rỗng
+    // Chỉ gửi những trường cần thiết
     const cleanData = {
-      firstName: profileData.firstName || "",
-      lastName: profileData.lastName || "",
-      city: profileData.city || "",
-      district: profileData.district || "",
-      ward: profileData.ward || "",
-      addressStreet: profileData.addressStreet || "",
+      "first-name": profileData.firstName || "",
+      "last-name": profileData.lastName || "",
+      "phone-number": profileData.phoneNumber || "",
       address: profileData.address || "",
     };
-    // Tạo địa chỉ từ các phần không rỗng
-    const combinedAddress = [
-      cleanData.addressStreet,
-      cleanData.ward,
-      cleanData.district,
-      cleanData.city,
-    ]
-      .filter((part) => part) // Loại bỏ các phần trống
-      .join(", ");
 
-    const updatedProfile = {
-      ...cleanData,
-      address: combinedAddress, // Set the full address
-    };
+    console.log("Payload gửi đi:", cleanData);
 
     try {
-      const response = await api.put("users/profile", updatedProfile);
+      const response = await api.put("users/profile", cleanData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")?.replaceAll('"', "")}`,
+        },
+      });
       console.log("Profile updated successfully", response.data);
       Swal.fire({
         title: "Do you want to save the changes?",
@@ -74,7 +64,6 @@ function FormMyProfile() {
         confirmButtonText: "Save",
         denyButtonText: `Don't save`,
       }).then((result) => {
-        /* Read more about isConfirmed, isDenied below */
         if (result.isConfirmed) {
           setProfileData(response.data);
           setIsUpdated(true);
@@ -84,38 +73,53 @@ function FormMyProfile() {
         }
       });
     } catch (error) {
-      console.log("Error updating profile", error);
-    }
-  };
+      console.log("Error updating profile:", error);
 
-  // Reset profile data (clear fields except userName)
-  const resetProfileData = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setProfileData((prevData) => ({
-          ...prevData,
-          firstName: "",
-          lastName: "",
-          city: "",
-          district: "",
-          ward: "",
-          addressStreet: "",
-        }));
+      // Xử lý lỗi theo status code
+      if (error.response) {
+        const status = error.response.status;
+
+        if (status === 400) {
+          // Lỗi 400 - Bad Request
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi 400",
+            text: "Dữ liệu bạn nhập không hợp lệ. Vui lòng kiểm tra lại!",
+          });
+        } else if (status === 401) {
+          // Lỗi 401 - Unauthorized
+          Swal.fire({
+            icon: "warning",
+            title: "Lỗi 401",
+            text: "Bạn chưa đăng nhập hoặc phiên đã hết hạn. Vui lòng đăng nhập lại.",
+          }).then(() => {
+            // Điều hướng người dùng đến trang đăng nhập
+            window.location.href = "/login";
+          });
+        } else {
+          // Các lỗi khác
+          Swal.fire({
+            icon: "error",
+            title: `Lỗi ${status}`,
+            text: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
+          });
+        }
+      } else if (error.request) {
+        // Lỗi request không nhận được phản hồi từ server
         Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success",
+          icon: "error",
+          title: "Lỗi kết nối",
+          text: "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.",
+        });
+      } else {
+        // Lỗi xảy ra khi cấu hình yêu cầu
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: `Đã xảy ra lỗi: ${error.message}`,
         });
       }
-    });
+    }
   };
 
   useEffect(() => {
@@ -140,13 +144,13 @@ function FormMyProfile() {
             <div className="w-full px-3 mb-6">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="name"
+                htmlFor="firstName"
               >
                 Họ
               </label>
               <input
                 className="appearance-none block w-64 bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="name"
+                id="firstName"
                 type="text"
                 value={profileData.firstName}
                 onChange={(e) =>
@@ -157,13 +161,13 @@ function FormMyProfile() {
             <div className="w-full px-3 mb-6">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="name"
+                htmlFor="lastName"
               >
                 Tên
               </label>
               <input
                 className="appearance-none block w-64 bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="name"
+                id="lastName"
                 type="text"
                 value={profileData.lastName}
                 onChange={(e) =>
@@ -171,6 +175,7 @@ function FormMyProfile() {
                 }
               />
             </div>
+
             <div className="w-full mb-6 px-3">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -183,9 +188,6 @@ function FormMyProfile() {
                 id="email"
                 type="email"
                 value={profileData.userName}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, userName: e.target.value })
-                }
                 disabled
               />
             </div>
@@ -193,109 +195,69 @@ function FormMyProfile() {
         </form>
 
         <form className="flex flex-col md:w-1/2">
-          <div className="form-group flex flex-col div2">
+          <div className="form-group flex flex-col">
+            {/* Số điện thoại */}
             <div className="w-full px-3 mb-6">
               <label
                 className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="city"
+                htmlFor="phoneNumber"
               >
-                Tỉnh / Thành phố
+                Số điện thoại
               </label>
               <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="city"
+                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                id="phoneNumber"
                 type="text"
-                value={profileData.city}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, city: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="w-full px-3 mb-6">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="district"
-              >
-                Quận huyện
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="district"
-                type="text"
-                value={profileData.district}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, district: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="w-full px-3 mb-6">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="ward"
-              >
-                Phường Xã
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="ward"
-                type="text"
-                value={profileData.ward}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, ward: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="w-full px-3 mb-10">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="address"
-              >
-                Địa chỉ
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="address"
-                type="text"
-                value={profileData.addressStreet}
+                value={profileData.phoneNumber}
                 onChange={(e) =>
                   setProfileData({
                     ...profileData,
-                    addressStreet: e.target.value,
+                    phoneNumber: e.target.value,
                   })
                 }
+              />
+            </div>
+
+            {/* points */}
+            <div className="w-full px-3 mb-10">
+              <label
+                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                htmlFor="points"
+              >
+                Số điểm thưởng:
+              </label>
+              <input
+                className="appearance-none block w-full text-xl text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4"
+                id="points"
+                type="text"
+                value={profileData.points}
+                readOnly
               />
             </div>
           </div>
         </form>
       </div>
-      <div className="w-full px-3 mb-10">
+
+      {/* Địa chỉ */}
+      <div className="w-full px-3 mb-6">
         <label
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
           htmlFor="address"
         >
-          Thông tin Địa chỉ
+          Địa chỉ
         </label>
         <input
-          className="appearance-none block w-full text-xl text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4"
+          className="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
           id="address"
           type="text"
           value={profileData.address}
           onChange={(e) =>
             setProfileData({ ...profileData, address: e.target.value })
           }
-          disabled
         />
       </div>
 
       <div className="flex justify-end">
-        <div className="mr-3 p-3 font-medium">
-          <a href="#" onClick={resetProfileData}>
-            Delete All
-          </a>
-        </div>
         <div
           className="flex bg-red-600 justify-center align-middle p-3 rounded-lg text-white font-medium w-32"
           onClick={updateProfile}

@@ -3,7 +3,7 @@ import NavbarEx from "../../components/navbar/navbarEx/NavbarEx";
 import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 import ProductDetail from "../../components/productDetail/ProductDetail";
 
-function ProductDetailPageUser() {
+function ProductDetailPage() {
   const isLoggedIn = !!localStorage.getItem("token");
   return (
     <>
@@ -15,4 +15,4 @@ function ProductDetailPageUser() {
   );
 }
 
-export default ProductDetailPageUser;
+export default ProductDetailPage;

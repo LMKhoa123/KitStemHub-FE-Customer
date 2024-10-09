@@ -64,26 +64,27 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
+    const token = localStorage.getItem("token");
+
+    // Kiểm tra nếu không có token -> điều hướng về trang login
+    if (!token) {
+      message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
+      navigate("/login");
+      return; // Dừng tiếp tục xử lý khi không có token
+    }
+
     if (!packageDetail) {
       message.error("Please select a package before adding to cart");
       return;
     }
+
     try {
       // Gọi API để thêm vào giỏ hàng
       const response = await api.post("carts", {
         "package-id": packageDetail.id,
         "package-quantity": quantity,
       });
-
-      // Kiểm tra mã trạng thái HTTP, nếu là 401 thì báo lỗi đăng nhập và điều hướng
-      if (response.status === 401) {
-        message.error("Unauthorized. Please login to add to cart.");
-        // Lưu trang hiện tại vào localStorage để điều hướng lại sau khi đăng nhập
-        localStorage.setItem("redirectAfterLogin", "/cart");
-        // Điều hướng đến trang đăng nhập
-        navigate("/login");
-        return;
-      }
 
       if (response.data && response.data.status === "success") {
         message.success(`Đã thêm ${quantity} vào giỏ hàng`);
@@ -92,16 +93,30 @@ const ProductDetail = () => {
         throw new Error("Không thể thêm vào giỏ hàng");
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        // Bắt lỗi 401 từ catch và điều hướng người dùng đến trang login
-        message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
-        localStorage.setItem("redirectAfterLogin", "/cart"); // Lưu URL cần redirect sau khi login
-        navigate("/login");
-      } else if (error.response && error.response.status === 404) {
-        message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
-        localStorage.setItem("redirectAfterLogin", "/cart"); // Lưu URL cần redirect sau khi login
-        navigate("/login");
+      if (error.response) {
+        // Trường hợp có response từ server nhưng có lỗi
+        const status = error.response.status;
+        console.error("Lỗi từ server:", error.response);
+
+        if (status === 401) {
+          // Bắt lỗi 401 và điều hướng đến trang login
+          console.error(
+            "Token đã hết hạn hoặc chưa đăng nhập, điều hướng về trang login"
+          );
+          localStorage.removeItem("token");
+          message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
+          localStorage.setItem("redirectAfterLogin", window.location.pathname);
+          navigate("/login");
+        } else if (status === 404) {
+          message.error("Không tìm thấy package này, vui lòng thử lại.");
+        } else {
+          // Nếu lỗi khác ngoài 401 và 404, hiển thị chi tiết lỗi
+          const errorMessage =
+            error.response.data?.message || "Đã xảy ra lỗi, vui lòng thử lại.";
+          message.error(`Không thể thêm vào giỏ hàng: ${errorMessage}`);
+        }
       } else {
+        // Trường hợp không có response (lỗi kết nối, server không phản hồi, v.v.)
         console.error("Lỗi khi thêm vào giỏ hàng:", error);
         message.error("Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.");
       }
