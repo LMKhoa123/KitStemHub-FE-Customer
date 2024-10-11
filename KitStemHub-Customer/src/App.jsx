@@ -46,7 +46,18 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <ToastContainer position="top-right" />
+        <ToastContainer
+          position="top-right"
+          autoClose={1500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           <Route
             path="/login"
