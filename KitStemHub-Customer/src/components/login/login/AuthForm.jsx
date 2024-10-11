@@ -22,11 +22,11 @@ function LoginInput() {
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const accessToken = credential.accessToken;
-      console.log("acc " + accessToken);
+      // console.log("acc " + accessToken);
       const idToken = credential.idToken;
-      console.log("id " + idToken);
+      // console.log("id " + idToken);
       const pendingToken = credential.pendingToken;
-      console.log(pendingToken);
+      // console.log(pendingToken);
       const user = result.user;
 
       if (user) {
@@ -36,13 +36,16 @@ function LoginInput() {
             "id-token": idToken,
             "access-token": accessToken,
           });
-          console.log(response.data);
+          // console.log(response.data);
           if (response.data.status === "success") {
-            console.log(response.data);
-            localStorage.setItem("token", response.data.details.accessToken);
+            // console.log(response.data);
+            localStorage.setItem(
+              "token",
+              response.data.details["access-token"]
+            );
             localStorage.setItem(
               "refreshToken",
-              response.data.details.refreshToken
+              response.data.details["refresh-token"]
             );
 
             setIsLoggedIn(true);
@@ -98,7 +101,9 @@ function LoginInput() {
         }
       } else {
         // Xử lý khi đăng nhập
-        const { accessToken, refreshToken } = response.data.details;
+        const accessToken = response.data.details["access-token"];
+        const refreshToken = response.data.details["refresh-token"];
+
         localStorage.setItem("token", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
