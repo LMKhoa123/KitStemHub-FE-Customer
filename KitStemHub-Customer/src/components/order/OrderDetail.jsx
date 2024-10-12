@@ -10,17 +10,18 @@ import {
   Typography,
   Divider,
   Breadcrumb,
-  Spin,
 } from "antd";
 import { motion } from "framer-motion";
 import {
   DownloadOutlined,
   FilePdfOutlined,
   HomeOutlined,
+  PhoneOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
 import api from "../../config/axios";
+import Loading from "../Loading";
 
 const { Step } = Steps;
 const { Title, Text } = Typography;
@@ -32,9 +33,11 @@ function OrderDetail() {
 
   useEffect(() => {
     const fetchOrderData = async () => {
+      setLoading(true);
       try {
         const response = await api.get(
-          `orders/d7664f0d-4f7f-487e-874e-4a518579d8eb`
+          // `orders/d7664f0d-4f7f-487e-874e-4a518579d8eb`
+          `orders/01023bb7-078a-49d0-8dd2-47eb1cde8c8e`
         );
         // console.log(response.data);
         setOrderData(response.data.details.data.order);
@@ -49,7 +52,7 @@ function OrderDetail() {
   }, [orderId]);
 
   if (loading) {
-    return <Spin size="large" />;
+    return <Loading />;
   }
 
   if (!orderData) {
@@ -61,13 +64,13 @@ function OrderDetail() {
       title: "Chờ Xác Nhận",
       date: new Date(orderData["created-at"]).toLocaleDateString(),
     },
-    { title: "Đã Xác Nhận", date: "Pending" },
-    { title: "Đang Giao Hàng", date: "Pending" },
+    { title: "Đã Xác Nhận", date: "Đang chờ" },
+    { title: "Đang Giao Hàng", date: "Đang chờ" },
     {
       title: "Giao Hàng Thành Công",
       date: orderData["delivered-at"]
         ? new Date(orderData["delivered-at"]).toLocaleDateString()
-        : "Expected",
+        : "Dự kiến",
     },
   ];
 
@@ -106,7 +109,8 @@ function OrderDetail() {
     <ConfigProvider
       theme={{
         token: {
-          // có thể tùy chỉnh theme ở đây nếu cần
+          colorPrimary: "#1890ff",
+          borderRadius: 8,
         },
       }}
     >
@@ -114,7 +118,7 @@ function OrderDetail() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-4xl mx-auto p-6"
+        className="max-w-5xl mx-auto p-6"
       >
         <Breadcrumb className="mb-6">
           <Breadcrumb.Item>
@@ -123,140 +127,159 @@ function OrderDetail() {
             </Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>
-            <Link to="/profile/cart">Orders</Link>
+            <Link to="/profile/cart">Đơn hàng</Link>
           </Breadcrumb.Item>
-          <Breadcrumb.Item>ID {orderData.id}</Breadcrumb.Item>
+          <Breadcrumb.Item>Mã đơn hàng {orderData.id}</Breadcrumb.Item>
         </Breadcrumb>
 
-        <Card className="mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+        <Card className="mb-6 shadow-md">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-              <Title level={4} className="mb-1">
-                Order ID: {orderData.id}
+              <Title level={3} className="mb-2">
+                Mã đơn hàng: {orderData.id}
               </Title>
-              <div className="flex flex-col sm:flex-row sm:space-x-4">
-                <Text type="secondary" className="text-sm">
-                  Order date:{" "}
+              <Space direction="vertical" size="small">
+                <Text type="secondary">
+                  Ngày đặt hàng:{" "}
                   {new Date(orderData["created-at"]).toLocaleDateString()}
                 </Text>
-                <Text type="success" className="text-sm">
-                  Dự kiến giao hàng:{" "}
+                <Text type="success">
+                  Ngày giao hàng dự kiến:{" "}
                   {orderData["deliveried-at"] !== null
-                    ? ""
-                    : new Date(orderData["deliveried-at"]).toLocaleDateString()}
+                    ? new Date(orderData["deliveried-at"]).toLocaleDateString()
+                    : "Đang chờ"}
                 </Text>
-              </div>
+              </Space>
             </div>
             <Space className="mt-4 md:mt-0">
-              <Button icon={<FilePdfOutlined />} size="small">
-                Invoice
-              </Button>
-              <Button type="primary" danger size="small">
-                Order Refund
+              <Button icon={<FilePdfOutlined />}>Hóa đơn</Button>
+              <Button
+                type="primary"
+                danger
+                disabled={!orderData["is-lab-downloaded"]}
+              >
+                Yêu cầu hoàn tiền
               </Button>
             </Space>
           </div>
 
-          <Steps current={currentStep} className="mt-6" size="small">
+          <Steps current={currentStep} className="my-8">
             {orderSteps.map((step, index) => (
               <Step key={index} title={step.title} description={step.date} />
             ))}
           </Steps>
-        </Card>
 
-        <Card className="mb-8">
+          <Divider />
+
           {orderData["package-orders"].map((packageOrder, index) => (
             <React.Fragment key={index}>
-              <div className="flex items-center py-4 ">
+              <div className="flex items-center py-6">
                 <div className="mr-4">
                   <Image
                     src={
                       packageOrder.package.kit.image ||
-                      "https://via.placeholder.com/80"
+                      "https://via.placeholder.com/100"
                     }
                     alt={packageOrder.package.kit.name}
-                    width={80}
-                    height={80}
-                    className="object-cover rounded-md mr-4"
+                    width={100}
+                    height={100}
+                    className="object-cover rounded-lg mr-6"
                   />
                 </div>
 
                 <div className="flex-grow">
-                  <Text strong className="text-lg">
+                  <Text strong className="text-xl mb-1 block">
                     {packageOrder.package.kit.name}
                   </Text>
-                  <Text type="secondary" className="block">
+                  <Text type="secondary" className="text-base block mb-2">
                     {packageOrder.package.name}
+                  </Text>
+                  <Text className="text-lg">
+                    {formatCurrency(packageOrder.package.price)} x{" "}
+                    {packageOrder["package-quantity"]}
                   </Text>
                 </div>
                 <div className="text-right">
-                  <Text strong className="text-lg">
-                    {formatCurrency(packageOrder.package.price)}
-                  </Text>
-                  <Text type="secondary" className="block">
-                    Qty: {packageOrder["package-quantity"]}
+                  <Text strong className="text-xl block">
+                    {formatCurrency(
+                      packageOrder.package.price *
+                        packageOrder["package-quantity"]
+                    )}
                   </Text>
                 </div>
               </div>
               {index < orderData["package-orders"].length - 1 && <Divider />}
             </React.Fragment>
           ))}
-        </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card title="Payment" className="h-full">
-            <Space align="center"></Space>
-          </Card>
-          <Card title="Delivery" className="h-full">
-            <Text>Address</Text>
-            <Text strong className="block">
-              Số nhà 123, Đường Lê Lợi
-            </Text>
-            <Text strong className="block">
-              Thành phố Hồ Chí Minh
-            </Text>
-            <Text strong className="block">
-              Việt Nam
-            </Text>
-            <Text strong className="block">
-              0912-345-678
-            </Text>
-            <Text>Note: {orderData.note}</Text>
-          </Card>
-        </div>
-
-        <Card className="mb-8">
-          <Title level={4} className="mb-4">
-            Order Summary
-          </Title>
-          <div className="flex justify-between mb-2">
-            <Text>Subtotal</Text>
-            <Text strong>{formatCurrency(orderData.price)}</Text>
-          </div>
-          <div className="flex justify-between mb-2">
-            <Text>Discount</Text>
-            <Text strong>-{formatCurrency(orderData.discount)}</Text>
-          </div>
           <Divider />
-          <div className="flex justify-between items-center">
-            <Text strong className="text-lg">
-              Total
-            </Text>
-            <Text strong className="text-2xl">
-              {formatCurrency(orderData["total-price"])}
-            </Text>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <Card title="Thông tin thanh toán" className="h-full">
+              <Space align="center" size="large">
+                <Text strong>Thẻ kết thúc bằng ***123</Text>
+                <Image
+                  src="vnpayImage.svg"
+                  alt="VNPay"
+                  width={80}
+                  height={80}
+                />
+              </Space>
+            </Card>
+
+            <Card title="Thông tin giao hàng" className="h-full">
+              <Text strong className="block mb-2">
+                Địa chỉ giao hàng:
+              </Text>
+              <Text className="block mb-4">
+                {orderData["shipping-address"]}
+              </Text>
+              <Text className="block mb-4">
+                <PhoneOutlined /> {orderData["phone-number"]}
+              </Text>
+              <Text strong className="block mb-2">
+                Ghi chú:
+              </Text>
+              <Text>{orderData.note || ""}</Text>
+            </Card>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between">
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              size="large"
+              className="bg-green-500  border-none h-12 text-lg font-semibold mb-4 md:mb-0"
+              disabled={!orderData["is-lab-downloaded"]}
+            >
+              Tải xuống bài lab
+            </Button>
+            <div className="w-full md:w-1/2">
+              <Title level={4} className="mb-4">
+                Tổng kết đơn hàng
+              </Title>
+              <div className="flex justify-between mb-2">
+                <Text>Tạm tính</Text>
+                <Text strong>{formatCurrency(orderData.price)}</Text>
+              </div>
+              <div className="flex justify-between mb-2">
+                <Text>Giảm giá</Text>
+                <Text strong className="text-green-500">
+                  -{formatCurrency(orderData.discount)}
+                </Text>
+              </div>
+              <Divider />
+              <div className="flex justify-between items-center">
+                <Text strong className="text-xl">
+                  Tổng cộng
+                </Text>
+                <Text strong className="text-2xl text-primary">
+                  {formatCurrency(orderData["total-price"])}
+                </Text>
+              </div>
+            </div>
           </div>
         </Card>
-
-        <Button
-          type="primary"
-          icon={<DownloadOutlined />}
-          size="large"
-          className="w-full bg-green-500 hover:bg-green-600 border-none h-12 text-lg font-semibold"
-          disabled={!orderData["is-lab-downloaded"]}
-        >
-          Download labs
-        </Button>
       </motion.div>
     </ConfigProvider>
   );
