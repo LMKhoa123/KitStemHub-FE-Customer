@@ -41,10 +41,10 @@ const ProductDetail = () => {
       console.log(kitId);
       const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
       if (response.data && response.data.status === "success") {
-        const kitData = response.data.details.data.package[0].kit; // Lấy dữ liệu kit từ package đầu tiên
+        const kitData = response.data.details.data.packages[0].kit; // Lấy dữ liệu kit từ package đầu tiên
         setKitDetail(kitData); // Lưu chi tiết của kit vào state
-        setPackages(response.data.details.data.package); // Lưu danh sách các package
-        setPackageDetail(response.data.details.data.package[0]); // Mặc định chọn package đầu tiên
+        setPackages(response.data.details.data.packages); // Lưu danh sách các package
+        setPackageDetail(response.data.details.data.packages[0]); // Mặc định chọn package đầu tiên
       } else {
         throw new Error("Unexpected response structure");
       }

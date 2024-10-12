@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useCallback } from "react";
-import { Spin, Card, Pagination, Skeleton, notification } from "antd";
+import { Spin, Card, Pagination, notification } from "antd";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
 import { EyeOutlined, HeartOutlined } from "@ant-design/icons";
@@ -24,7 +24,9 @@ function HomeProductCarousel({ searchTerm }) {
             pageSize: pageSize,
           },
         });
-        const products = response.data.details.data.kits;
+        const products = response.data.details.data.kits.filter(
+          (kit) => kit.status === true // Lọc chỉ lấy các kit available
+        );
         setDataSource((prev) => [...prev, ...products]); // Thêm vào danh sách hiện tại
       } catch (error) {
         console.error("Error prefetching kits:", error);
@@ -52,7 +54,9 @@ function HomeProductCarousel({ searchTerm }) {
           pageSize: pageSize,
         },
       });
-      const products = response.data.details.data.kits;
+      const products = response.data.details.data.kits.filter(
+        (kit) => kit.status === true // Chỉ giữ lại các kit có status = true (Available)
+      );
       const totalPages = response.data.details.data["total-pages"];
       const currentPage = response.data.details.data["current-page"];
 
