@@ -89,7 +89,6 @@ function LoginInput() {
 
       if (isSignUpMode) {
         // Xử lý khi đăng ký
-        // Xử lý khi đăng ký
         if (response.data.status === "success") {
           toast.success(response.data.details.message);
           setIsSignUpMode(false);
@@ -100,6 +99,7 @@ function LoginInput() {
         }
       } else {
         // Xử lý khi đăng nhập
+        console.log(response.data);
         const accessToken = response.data.details["access-token"];
         const refreshToken = response.data.details["refresh-token"];
 

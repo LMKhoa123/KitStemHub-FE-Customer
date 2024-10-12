@@ -29,19 +29,21 @@ function HomeUser() {
             <div className="flex mb-5 items-center">
               <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
               <h3 className="text-rose-600 font-medium flex items-center">
-                Our Products
+                Sản phẩm của chúng tôi
               </h3>
             </div>
             <div className="flex mb-5 items-center">
               <Search
-                placeholder="What are you looking for?"
+                placeholder="Bạn đang tìm kiếm gì?"
                 onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
                 enterButton
                 className="search-product w-full"
               />
             </div>
           </div>
-          <h1 className="font-semibold text-3xl mb-10">Explore Our Products</h1>
+          <h1 className="font-semibold text-3xl mb-10">
+            Khám phá sản phẩm của chúng tôi
+          </h1>
 
           {/* carousel product */}
           <div className="flex-grow mb-16">
@@ -77,9 +79,11 @@ function HomeUser() {
               </div>
             </div>
           </div>
-          <h3 className="font-bold text-lg">FREE AND FAST DELIVERY</h3>
+          <h3 className="font-bold text-lg">
+            GIAO HÀNG MIỄN PHÍ VÀ NHANH CHÓNG
+          </h3>
           <p className="text-gray-500">
-            Free delivery for all orders over $140
+            Miễn phí giao hàng cho tất cả đơn hàng trên 3.000.000đ
           </p>
         </div>
 
@@ -108,8 +112,8 @@ function HomeUser() {
               </div>
             </div>
           </div>
-          <h3 className="font-bold text-lg">24/7 CUSTOMER SERVICE</h3>
-          <p className="text-gray-500">Friendly 24/7 customer support</p>
+          <h3 className="font-bold text-lg">DỊCH VỤ KHÁCH HÀNG 24/7</h3>
+          <p className="text-gray-500">Hỗ trợ khách hàng thân thiện 24/7</p>
         </div>
 
         {/* Money Back Guarantee */}
@@ -133,8 +137,10 @@ function HomeUser() {
               </div>
             </div>
           </div>
-          <h3 className="font-bold text-lg">MONEY BACK GUARANTEE</h3>
-          <p className="text-gray-500">We return money within 30 days</p>
+          <h3 className="font-bold text-lg">ĐẢM BẢO HOÀN TIỀN</h3>
+          <p className="text-gray-500">
+            Chúng tôi hoàn tiền trong vòng 30 ngày
+          </p>
         </div>
       </div>
     </>
