@@ -5,18 +5,20 @@ import CartNav from "./cartcontent/CartNav";
 
 function Cart() {
   return (
-    <div className="w-full h-screen">
+    <>
       <NavbarUser />
-      <div className="flex flex-col">
-        <div className="pl-64">
-          <CartNav />
+      <div className="w-full min-h-screen flex flex-col justify-between">
+        <div className="flex-grow">
+          <div className="pl-64">
+            <CartNav />
+          </div>
+          <div className="flex justify-center">
+            <CartContent />
+          </div>
         </div>
-        <div className="flex justify-center h-screen">
-          <CartContent />
-        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </>
   );
 }
 
