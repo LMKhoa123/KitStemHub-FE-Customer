@@ -89,11 +89,10 @@ function LoginInput() {
 
       if (isSignUpMode) {
         // Xử lý khi đăng ký
+        // Xử lý khi đăng ký
         if (response.data.status === "success") {
-          toast.success("Đăng ký thành công! Vui lòng đăng nhập.", {
-            onClose: () => setIsSignUpMode(false),
-          });
-          // Các comment về Modal và Gmail link có thể giữ nguyên
+          toast.success(response.data.details.message);
+          setIsSignUpMode(false);
         } else {
           const error = response.data.details?.errors || {};
           console.log(error);
