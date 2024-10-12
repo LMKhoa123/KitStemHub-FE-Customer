@@ -26,7 +26,7 @@ function CartMyProfile() {
         </span>
       ),
       chitietdonhang: (
-        <a href="#" className="text-blue-600">
+        <a href="" className="text-blue-600">
           Chi Tiết
         </a>
       ),

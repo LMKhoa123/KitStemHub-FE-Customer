@@ -35,24 +35,54 @@ const ProductDetail = () => {
   }, [kitId]); // Chạy lại khi KitId thay đổi
 
   // Hàm fetch chi tiết Kit từ API
+  // const fetchKitDetail = async () => {
+  //   setLoading(true); // Hiển thị loading trong khi fetch
+  //   try {
+  //     console.log(kitId);
+  //     const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
+  //     if (response.data && response.data.status === "success") {
+  //       // console.log(response.data);
+  //       const kitData = response.data.details.data.packages[0].kit; // Lấy dữ liệu kit từ package đầu tiên
+  //       setKitDetail(kitData); // Lưu chi tiết của kit vào state
+  //       setPackages(response.data.details.data.packages); // Lưu danh sách các package
+  //       setPackageDetail(response.data.details.data.packages[0]); // Mặc định chọn package đầu tiên
+  //     } else {
+  //       throw new Error("Unexpected response structure");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching kit details:", error);
+  //     message.error("Failed to fetch kit details");
+  //   } finally {
+  //     setLoading(false); // Tắt loading khi đã fetch xong
+  //   }
+  // };
   const fetchKitDetail = async () => {
-    setLoading(true); // Hiển thị loading trong khi fetch
+    setLoading(true);
     try {
       console.log(kitId);
-      const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
+      const response = await api.get(`kits/${kitId}/packages`);
+      console.log(response.data);
       if (response.data && response.data.status === "success") {
-        const kitData = response.data.details.data.packages[0].kit; // Lấy dữ liệu kit từ package đầu tiên
-        setKitDetail(kitData); // Lưu chi tiết của kit vào state
-        setPackages(response.data.details.data.packages); // Lưu danh sách các package
-        setPackageDetail(response.data.details.data.packages[0]); // Mặc định chọn package đầu tiên
+        const packageData = response.data.details.data.packages;
+        if (Array.isArray(packageData) && packageData.length > 0) {
+          const kitData = packageData[0].kit;
+          setKitDetail(kitData);
+          setPackages(packageData);
+          setPackageDetail(packageData[0]);
+        } else {
+          throw new Error("No package data available");
+        }
       } else {
         throw new Error("Unexpected response structure");
       }
     } catch (error) {
       console.error("Error fetching kit details:", error);
-      message.error("Failed to fetch kit details");
+      message.error("Failed to fetch kit details: " + error.message);
+      setKitDetail(null);
+      setPackages([]);
+      setPackageDetail(null);
     } finally {
-      setLoading(false); // Tắt loading khi đã fetch xong
+      setLoading(false);
     }
   };
 

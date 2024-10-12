@@ -21,7 +21,8 @@ import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
-
+import OrderDetail from "./components/order/OrderDetail";
+// import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
 
@@ -46,7 +47,18 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <ToastContainer position="top-right" />
+        <ToastContainer
+          position="top-right"
+          autoClose={1500}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           <Route
             path="/login"
@@ -91,6 +103,7 @@ function App() {
           />
           <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckOutPage />} />
+          <Route path="/order" element={<OrderDetail />} />
         </Routes>
       </Router>
     </AuthProvider>

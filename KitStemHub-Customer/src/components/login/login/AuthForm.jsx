@@ -36,13 +36,16 @@ function LoginInput() {
             "id-token": idToken,
             "access-token": accessToken,
           });
-          console.log(response.data);
+          // console.log(response.data);
           if (response.data.status === "success") {
-            console.log(response.data);
-            localStorage.setItem("token", response.data.details.accessToken);
+            // console.log(response.data);
+            localStorage.setItem(
+              "token",
+              response.data.details["access-token"]
+            );
             localStorage.setItem(
               "refreshToken",
-              response.data.details.refreshToken
+              response.data.details["refresh-token"]
             );
 
             setIsLoggedIn(true);
@@ -86,11 +89,10 @@ function LoginInput() {
 
       if (isSignUpMode) {
         // Xử lý khi đăng ký
+        // Xử lý khi đăng ký
         if (response.data.status === "success") {
-          toast.success("Đăng ký thành công! Vui lòng đăng nhập.", {
-            onClose: () => setIsSignUpMode(false),
-          });
-          // Các comment về Modal và Gmail link có thể giữ nguyên
+          toast.success(response.data.details.message);
+          setIsSignUpMode(false);
         } else {
           const error = response.data.details?.errors || {};
           console.log(error);
@@ -98,7 +100,9 @@ function LoginInput() {
         }
       } else {
         // Xử lý khi đăng nhập
-        const { accessToken, refreshToken } = response.data.details;
+        const accessToken = response.data.details["access-token"];
+        const refreshToken = response.data.details["refresh-token"];
+
         localStorage.setItem("token", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
