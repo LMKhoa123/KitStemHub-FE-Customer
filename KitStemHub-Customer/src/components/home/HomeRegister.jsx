@@ -1,35 +1,45 @@
 // import HomeCarousel from "./homeCarousel/HomeCarousel";
+import { useState } from "react";
+import Search from "antd/es/input/Search";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
-import HomeSidebar from "./homeSidebar/HomeSidebar";
 
 function HomeRegister() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value); // Cập nhật từ khóa tìm kiếm liên tục khi nhập
+  };
   return (
     <>
       {/* nav home page */}
-      <div className="flex mt-16">
-        {/* side bar */}
-        <div className="flex justify-end w-1/4">
-          <HomeSidebar />
+      {/* <div className="flex mt-16"> */}
+      {/* side bar */}
+
+      {/* our product */}
+      <div className="flex flex-col ml-20 mr-4 mt-16">
+        <div className="flex mb-5 items-center">
+          <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
+          <h3 className="text-rose-600 font-medium flex items-center">
+            Sản phẩm của chúng tôi
+          </h3>
         </div>
+        <div className="flex mb-5 items-center flex justify-end">
+          <Search
+            placeholder="Bạn đang tìm kiếm gì?"
+            onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
+            enterButton
+            className="search-product w-1/5 "
+          />
+        </div>
+        <h1 className="font-semibold text-3xl mb-10">
+          Khám phá sản phẩm của chúng tôi
+        </h1>
 
-        {/* our product */}
-        <div className="flex flex-col ml-20 w-3/5">
-          <div className="flex mb-5 items-center">
-            <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
-            <h3 className="text-rose-600 font-medium flex items-center">
-              Sản phẩm của chúng tôi
-            </h3>
-          </div>
-          <h1 className="font-semibold text-3xl mb-10">
-            Khám phá sản phẩm của chúng tôi
-          </h1>
-
-          {/* carousel product */}
-          <div className="flex-grow mb-16">
-            <HomeProductCarousel />
-          </div>
+        {/* carousel product */}
+        <div className="flex-grow mb-16">
+          <HomeProductCarousel searchTerm={searchTerm} />{" "}
         </div>
       </div>
+      {/* </div> */}
       {/* service */}
       <div className="flex justify-around mb-16">
         {/* Free and Fast Delivery */}

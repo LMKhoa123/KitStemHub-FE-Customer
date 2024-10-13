@@ -2,7 +2,6 @@ import { useState } from "react";
 import Search from "antd/es/input/Search";
 import HomeCarousel from "./homeCarousel/HomeCarousel";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
-import HomeSidebar from "./homeSidebar/HomeSidebar";
 
 function HomeUser() {
   const [searchTerm, setSearchTerm] = useState(""); // Trạng thái từ khóa tìm kiếm
@@ -17,41 +16,38 @@ function HomeUser() {
       <HomeCarousel />
 
       {/* nav home page */}
-      <div className="flex mt-16">
-        {/* side bar */}
-        <div className="flex justify-end w-1/4">
-          <HomeSidebar />
+      {/* <div className="flex mt-16"> */}
+      {/* side bar */}
+
+      {/* our product */}
+      <div className="flex flex-col ml-20 mr-4 mt-16">
+        <div className="flex justify-between">
+          <div className="flex mb-5 items-center">
+            <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
+            <h3 className="text-rose-600 font-medium flex items-center">
+              Sản phẩm của chúng tôi
+            </h3>
+          </div>
+          <div className="flex mb-5 items-center w-1/5">
+            <Search
+              placeholder="Bạn đang tìm kiếm gì?"
+              onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
+              enterButton
+              className="search-product w-full"
+            />
+          </div>
         </div>
+        <h1 className="font-semibold text-3xl mb-10">
+          Khám phá sản phẩm của chúng tôi
+        </h1>
 
-        {/* our product */}
-        <div className="flex flex-col ml-20 w-3/5">
-          <div className="flex justify-between">
-            <div className="flex mb-5 items-center">
-              <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
-              <h3 className="text-rose-600 font-medium flex items-center">
-                Sản phẩm của chúng tôi
-              </h3>
-            </div>
-            <div className="flex mb-5 items-center">
-              <Search
-                placeholder="Bạn đang tìm kiếm gì?"
-                onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
-                enterButton
-                className="search-product w-full"
-              />
-            </div>
-          </div>
-          <h1 className="font-semibold text-3xl mb-10">
-            Khám phá sản phẩm của chúng tôi
-          </h1>
-
-          {/* carousel product */}
-          <div className="flex-grow mb-16">
-            <HomeProductCarousel searchTerm={searchTerm} />{" "}
-            {/* Truyền searchTerm vào */}
-          </div>
+        {/* carousel product */}
+        <div className="flex-grow mb-16">
+          <HomeProductCarousel searchTerm={searchTerm} />{" "}
+          {/* Truyền searchTerm vào */}
         </div>
       </div>
+      {/* </div> */}
 
       {/* service section */}
       <div className="flex justify-around py-16">
