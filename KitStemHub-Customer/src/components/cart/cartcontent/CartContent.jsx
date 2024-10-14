@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   InputNumber,
-  Checkbox,
   Popconfirm,
   Modal,
   notification,
@@ -20,8 +19,6 @@ function CartContent() {
   const [total, setTotal] = useState(0);
   const [labModalVisible, setLabModalVisible] = useState(false);
   const [selectedLabs, setSelectedLabs] = useState([]);
-  const [point, setPoint] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]); // State để lưu các sản phẩm được chọn
   const [loading, setLoading] = useState(true); // Trạng thái tải
 
   // Fetch dữ liệu từ API khi component render
@@ -33,7 +30,7 @@ function CartContent() {
 
       const kitsData = kitsResponse.data.details.data.kits;
 
-      // Tìm ảnh kit dựa trên kitId thay vì packageId
+      // Tìm ảnh kit dựa trên kitId
       const findKitImage = (kitId) => {
         const kit = kitsData.find((kit) => kit.id === kitId);
         return kit
@@ -44,7 +41,8 @@ function CartContent() {
       const cartsData = cartResponse.data.details.data.carts.map(
         (item, index) => ({
           key: index.toString(),
-          kitId: item.package.kit.id, // Sử dụng id của kit
+          packageId: item.package["package-id"], // Sử dụng packageId để thao tác với giỏ hàng
+          kitId: item.package.kit.id, // Sử dụng kitId để lấy ảnh
           product: item.package.kit.name,
           price: item.package.price, // Giá từ giỏ hàng
           quantity: item["package-quantity"],
@@ -56,8 +54,6 @@ function CartContent() {
       );
 
       setCartItems(cartsData);
-      setSelectedItems([]); // Ban đầu không có sản phẩm nào được chọn
-      updateTotals([]); // Cập nhật lại tổng tiền ban đầu
       setLoading(false); // Đặt trạng thái tải về false khi dữ liệu đã được fetch
     } catch (error) {
       console.error("Error fetching cart data:", error);
@@ -67,6 +63,11 @@ function CartContent() {
   useEffect(() => {
     fetchCartData();
   }, []);
+
+  // Gọi lại updateTotals khi cartItems thay đổi
+  useEffect(() => {
+    updateTotals(cartItems);
+  }, [cartItems]);
 
   // Hàm xóa cart theo packageId
   const deleteCart = async (packageId) => {
@@ -79,20 +80,18 @@ function CartContent() {
         placement: "topRight", // Vị trí hiển thị thông báo
       });
       // Cập nhật lại danh sách giỏ hàng sau khi xóa
-      setCartItems(cartItems.filter((item) => item.packageId !== packageId));
-      setSelectedItems(
-        selectedItems.filter((item) => item.packageId !== packageId)
+      const updatedCartItems = cartItems.filter(
+        (item) => item.packageId !== packageId
       );
-      updateTotals(
-        selectedItems.filter((item) => item.packageId !== packageId)
-      );
+      setCartItems(updatedCartItems);
+      updateTotals(updatedCartItems); // Cập nhật lại tổng sau khi xóa
     } catch (error) {
       notification.error({
         message: "Thất bại",
         description: "Xóa sản phẩm khỏi giỏ hàng thất bại.",
         placement: "topRight",
       });
-      console.error("Error deleting cart:", error);
+      console.error("Error deleting cart:", error.response || error.message);
     }
   };
 
@@ -106,7 +105,6 @@ function CartContent() {
         placement: "topRight",
       });
       setCartItems([]);
-      setSelectedItems([]);
       updateTotals([]);
     } catch (error) {
       notification.error({
@@ -118,31 +116,6 @@ function CartContent() {
     }
   };
 
-  // Hàm xử lý khi chọn hoặc bỏ chọn sản phẩm
-  const handleSelectItem = (selected, record) => {
-    let updatedSelectedItems = [...selectedItems];
-    if (selected) {
-      updatedSelectedItems.push(record);
-    } else {
-      updatedSelectedItems = updatedSelectedItems.filter(
-        (item) => item.key !== record.key
-      );
-    }
-    setSelectedItems(updatedSelectedItems);
-    updateTotals(updatedSelectedItems);
-  };
-
-  // Hàm xử lý khi chọn hoặc bỏ chọn tất cả sản phẩm
-  const handleSelectAll = (selected) => {
-    if (selected) {
-      setSelectedItems(cartItems);
-      updateTotals(cartItems);
-    } else {
-      setSelectedItems([]);
-      updateTotals([]);
-    }
-  };
-
   // Hàm xử lý khi thay đổi số lượng sản phẩm
   const handleQuantityChange = (value, record) => {
     const newCartItems = cartItems.map((item) =>
@@ -151,15 +124,7 @@ function CartContent() {
         : item
     );
     setCartItems(newCartItems);
-
-    // Cập nhật lại tổng khi thay đổi số lượng sản phẩm
-    const newSelectedItems = selectedItems.map((item) =>
-      item.key === record.key
-        ? { ...item, quantity: value, subtotal: item.price * value }
-        : item
-    );
-    setSelectedItems(newSelectedItems);
-    updateTotals(newSelectedItems);
+    updateTotals(newCartItems);
   };
 
   // Hàm xử lý khi quay lại trang Home
@@ -167,43 +132,18 @@ function CartContent() {
     navigate("/home"); // Điều hướng về trang Home
   };
 
-  // Hàm cập nhật tổng tiền
-  const updateTotals = (items) => {
-    const newSubtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
-    setSubtotal(newSubtotal);
-
-    const discount = point ? 1000 : 0;
-    setTotal(newSubtotal - discount);
-    console.log("Subtotal:", newSubtotal.toLocaleString("vi-VN")); // Thêm console log
+  const handleProceedToCheckout = () => {
+    navigate("/checkout", { state: { cartItems } });
   };
 
-  const handlePointChange = (e) => {
-    setPoint(e.target.checked);
-    updateTotals(selectedItems);
+  const updateTotals = (items) => {
+    if (items.length === 0) return; // Nếu không có sản phẩm thì không cần tính
+    const newSubtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
+    setSubtotal(newSubtotal);
+    setTotal(newSubtotal);
   };
 
   const columns = [
-    {
-      title: (
-        <Checkbox
-          onChange={(e) => handleSelectAll(e.target.checked)} // Checkbox "Chọn tất cả"
-          checked={
-            selectedItems.length === cartItems.length && cartItems.length > 0
-          } // Nếu tất cả sản phẩm đã được chọn
-        >
-          Select all
-        </Checkbox>
-      ),
-      dataIndex: "select",
-      key: "select",
-      width: "5%",
-      render: (_, record) => (
-        <Checkbox
-          onChange={(e) => handleSelectItem(e.target.checked, record)}
-          checked={selectedItems.some((item) => item.key === record.key)} // Kiểm tra sản phẩm có được chọn hay không
-        />
-      ),
-    },
     {
       title: "Product",
       dataIndex: "product",
@@ -356,15 +296,11 @@ function CartContent() {
               <span>Total:</span>
               <span>{total.toLocaleString("vi-VN")} VND</span>
             </div>
-            <div className="flex justify-between mb-3 font-medium">
-              <span>Point:</span>
-              <Checkbox checked={point} onChange={() => setPoint(!point)}>
-                10 points
-              </Checkbox>
-            </div>
+
             <Button
               type="primary"
               className="w-full bg-red-500 text-white mt-3 font-semibold"
+              onClick={handleProceedToCheckout}
             >
               Proceed to checkout
             </Button>
