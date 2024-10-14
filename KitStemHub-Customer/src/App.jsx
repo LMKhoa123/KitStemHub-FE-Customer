@@ -22,6 +22,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
 import OrderDetail from "./components/order/OrderDetail";
+import EmailVerification from "./components/EmailVerification"; // Import EmailVerification component
 import Result from "./components/result/Result";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
@@ -80,6 +81,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/verify" element={<EmailVerification />} />
           <Route
             path="/profile"
             element={
