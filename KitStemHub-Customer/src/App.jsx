@@ -22,6 +22,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
 import OrderDetail from "./components/order/OrderDetail";
+import Result from "./components/result/Result";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -104,6 +105,7 @@ function App() {
           <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckOutPage />} />
           <Route path="/order" element={<OrderDetail />} />
+          <Route path="/order/result" element={<Result />} />
         </Routes>
       </Router>
     </AuthProvider>

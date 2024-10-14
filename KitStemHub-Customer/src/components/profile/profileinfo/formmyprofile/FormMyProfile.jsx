@@ -19,18 +19,15 @@ function FormMyProfile() {
       const response = await api.get("users/profile");
       console.log("Lấy dữ liệu thành công", response.data);
 
+      const userProfile = response.data.details.data["user-profile-dto"];
+
       setProfileData({
-        firstName:
-          response.data.details.data["user-profile-dto"]["first-name"] || "",
-        lastName:
-          response.data.details.data["user-profile-dto"]["last-name"] || "",
-        userName:
-          response.data.details.data["user-profile-dto"]["user-name"] || "",
-        phoneNumber:
-          response.data.details.data["user-profile-dto"]["phone-number"] || "", // Lấy phoneNumber từ API
-        address:
-          response.data.details.data["user-profile-dto"]["address"] || "",
-        points: response.data.details.data["user-profile-dto"]["points"] || 0,
+        firstName: userProfile["first-name"] || "",
+        lastName: userProfile["last-name"] || "",
+        userName: userProfile["user-name"] || "",
+        phoneNumber: userProfile["phone-number"] || "", // Lấy phoneNumber từ API
+        address: userProfile["address"] || "",
+        points: userProfile["points"] || 0,
       });
     } catch (error) {
       console.log("Lấy dữ liệu thất bại", error);
