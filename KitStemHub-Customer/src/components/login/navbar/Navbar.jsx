@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { MenuOutlined } from "@ant-design/icons";
-import { Input, Menu, Drawer } from "antd";
+import { Menu, Drawer } from "antd";
 import { NavLink } from "react-router-dom";
-const { Search } = Input;
-
-const onSearch = (value) => console.log(value);
 
 const items = [
   {
@@ -74,7 +71,7 @@ function Navbar({ childrenItem }) {
           {/* Desktop Menu */}
           <ul
             id="kt-menu"
-            className="basis-2/6 hidden lg:flex lg:items-center lg:justify-between text-md font-normal text-gray-400"
+            className="basis-3/6 hidden lg:flex lg:items-center lg:justify-between text-md font-normal text-gray-400"
           >
             <li className="">
               <NavLink
@@ -131,12 +128,13 @@ function Navbar({ childrenItem }) {
           </ul>
 
           {/* Desktop Search */}
-          <Search
+          {/* <Search
             placeholder="What are you looking for?"
             onSearch={onSearch}
             enterButton
             className="hidden lg:block lg:basis-2/6"
-          />
+          /> */}
+          <div className="w-36"></div>
 
           {childrenItem}
 

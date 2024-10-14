@@ -1,7 +1,5 @@
 import { Input } from "antd";
 import { NavLink } from "react-router-dom";
-const { Search } = Input;
-const onSearch = (value, _e, info) => console.log(info && info.source, value);
 
 // eslint-disable-next-line react/prop-types
 function NavbarEx({ childrenItem }) {
@@ -12,7 +10,7 @@ function NavbarEx({ childrenItem }) {
           <div className="logo basis-1/6 text-center text-xl font-semibold cursor-pointer">
             KitStemHub
           </div>
-          <ul className=" basis-2/6 flex items-center justify-between text-md font-normal text-gray-400">
+          <ul className=" basis-2/5 flex items-center justify-between text-md font-normal text-gray-400">
             <li className="kt-menu-item">
               <NavLink to="/home">Home</NavLink>
             </li>
@@ -23,12 +21,7 @@ function NavbarEx({ childrenItem }) {
               <NavLink to="about">About</NavLink>
             </li>
           </ul>
-          <Search
-            placeholder="What are you looking for?"
-            onSearch={onSearch}
-            enterButton
-            className="search-product basis-1/6"
-          />
+
           {childrenItem}
         </nav>
       </header>
