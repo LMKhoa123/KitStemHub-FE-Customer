@@ -63,6 +63,10 @@ function OrderDetail() {
     return <div>Order not found</div>;
   }
 
+  const packageOrders = Array.isArray(orderData["package-orders"])
+    ? orderData["package-orders"]
+    : [];
+
   const orderSteps = [
     {
       title: "Chờ Xác Nhận",
@@ -175,46 +179,50 @@ function OrderDetail() {
 
           <Divider />
 
-          {orderData["package-orders"].map((packageOrder, index) => (
-            <React.Fragment key={index}>
-              <div className="flex items-center py-6">
-                <div className="mr-4">
-                  <Image
-                    src={
-                      packageOrder.package.kit.image ||
-                      "https://via.placeholder.com/100"
-                    }
-                    alt={packageOrder.package.kit.name}
-                    width={100}
-                    height={100}
-                    className="object-cover rounded-lg mr-6"
-                  />
-                </div>
+          {packageOrders.length > 0 ? (
+            packageOrders.map((packageOrder, index) => (
+              <React.Fragment key={index}>
+                <div className="flex items-center py-6">
+                  <div className="mr-4">
+                    <Image
+                      src={
+                        packageOrder.package?.kit?.image ||
+                        "https://via.placeholder.com/100"
+                      }
+                      alt={packageOrder.package?.kit?.name || "Package Image"}
+                      width={100}
+                      height={100}
+                      className="object-cover rounded-lg mr-6"
+                    />
+                  </div>
 
-                <div className="flex-grow">
-                  <Text strong className="text-xl mb-1 block">
-                    {packageOrder.package.kit.name}
-                  </Text>
-                  <Text type="secondary" className="text-base block mb-2">
-                    {packageOrder.package.name}
-                  </Text>
-                  <Text className="text-lg">
-                    {formatCurrency(packageOrder.package.price)} x{" "}
-                    {packageOrder["package-quantity"]}
-                  </Text>
+                  <div className="flex-grow">
+                    <Text strong className="text-xl mb-1 block">
+                      {packageOrder.package?.kit?.name || "Unknown Package"}
+                    </Text>
+                    <Text type="secondary" className="text-base block mb-2">
+                      {packageOrder.package?.name || "Unknown Name"}
+                    </Text>
+                    <Text className="text-lg">
+                      {formatCurrency(packageOrder.package?.price || 0)} x{" "}
+                      {packageOrder["package-quantity"] || 0}
+                    </Text>
+                  </div>
+                  <div className="text-right">
+                    <Text strong className="text-xl block">
+                      {formatCurrency(
+                        (packageOrder.package?.price || 0) *
+                          (packageOrder["package-quantity"] || 0)
+                      )}
+                    </Text>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <Text strong className="text-xl block">
-                    {formatCurrency(
-                      packageOrder.package.price *
-                        packageOrder["package-quantity"]
-                    )}
-                  </Text>
-                </div>
-              </div>
-              {index < orderData["package-orders"].length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
+                {index < packageOrders.length - 1 && <Divider />}
+              </React.Fragment>
+            ))
+          ) : (
+            <Text>No package orders found</Text>
+          )}
 
           <Divider />
 
