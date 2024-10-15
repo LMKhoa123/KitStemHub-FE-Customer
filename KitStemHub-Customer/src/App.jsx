@@ -10,7 +10,6 @@ import Loading from "./components/Loading";
 import AuthPage from "./pages/loginpage/LoginPage";
 import ProfilePage from "./pages/profilepage/ProfilePage";
 import ProfileInfo from "./components/profile/profileinfo/ProfileInfo";
-import ProfileAddress from "./components/profile/profileaddress/ProfileAddress";
 import ProfileCart from "./components/profile/profilecart/ProfileCart";
 import ProfileLab from "./components/profile/profilelab/ProfileLab";
 import HomePageUser from "./pages/homepage/HomePageUser";
@@ -92,7 +91,6 @@ function App() {
             }
           >
             <Route index element={<ProfileInfo />} />
-            <Route path="address" element={<ProfileAddress />} />
             <Route path="cart" element={<ProfileCart />} />
             <Route path="lab" element={<ProfileLab />} />
           </Route>
@@ -106,7 +104,7 @@ function App() {
           />
           <Route path="/productdetail/:kitId" element={<ProductDetailPage />} />
           <Route path="/checkout" element={<CheckOutPage />} />
-          <Route path="/order" element={<OrderDetail />} />
+          <Route path="/order/:orderId" element={<OrderDetail />} />
           <Route path="/order/result" element={<Result />} />
         </Routes>
       </Router>

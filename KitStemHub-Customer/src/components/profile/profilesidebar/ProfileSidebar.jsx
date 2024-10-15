@@ -1,8 +1,4 @@
-import {
-  HeartOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { ShoppingOutlined, UserOutlined } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { useNavigate } from "react-router-dom";
@@ -30,13 +26,6 @@ function ProfileSidebar() {
           ),
           onClick: handleNavigate("/profile"),
         },
-        {
-          key: "2",
-          label: (
-            <MenuItem label="Địa chỉ giao hàng" className="text-gray-500" />
-          ),
-          onClick: handleNavigate("/profile/address"),
-        },
       ],
     },
     {
@@ -58,19 +47,13 @@ function ProfileSidebar() {
         },
       ],
     },
-    {
-      key: "sub3",
-      icon: <HeartOutlined />,
-      label: <p className="font-medium">My Wishlist</p>,
-      children: [{}, {}],
-    },
   ];
   return (
     <Layout className="shrink p-14 pl-14">
       <Sider width={200}>
         <Menu
           mode="inline"
-          defaultOpenKeys={["sub1"]}
+          defaultOpenKeys={["sub1", "sub2", "sub3"]}
           style={{ height: "100%", borderRight: 0 }}
           items={items}
         />
