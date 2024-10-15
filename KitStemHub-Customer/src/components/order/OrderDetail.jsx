@@ -37,9 +37,9 @@ function OrderDetail() {
       try {
         const response = await api.get(
           // `orders/d7664f0d-4f7f-487e-874e-4a518579d8eb`
-          `orders/01023bb7-078a-49d0-8dd2-47eb1cde8c8e`
+          `orders/${orderId}`
         );
-        // console.log(response.data);
+        console.log(response.data.details.data.order);
         setOrderData(response.data.details.data.order);
         setLoading(false);
       } catch (error) {
@@ -48,7 +48,11 @@ function OrderDetail() {
       }
     };
 
-    fetchOrderData();
+    if (orderId) {
+      fetchOrderData();
+    } else {
+      console.log("No orderId found");
+    }
   }, [orderId]);
 
   if (loading) {

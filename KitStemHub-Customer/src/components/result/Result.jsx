@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, message, Typography } from "antd";
+import { Button, notification, Typography } from "antd";
 import api from "../../config/axios";
 import Confetti from "react-confetti";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
@@ -12,6 +12,7 @@ const Result = () => {
   const navigate = useNavigate();
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false); // Hiệu ứng pháo hoa
+  const orderId = location.state?.orderId; // Lấy orderId từ state (khi COD)
 
   // Hàm để lấy query parameters từ URL
   const getQueryParams = (search) => {
@@ -33,40 +34,65 @@ const Result = () => {
   };
 
   useEffect(() => {
+    // Nếu có orderId thì lưu vào localStorage
+    if (orderId) {
+      localStorage.setItem("orderId", orderId);
+    }
     // Lấy các thông tin từ query parameters
     const queryParams = getQueryParams(location.search);
 
-    // Gọi API để xác nhận kết quả thanh toán
+    // Nếu có thông tin thanh toán VNPay, gọi API để xác nhận thanh toán
     const confirmPayment = async () => {
-      try {
-        const response = await api.get("payments/vnpay/callback", {
-          params: queryParams,
-        });
+      if (queryParams.vnp_TransactionStatus) {
+        try {
+          const response = await api.get("payments/vnpay/callback", {
+            params: queryParams,
+          });
 
-        if (response.data.status === "success") {
-          setPaymentStatus("success");
-          setShowConfetti(true); // Hiển thị hiệu ứng pháo hoa
-          message.destroy();
-          message.success("Thực hiện giao dịch thanh toán thành công!");
-        } else {
+          if (response.data.status === "success") {
+            setPaymentStatus("success");
+            setShowConfetti(true); // Hiển thị hiệu ứng pháo hoa
+            notification.destroy();
+            notification.success({
+              message: "Thực hiện giao dịch thanh toán thành công!",
+              duration: 3,
+            });
+          } else {
+            setPaymentStatus("fail");
+            notification.destroy();
+            notification.error({
+              message: "Thực hiện giao dịch thanh toán thất bại!",
+              duration: 3,
+            });
+            navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
+          }
+
+          // Sau khi xử lý xong, xóa query string khỏi URL
+          window.history.replaceState(null, "", "/order/result"); // Thay thế URL mà không có query string
+        } catch (error) {
+          console.log(error);
           setPaymentStatus("fail");
-          message.destroy();
-          message.error("Thực hiện giao dịch thanh toán thất bại!");
+          notification.destroy();
+          notification.error({
+            message: "Đã có lỗi xảy ra khi thực hiện giao dịch thanh toán!",
+            duration: 3,
+          });
           navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
         }
-        // Sau khi xử lý xong, xóa query string khỏi URL
-        window.history.replaceState(null, "", "/order/result"); // Thay thế URL mà không có query string
-      } catch (error) {
-        console.log(error);
-        setPaymentStatus("fail");
-        message.destroy();
-        message.error("Đã có lỗi xảy ra khi thực hiện giao dịch thanh toán!");
-        navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
+      } else if (orderId) {
+        // Nếu không phải VNPay mà là thanh toán COD (orderId có trong state)
+        setPaymentStatus("success");
+        setShowConfetti(true);
+        notification.destroy();
+        notification.success({
+          message: "Đơn hàng COD đã được đặt thành công!",
+          duration: 3,
+        });
       }
     };
 
     confirmPayment();
-  }, [location.search, navigate]);
+  }, [location.search, navigate, orderId]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white">
@@ -98,10 +124,14 @@ const Result = () => {
         </div>
 
         <Title level={2} className="text-rose-500">
-          Thực hiện giao dịch thanh toán thành công!
+          {paymentStatus === "success"
+            ? "Thực hiện giao dịch thanh toán thành công!"
+            : "Đã có lỗi xảy ra khi thanh toán!"}
         </Title>
         <Text className="text-black text-lg">
-          Cảm ơn bạn đã đặt hàng với chúng tôi.
+          {paymentStatus === "success"
+            ? "Cảm ơn bạn đã đặt hàng với chúng tôi."
+            : "Vui lòng thử lại."}
         </Text>
         <br />
         <br />
@@ -116,7 +146,12 @@ const Result = () => {
           </Button>
           <Button
             type="primary"
-            onClick={() => navigate("/order")}
+            onClick={() => {
+              const storedOrderId = localStorage.getItem("orderId");
+              navigate(`/order/${storedOrderId || orderId}`, {
+                state: { orderId: storedOrderId || orderId },
+              });
+            }}
             className="bg-rose-500 hover:bg-rose-600 font-semibold"
           >
             Xem đơn hàng {<RightOutlined />}

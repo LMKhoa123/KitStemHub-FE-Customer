@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-import { Radio, Select, Button, Steps, Divider, message, Checkbox } from "antd";
+import {
+  Radio,
+  Select,
+  Button,
+  Steps,
+  Divider,
+  message,
+  Checkbox,
+  notification,
+} from "antd";
 import {
   CreditCardOutlined,
   HomeOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../config/axios";
 
 const { Option } = Select;
@@ -21,6 +30,7 @@ const CheckOut = () => {
   const [useNewPhoneNumber, setUseNewPhoneNumber] = useState(false); // Kiểm tra có dùng số điện thoại mới không
   const [useNewAddress, setUseNewAddress] = useState(false); // Kiểm tra có dùng địa chỉ mới không
   const [newAddress, setNewAddress] = useState(""); // Địa chỉ mới
+  const [note, setNote] = useState(""); // Ghi chú
   const [profileData, setProfileData] = useState({}); // Dữ liệu từ profile API
   const location = useLocation();
   const { cartItems } = location.state || { cartItems: [] }; // Nhận cartItems từ state
@@ -28,6 +38,7 @@ const CheckOut = () => {
   const [usePoints, setUsePoints] = useState(false); // Xác định có sử dụng điểm không
   const [points, setPoints] = useState(0); // Số điểm của user, fetch từ API profile
   const [errors, setErrors] = useState({}); // Lưu trữ lỗi
+  const navigate = useNavigate();
 
   // Fetch dữ liệu profile (bao gồm điểm)
   const fetchUserProfile = async () => {
@@ -49,7 +60,7 @@ const CheckOut = () => {
   };
 
   useEffect(() => {
-    fetchUserProfile(); // Lấy thông tin profile khi component được render
+    fetchUserProfile();
   }, []);
 
   const subtotal = cartItems.reduce(
@@ -108,7 +119,7 @@ const CheckOut = () => {
           "is-use-point": usePoints,
           "shipping-address": shippingAddr,
           "phone-number": phoneNumber,
-          note: "Ghi chú của khách hàng",
+          note: note,
         },
       });
 
@@ -122,38 +133,77 @@ const CheckOut = () => {
       if (locationHeader) {
         const orderId = locationHeader.split("/").pop(); // Tách orderId từ URL trong header 'location'
         console.log("Order ID:", orderId);
-        // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
-        const paymentResponse = await api.post("/payments/vnpay", {
-          "order-id": orderId,
-        });
 
-        // Kiểm tra nếu API thanh toán trả về URL giao dịch thành công
-        if (
-          paymentResponse.data &&
-          paymentResponse.data.details &&
-          paymentResponse.data.details.data &&
-          paymentResponse.data.details.data.url
-        ) {
-          const paymentUrl = paymentResponse.data.details.data.url;
-          console.log("Payment URL:", paymentUrl);
+        if (paymentMethod === "bank") {
+          // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
+          const paymentResponse = await api.post("/payments/vnpay", {
+            "order-id": orderId,
+          });
 
-          // Chuyển hướng người dùng đến trang thanh toán
-          window.location.href = paymentUrl;
-        } else {
-          message.error(
-            "Không lấy được URL giao dịch thanh toán. Vui lòng thử lại."
-          );
+          // Kiểm tra nếu API thanh toán trả về URL giao dịch thành công
+          if (
+            paymentResponse.data &&
+            paymentResponse.data.details &&
+            paymentResponse.data.details.data &&
+            paymentResponse.data.details.data.url
+          ) {
+            const paymentUrl = paymentResponse.data.details.data.url;
+            console.log("Payment URL:", paymentUrl);
+
+            // Chuyển hướng người dùng đến trang thanh toán
+            window.location.href = paymentUrl;
+            notification.destroy();
+            notification.success({
+              message: "Đơn hàng đã được đặt thành công!",
+              duration: 3,
+            });
+            setCurrentStep(2);
+          } else {
+            notification.destroy();
+            notification.error({
+              message:
+                "Không lấy được URL giao dịch thanh toán. Vui lòng thử lại.",
+              duration: 3,
+            });
+          }
+        } else if (paymentMethod === "cash") {
+          // Nếu thanh toán bằng COD
+          const cashResponse = await api.post("payments/cash", {
+            "order-id": orderId,
+          });
+
+          if (cashResponse.data && cashResponse.data.status === "success") {
+            notification.destroy();
+            notification.success({
+              message: "Đơn hàng COD đã được đặt thành công!",
+              duration: 3,
+            });
+            // Chuyển hướng sang trang kết quả sau khi đặt hàng COD thành công
+            navigate("/order/result", { state: { orderId } });
+            setCurrentStep(2);
+          } else {
+            notification.destroy();
+            notification.error({
+              message: "Đặt hàng COD thất bại. Vui lòng thử lại!",
+              duration: 3,
+            });
+          }
         }
-        //
-        message.success("Đơn hàng đã được đặt thành công!");
-        setCurrentStep(2);
       } else {
         console.error("Không tìm thấy location trong response headers.");
-        message.error("Không tìm thấy Order ID. Vui lòng thử lại.");
+        notification.destroy();
+        notification.error({
+          message: "Không tìm thấy Order ID. Vui lòng thử lại!",
+          duration: 3,
+        });
       }
     } catch (error) {
       console.error("Error creating order:", error);
-      message.error("Đặt hàng thất bại, vui lòng thử lại!");
+      notification.destroy();
+      notification.error({
+        message: "Đặt hàng thất bại, vui lòng thử lại!",
+        duration: 3,
+      });
     }
   };
 
@@ -262,6 +312,16 @@ const CheckOut = () => {
               )}
             </Radio>
           </Radio.Group>
+
+          {/* Ghi chú */}
+          <h2 className="text-2xl font-semibold mb-6 text-gray-700">Ghi chú</h2>
+          <textarea
+            type="text"
+            placeholder="VD: Ghi chú đơn hàng"
+            className="w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
         </motion.div>
 
         <motion.div
