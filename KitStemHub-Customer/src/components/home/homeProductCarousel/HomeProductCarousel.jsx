@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useCallback } from "react";
-import { Spin, Card, Pagination, notification, Menu } from "antd";
+import { Spin, Card, Pagination, Menu } from "antd";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
 import { EyeOutlined, HeartOutlined } from "@ant-design/icons";
@@ -12,7 +12,7 @@ function HomeProductCarousel({ searchTerm }) {
   const [filteredData, setFilteredData] = useState([]); // Dữ liệu sau khi lọc
   const [loading, setLoading] = useState(true); // Trạng thái loading
   const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
-  const [totalPages, setTotalPages] = useState(0); // Tổng số trang
+  // const [totalPages, setTotalPages] = useState(0); // Tổng số trang
   const [pageSize] = useState(20); // Số lượng sản phẩm trên mỗi trang
   const [categories, setCategories] = useState([]); // Danh sách categories
   const [selectedCategory, setSelectedCategory] = useState(null); // Category được chọn
@@ -52,44 +52,41 @@ function HomeProductCarousel({ searchTerm }) {
         (kit) => kit.status === true
       );
       setDataSource(products);
-      filterProducts(products, selectedCategory);
+      filterProducts(products, selectedCategory, searchTerm);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu kit:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedCategory, searchTerm]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const filterProducts = (products, category) => {
+  const filterProducts = (products, category, search) => {
     let filtered = products;
     if (category) {
-      filtered = products.filter(
+      filtered = filtered.filter(
         (product) => product["kits-category"].name === category.name
       );
     }
+    if (search) {
+      filtered = filtered.filter((product) =>
+        product.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
     setFilteredData(filtered);
-    setTotalPages(Math.ceil(filtered.length / pageSize));
+    setCurrentPage(1);
   };
+
+  useEffect(() => {
+    filterProducts(dataSource, selectedCategory, searchTerm);
+  }, [searchTerm, dataSource, selectedCategory]);
 
   const handleProductClick = (kitId) => {
     navigate(`/productdetail/${kitId}`); // Điều hướng đúng đến URL
   };
-
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = dataSource.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredData(filtered);
-      setTotalPages(Math.ceil(filtered.length / pageSize));
-    } else {
-      filterProducts(dataSource, selectedCategory);
-    }
-  }, [searchTerm, dataSource, selectedCategory, pageSize]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -97,8 +94,7 @@ function HomeProductCarousel({ searchTerm }) {
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    setCurrentPage(1);
-    filterProducts(dataSource, category);
+    filterProducts(dataSource, category, searchTerm);
   };
 
   const paginatedData = filteredData.slice(
