@@ -1,19 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button, Form, Input } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Button, Form, Input, Modal } from "antd";
+import { useLocation, useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
 import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
+import EmailVerification from "../../EmailVerification";
 
 function LoginInput() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  ///
+  const [verificationEmail, setVerificationEmail] = useState("");
+  const location = useLocation();
+  const [isVerifying, setIsVerifying] = useState(false);
+  ///
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const email = urlParams.get("email");
+    const token = urlParams.get("token");
+
+    if (email && token) {
+      setIsVerifying(true);
+    }
+  }, [location]);
+  ///
+  useEffect(() => {
+    const urlParams = window.location.search.substring(1).split("&");
+    console.log(urlParams);
+    let email, token;
+
+    urlParams.forEach((param) => {
+      const [key, value] = param.split("=");
+      if (key === "email") email = decodeURIComponent(value);
+      if (key === "token") token = decodeURIComponent(value);
+    });
+
+    console.log("Email from URL:", email);
+    console.log("Token from URL:", token);
+
+    if (email && token) {
+      verifyEmail(email, token);
+    } else {
+      console.log("Email or token is missing from the URL");
+    }
+  }, []);
+
+  const verifyEmail = async (email, token) => {
+    if (!email || !token) {
+      console.log("Email or token is missing, cannot verify");
+      toast.error("Không thể xác thực email. Thiếu thông tin cần thiết.");
+      return;
+    }
+
+    try {
+      const response = await api.get(
+        `users/email/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`
+      );
+      console.log("Verification response:", response.data);
+      if (response.data.status === "success") {
+        toast.success("Xác thực email thành công!");
+      } else {
+        toast.error("Xác thực email thất bại. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi xác thực email:", error);
+      toast.error("Đã xảy ra lỗi trong quá trình xác thực email.");
+    }
+  };
 
   const handleLoginGoogle = async () => {
     setLoading(true);
@@ -88,10 +148,10 @@ function LoginInput() {
       );
 
       if (isSignUpMode) {
-        // Xử lý khi đăng ký
         if (response.data.status === "success") {
-          toast.success(response.data.details.message);
-          setIsSignUpMode(false);
+          //
+          setVerificationEmail(values.email);
+          setIsModalVisible(true);
         } else {
           const error = response.data.details?.errors || {};
           console.log(error);
@@ -159,6 +219,15 @@ function LoginInput() {
       setLoading(false);
     }
   };
+
+  const handleModalOk = () => {
+    setIsModalVisible(false);
+    setIsSignUpMode(false);
+  };
+
+  if (isVerifying) {
+    return <EmailVerification />;
+  }
 
   if (loading) {
     return <Loading />;
@@ -400,6 +469,24 @@ function LoginInput() {
           <img src="./register.svg" className={styles.image} alt="" />
         </div>
       </div>
+      {/* /// */}
+      <Modal
+        title="Email Verification Required"
+        visible={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalOk}
+        footer={[
+          <Button key="ok" type="primary" onClick={handleModalOk}>
+            OK
+          </Button>,
+        ]}
+      >
+        <p>
+          A verification email has been sent to {verificationEmail}. Please
+          check your inbox and click on the verification link to complete your
+          registration.
+        </p>
+      </Modal>
     </div>
   );
 }

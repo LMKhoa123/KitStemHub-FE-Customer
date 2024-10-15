@@ -22,9 +22,10 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [kitDetail, setKitDetail] = useState(null);
+  const [kitImage, setKitImage] = useState("");
   const [packageDetail, setPackageDetail] = useState(null);
   const [packages, setPackages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(0);
+  // const [selectedImage, setSelectedImage] = useState(0);
   const navigate = useNavigate();
 
   // Fetch dữ liệu khi component mount hoặc KitId thay đổi
@@ -34,32 +35,17 @@ const ProductDetail = () => {
     }
   }, [kitId]); // Chạy lại khi KitId thay đổi
 
-  // Hàm fetch chi tiết Kit từ API
-  // const fetchKitDetail = async () => {
-  //   setLoading(true); // Hiển thị loading trong khi fetch
-  //   try {
-  //     console.log(kitId);
-  //     const response = await api.get(`kits/${kitId}/packages`); // Gọi API với KitId
-  //     if (response.data && response.data.status === "success") {
-  //       // console.log(response.data);
-  //       const kitData = response.data.details.data.packages[0].kit; // Lấy dữ liệu kit từ package đầu tiên
-  //       setKitDetail(kitData); // Lưu chi tiết của kit vào state
-  //       setPackages(response.data.details.data.packages); // Lưu danh sách các package
-  //       setPackageDetail(response.data.details.data.packages[0]); // Mặc định chọn package đầu tiên
-  //     } else {
-  //       throw new Error("Unexpected response structure");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching kit details:", error);
-  //     message.error("Failed to fetch kit details");
-  //   } finally {
-  //     setLoading(false); // Tắt loading khi đã fetch xong
-  //   }
-  // };
   const fetchKitDetail = async () => {
     setLoading(true);
     try {
       console.log(kitId);
+      const responseData = await api.get(`kits/${kitId}`);
+      const firstImageUrl =
+        responseData.data.details.data.kit[0]["kit-images"][0].url;
+      setKitImage(firstImageUrl);
+      console.log(firstImageUrl);
+      // setKitImage(reponseData.data.details.data.kit[0].kit - images[0].url);
+      // console.log(responseData.data.details.data.kit[0].kit - images[0].url);
       const response = await api.get(`kits/${kitId}/packages`);
       console.log(response.data);
       if (response.data && response.data.status === "success") {
@@ -173,9 +159,9 @@ const ProductDetail = () => {
   // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
   const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
 
-  const handleThumbnailClick = (index) => {
-    setSelectedImage(index);
-  };
+  // const handleThumbnailClick = (index) => {
+  //   setSelectedImage(index);
+  // };
 
   return (
     <div className="container mx-auto px-4">
@@ -188,7 +174,8 @@ const ProductDetail = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2">
           <div className="flex gap-4">
-            <div className="w-1/5">
+            {/* dung xoa */}
+            {/* <div className="w-1/5">
               {images.map((image, index) => (
                 <img
                   key={index}
@@ -200,12 +187,12 @@ const ProductDetail = () => {
                   onClick={() => handleThumbnailClick(index)}
                 />
               ))}
-            </div>
-            <div className="w-4/5">
+            </div> */}
+            <div className="w-full">
               <TransformWrapper>
                 <TransformComponent>
                   <img
-                    src={images[selectedImage]}
+                    src={kitImage}
                     alt="Selected product"
                     className="w-full rounded-lg"
                   />
@@ -304,52 +291,69 @@ const ProductDetail = () => {
               />
             </Tooltip>
           </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <h3 className="font-semibold mb-2">Kit Description:</h3>
-            <p className="text-sm mb-2">{kitDetail.description}</p>
-          </div>
+          {/* Lab Exercises Section */}
+          {packageDetail && packageDetail["package-labs"] && (
+            <div className="mt-16 mb-12">
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <span className="bg-blue-600 text-white px-4 py-2 rounded-l-full flex items-center">
+                  <ExperimentOutlined className="mr-2" /> Lab Exercises
+                </span>
+                <span className="flex-grow border-t-2 border-blue-600 ml-4"></span>
+              </h2>
+              <List
+                itemLayout="horizontal"
+                dataSource={packageDetail["package-labs"]}
+                renderItem={(lab) => (
+                  <List.Item className="bg-white rounded-lg shadow-md p-6 mb-4  hover:shadow-lg transition-shadow duration-300 border border-gray-200">
+                    <List.Item.Meta
+                      className="ml-4"
+                      title={
+                        <span className="text-xl font-semibold text-blue-700">
+                          {lab.name}
+                        </span>
+                      }
+                      description={
+                        <div className="mt-2">
+                          <p className="text-gray-700 mb-3">
+                            <span className="font-medium">Author:</span>{" "}
+                            {lab.author}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-4">
+                            <Tag color="blue" className="px-3 py-1 text-sm">
+                              {lab.level.name}
+                            </Tag>
+                            <span className="text-sm text-gray-600">
+                              <span className="font-medium">Price:</span>{" "}
+                              {lab.price.toLocaleString("vi-VN")} ₫
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              <span className="font-medium">
+                                Max Support Times:
+                              </span>{" "}
+                              {lab["max-support-times"]}
+                            </span>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Lab Exercises Section */}
-      {packageDetail && packageDetail["package-labs"] && (
-        <div className="mt-16 mb-12">
-          <h2 className="text-2xl font-bold mb-6 flex items-center">
-            <span className="bg-blue-500 text-white px-4 py-2 rounded-l-full flex items-center">
-              <ExperimentOutlined className="mr-2" /> Lab Exercises
-            </span>
-            <span className="flex-grow border-t-2 border-blue-500 ml-4"></span>
-          </h2>
-          <List
-            itemLayout="horizontal"
-            dataSource={packageDetail["package-labs"]}
-            renderItem={(lab) => (
-              <List.Item className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow duration-300">
-                <List.Item.Meta
-                  title={
-                    <span className="text-lg font-semibold">{lab.name}</span>
-                  }
-                  description={
-                    <div>
-                      <p className="text-gray-600 mb-2">Author: {lab.author}</p>
-                      <div className="flex items-center gap-4">
-                        <Tag color="blue">{lab.level.name}</Tag>
-                        <span className="text-sm text-gray-500">
-                          Price: {lab.price.toLocaleString("vi-VN")} ₫
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          Max Support Times: {lab["max-support-times"]}
-                        </span>
-                      </div>
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
+      {/* Kit Description Section */}
+      <div className="border-t border-gray-200 pt-8 my-8">
+        <h3 className="text-2xl font-bold mb-4 text-blue-700">
+          Kit Description
+        </h3>
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-8 rounded-r-lg">
+          <p className="text-gray-700 leading-relaxed">
+            {kitDetail.description}
+          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
