@@ -10,7 +10,7 @@ import {
   Select,
   Spin,
 } from "antd";
-import { useNavigate, useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
+import { Link, useNavigate, useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
 import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
@@ -154,8 +154,9 @@ const ProductDetail = () => {
   return (
     <div className="container mx-auto px-4">
       <Breadcrumb className="py-4 text-sm">
-        <Breadcrumb.Item>Kits</Breadcrumb.Item>
-        <Breadcrumb.Item>{kitDetail["kits-category"].name}</Breadcrumb.Item>
+        <Breadcrumb.Item>
+          <Link to="/">Trang Chủ</Link>
+        </Breadcrumb.Item>
         <Breadcrumb.Item>{kitDetail.name}</Breadcrumb.Item>
       </Breadcrumb>
 
@@ -204,7 +205,7 @@ const ProductDetail = () => {
             </span>
           </div>
           <p className="text-2xl font-bold text-red-600 mb-4">
-            {kitDetail["purchase-cost"].toLocaleString("vi-VN")} ₫
+            {packageDetail.price.toLocaleString("vi-VN")} ₫
           </p>
           <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
 

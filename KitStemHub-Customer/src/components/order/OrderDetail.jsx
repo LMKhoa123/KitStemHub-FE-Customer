@@ -85,16 +85,16 @@ function OrderDetail() {
   let currentStep;
   switch (orderData["shipping-status"]) {
     case "CHỜ XÁC NHẬN":
-      currentStep = 0;
-      break;
-    case "ĐÃ XÁC NHẬN":
       currentStep = 1;
       break;
-    case "ĐANG GIAO HÀNG":
+    case "ĐÃ XÁC NHẬN":
       currentStep = 2;
       break;
-    case "GIAO HÀNG THÀNH CÔNG":
+    case "ĐANG GIAO HÀNG":
       currentStep = 3;
+      break;
+    case "GIAO HÀNG THÀNH CÔNG":
+      currentStep = 4;
       break;
     default:
       currentStep = 0; // Mặc định là bước đầu tiên nếu status không khớp
