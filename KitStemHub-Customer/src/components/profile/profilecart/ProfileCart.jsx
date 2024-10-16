@@ -1,31 +1,28 @@
 import { Layout } from "antd";
 import CartMyProfile from "./cartmyprofile/CartMyProfile";
-import { Content } from "antd/es/layout/layout";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
 
 function ProfileCart() {
   return (
-    <Layout className="h-screen">
-      <Content className="px-11">
+    <Layout className="min-h-screen">
+      <div className="px-11">
         {/* Nav profile */}
         <ProfileNav />
 
-        <Layout className="">
-          {/* side bar */}
+        {/* Flex container để sidebar và profile cùng một hàng */}
+        <div className="flex flex-row min-h-screen ml-28">
+          {/* Sidebar */}
+          <div className="w-1/4">
+            <ProfileSidebar />
+          </div>
 
-          <Content className="flex justify-center flex-wrap">
-            <div className="pr-1 max-w-xs">
-              <ProfileSidebar />
-            </div>
-
-            {/* form profile */}
-            <div className="pt-14">
-              <CartMyProfile />
-            </div>
-          </Content>
-        </Layout>
-      </Content>
+          {/* Nội dung chi tiết đơn hàng */}
+          <div className="w-3/4 mt-14">
+            <CartMyProfile />
+          </div>
+        </div>
+      </div>
     </Layout>
   );
 }

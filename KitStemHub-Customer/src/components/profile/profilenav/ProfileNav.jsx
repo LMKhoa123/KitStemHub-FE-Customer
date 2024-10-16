@@ -1,21 +1,12 @@
 import { Breadcrumb } from "antd";
-import { Content } from "antd/es/layout/layout";
 
 function ProfileNav() {
   return (
-    <div className="flex justify-between shrink p-14">
+    <div className="flex justify-between shrink p-14 pl-64">
       <Breadcrumb>
-        <Breadcrumb.Item>Home</Breadcrumb.Item>
-        <Breadcrumb.Item>My Account</Breadcrumb.Item>
+        <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
+        <Breadcrumb.Item>Quản lý tài khoản</Breadcrumb.Item>
       </Breadcrumb>
-      <div className="">
-        <Content>
-          Welcome!
-          <a href="#" className="text-red-500">
-            Md Rimel
-          </a>
-        </Content>
-      </div>
     </div>
   );
 }

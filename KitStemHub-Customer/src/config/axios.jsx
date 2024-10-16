@@ -51,9 +51,9 @@ api.interceptors.response.use(
         const currentRefreshToken = localStorage.getItem("refreshToken");
         console.log(currentRefreshToken);
         const response = await axios.post(
-          `http://54.66.193.22:5001/api/users/refreshtoken/${currentRefreshToken}`
+          // `http://54.66.193.22:5001/api/users/refreshtoken/${currentRefreshToken}`
 
-          // `https://54.66.193.22:5000/api/users/refreshtoken/${currentRefreshToken}`
+          `https://54.66.193.22:5000/api/users/refreshtoken/${currentRefreshToken}`
         );
         console.log("ggggg" + response.data);
         const { accessToken, refreshToken } = response.data.details;
