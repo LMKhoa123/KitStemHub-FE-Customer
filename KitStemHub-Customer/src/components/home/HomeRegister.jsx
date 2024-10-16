@@ -22,14 +22,14 @@ function HomeRegister() {
             Sản phẩm của chúng tôi
           </h3>
         </div>
-        <div className="flex mb-5 items-center flex justify-end">
+        {/* <div className="flex mb-5 items-center flex justify-end">
           <Search
             placeholder="Bạn đang tìm kiếm gì?"
             onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
             enterButton
             className="search-product w-1/5 "
           />
-        </div>
+        </div> */}
         <h1 className="font-semibold text-3xl mb-10">
           Khám phá sản phẩm của chúng tôi
         </h1>
