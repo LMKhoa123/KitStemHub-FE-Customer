@@ -28,46 +28,34 @@ const ProductDetail = () => {
   // const [selectedImage, setSelectedImage] = useState(0);
   const navigate = useNavigate();
 
-  // Fetch dữ liệu khi component mount hoặc KitId thay đổi
   useEffect(() => {
     if (kitId) {
       fetchKitDetail();
     }
-  }, [kitId]); // Chạy lại khi KitId thay đổi
+  }, [kitId]);
 
   const fetchKitDetail = async () => {
     setLoading(true);
     try {
-      console.log(kitId);
-      const responseData = await api.get(`kits/${kitId}`);
-      const firstImageUrl =
-        responseData.data.details.data.kit[0]["kit-images"][0].url;
-      setKitImage(firstImageUrl);
-      console.log(firstImageUrl);
-      // setKitImage(reponseData.data.details.data.kit[0].kit - images[0].url);
-      // console.log(responseData.data.details.data.kit[0].kit - images[0].url);
-      const response = await api.get(`kits/${kitId}/packages`);
-      console.log(response.data);
-      if (response.data && response.data.status === "success") {
-        const packageData = response.data.details.data.packages;
-        if (Array.isArray(packageData) && packageData.length > 0) {
-          const kitData = packageData[0].kit;
-          setKitDetail(kitData);
-          setPackages(packageData);
-          setPackageDetail(packageData[0]);
-        } else {
-          throw new Error("No package data available");
-        }
-      } else {
-        throw new Error("Unexpected response structure");
-      }
+      // Fetch kit details
+      const kitResponse = await api.get(`kits/${kitId}`);
+      const kitData = kitResponse.data.details.data.kit[0];
+      setKitDetail(kitData);
+      setKitImage(kitData["kit-images"][0].url);
+
+      // Fetch package and lab details
+      const packageResponse = await api.get(`kits/${kitId}/packages`);
+      const packageData = packageResponse.data.details.data.packages;
+      setPackages(packageData);
+      setPackageDetail(packageData[0]); // Set the first package as default
+
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching kit details:", error);
       message.error("Failed to fetch kit details: " + error.message);
       setKitDetail(null);
       setPackages([]);
       setPackageDetail(null);
-    } finally {
       setLoading(false);
     }
   };
@@ -167,15 +155,14 @@ const ProductDetail = () => {
     <div className="container mx-auto px-4">
       <Breadcrumb className="py-4 text-sm">
         <Breadcrumb.Item>Kits</Breadcrumb.Item>
-        <Breadcrumb.Item>{kitDetail["category"].name}</Breadcrumb.Item>
+        <Breadcrumb.Item>{kitDetail["kits-category"].name}</Breadcrumb.Item>
         <Breadcrumb.Item>{kitDetail.name}</Breadcrumb.Item>
       </Breadcrumb>
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2">
-          <div className="flex gap-4">
-            {/* dung xoa */}
-            {/* <div className="w-1/5">
+          {/* dung xoa */}
+          {/* <div className="w-1/5">
               {images.map((image, index) => (
                 <img
                   key={index}
@@ -188,18 +175,15 @@ const ProductDetail = () => {
                 />
               ))}
             </div> */}
-            <div className="w-full">
-              <TransformWrapper>
-                <TransformComponent>
-                  <img
-                    src={kitImage}
-                    alt="Selected product"
-                    className="w-full rounded-lg"
-                  />
-                </TransformComponent>
-              </TransformWrapper>
-            </div>
-          </div>
+          <TransformWrapper>
+            <TransformComponent>
+              <img
+                src={kitImage}
+                alt="Selected product"
+                className="w-full rounded-lg"
+              />
+            </TransformComponent>
+          </TransformWrapper>
         </div>
 
         <div className="md:w-1/2">
