@@ -159,7 +159,7 @@ function HomeProductCarousel({ searchTerm }) {
                           {item.name}
                         </div>
                         <div className="text-center text-gray-600">
-                          {item["purchase-cost"].toLocaleString()} VND
+                          {/* {item["purchase-cost"].toLocaleString()} VND */}
                         </div>
                       </div>
                       <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
