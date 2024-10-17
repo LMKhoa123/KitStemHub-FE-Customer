@@ -11,7 +11,7 @@ const items = [
         exact
         className={({ isActive }) => (isActive ? " font-bold " : "")}
       >
-        Home
+        Trang Chủ
       </NavLink>
     ),
     key: "home",
@@ -23,7 +23,7 @@ const items = [
         exact
         className={({ isActive }) => (isActive ? " font-bold " : "")}
       >
-        Contact Us
+        Liên Hệ
       </NavLink>
     ),
     key: "contact",
@@ -31,7 +31,7 @@ const items = [
   {
     label: (
       <NavLink to="/about" className="text-gray-800 hover:text-red-500">
-        About
+        Về Chúng Tôi
       </NavLink>
     ),
     key: "about",
@@ -43,7 +43,7 @@ const items = [
         exact
         className={({ isActive }) => (isActive ? " font-bold " : "")}
       >
-        Login
+        Đăng Nhập
       </NavLink>
     ),
     key: "login",
@@ -83,7 +83,7 @@ function Navbar({ childrenItem }) {
                     : "kt-menu-item"
                 }
               >
-                Home
+                Trang Chủ
               </NavLink>
             </li>
             <li className="">
@@ -96,7 +96,7 @@ function Navbar({ childrenItem }) {
                     : "kt-menu-item"
                 }
               >
-                Contact
+                Liên Hệ
               </NavLink>
             </li>
             <li className="">
@@ -122,7 +122,7 @@ function Navbar({ childrenItem }) {
                     : "kt-menu-item"
                 }
               >
-                Log In
+                Đăng Nhập
               </NavLink>
             </li>
           </ul>

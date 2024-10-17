@@ -10,7 +10,7 @@ import {
   Select,
   Spin,
 } from "antd";
-import { Link, useNavigate, useParams } from "react-router-dom"; // Import useParams để lấy KitId từ URL
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
@@ -18,14 +18,13 @@ import api from "../../config/axios";
 const { Option } = Select;
 
 const ProductDetail = () => {
-  const { kitId } = useParams(); // Lấy KitId từ URL
+  const { kitId } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [kitDetail, setKitDetail] = useState(null);
   const [kitImage, setKitImage] = useState("");
   const [packageDetail, setPackageDetail] = useState(null);
   const [packages, setPackages] = useState([]);
-  // const [selectedImage, setSelectedImage] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,22 +36,20 @@ const ProductDetail = () => {
   const fetchKitDetail = async () => {
     setLoading(true);
     try {
-      // Fetch kit details
       const kitResponse = await api.get(`kits/${kitId}`);
       const kitData = kitResponse.data.details.data.kit[0];
       setKitDetail(kitData);
       setKitImage(kitData["kit-images"][0].url);
 
-      // Fetch package and lab details
       const packageResponse = await api.get(`kits/${kitId}/packages`);
       const packageData = packageResponse.data.details.data.packages;
       setPackages(packageData);
-      setPackageDetail(packageData[0]); // Set the first package as default
+      setPackageDetail(packageData[0]);
 
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching kit details:", error);
-      message.error("Failed to fetch kit details: " + error.message);
+      console.error("Lỗi khi tải thông tin kit:", error);
+      message.error("Không thể tải thông tin kit: " + error.message);
       setKitDetail(null);
       setPackages([]);
       setPackageDetail(null);
@@ -79,12 +76,11 @@ const ProductDetail = () => {
     }
 
     if (!packageDetail) {
-      message.error("Please select a package before adding to cart");
+      message.error("Vui lòng chọn một gói trước khi thêm vào giỏ hàng");
       return;
     }
 
     try {
-      // Gọi API để thêm vào giỏ hàng
       const response = await api.post("carts", {
         "package-id": packageDetail.id,
         "package-quantity": quantity,
@@ -92,27 +88,25 @@ const ProductDetail = () => {
 
       if (response.data && response.data.status === "success") {
         message.success(`Đã thêm ${quantity} vào giỏ hàng`);
-        setQuantity(1); // Reset số lượng sau khi thêm vào giỏ hàng
+        setQuantity(1);
       } else {
         throw new Error("Không thể thêm vào giỏ hàng");
       }
     } catch (error) {
       if (error.response) {
-        // Trường hợp có response từ server nhưng có lỗi
         const status = error.response.status;
         console.error("Lỗi từ server:", error.response);
 
         if (status === 401) {
-          // Bắt lỗi 401 và điều hướng đến trang login
           console.error(
-            "Token đã hết hạn hoặc chưa đăng nhập, điều hướng về trang login"
+            "Token đã hết hạn hoặc chưa đăng nhập, điều hướng về trang đăng nhập"
           );
           localStorage.removeItem("token");
           message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
           localStorage.setItem("redirectAfterLogin", window.location.pathname);
           navigate("/login");
         } else if (status === 404) {
-          message.error("Không tìm thấy package này, vui lòng thử lại.");
+          message.error("Không tìm thấy gói này, vui lòng thử lại.");
         } else {
           // Nếu lỗi khác ngoài 401 và 404, hiển thị chi tiết lỗi
           const errorMessage =
@@ -141,7 +135,7 @@ const ProductDetail = () => {
   }
 
   if (!kitDetail) {
-    return <div>No kit details available</div>;
+    return <div>Không có thông tin chi tiết về kit</div>;
   }
 
   // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
@@ -180,7 +174,7 @@ const ProductDetail = () => {
             <TransformComponent>
               <img
                 src={kitImage}
-                alt="Selected product"
+                alt="Sản phẩm đã chọn"
                 className="w-full rounded-lg"
               />
             </TransformComponent>
@@ -201,19 +195,15 @@ const ProductDetail = () => {
                 kitDetail.status ? "text-green-500" : "text-red-500"
               }`}
             >
-              {kitDetail.status ? "In Stock" : "Out of Stock"}
+              {kitDetail.status ? "Còn hàng" : "Hết hàng"}
             </span>
           </div>
-          <p className="text-2xl font-bold text-red-600 mb-4">
-            {packageDetail.price.toLocaleString("vi-VN")} ₫
-          </p>
-          <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
 
           <div className="mb-6">
-            <h3 className="font-semibold mb-2">Select a Package:</h3>
+            <h3 className="font-semibold mb-2">Chọn gói:</h3>
             <Select
               style={{ width: "100%" }}
-              placeholder="Select a package"
+              placeholder="Chọn một gói"
               onChange={handlePackageSelect}
               defaultValue={packageDetail?.id}
             >
@@ -224,17 +214,17 @@ const ProductDetail = () => {
               ))}
             </Select>
           </div>
-
+          <p className="text-2xl font-bold text-red-600 mb-4">
+            {packageDetail.price.toLocaleString("vi-VN")} ₫
+          </p>
+          <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
           {packageDetail && (
             <div className="border-t border-gray-200 pt-4">
-              <h3 className="font-semibold mb-2">Selected Package Details:</h3>
-              <p className="text-sm mb-2">Name: {packageDetail.name}</p>
-              <p className="text-sm mb-2">Level: {packageDetail.level.name}</p>
-              <p className="text-sm mb-2">
-                Price: {packageDetail.price.toLocaleString("vi-VN")} ₫
-              </p>
+              <h3 className="font-semibold mb-2">Chi tiết gói đã chọn:</h3>
+              <p className="text-sm mb-2">Tên: {packageDetail.name}</p>
+              <p className="text-sm mb-2">Cấp độ: {packageDetail.level.name}</p>
               <p className="text-sm">
-                Status: {packageDetail.status ? "Available" : "Unavailable"}
+                Trạng thái: {packageDetail.status ? "Có sẵn" : "Không có sẵn"}
               </p>
             </div>
           )}
@@ -266,9 +256,9 @@ const ProductDetail = () => {
               className="bg-red-500 hover:bg-red-600 border-none"
               onClick={handleAddToCart}
             >
-              Add To Cart
+              Thêm vào giỏ hàng
             </Button>
-            <Tooltip title="Add to Wishlist">
+            <Tooltip title="Thêm vào danh sách yêu thích">
               <Button
                 icon={<HeartOutlined />}
                 size="large"
@@ -281,7 +271,7 @@ const ProductDetail = () => {
             <div className="mt-16 mb-12">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
                 <span className="bg-blue-600 text-white px-4 py-2 rounded-l-full flex items-center">
-                  <ExperimentOutlined className="mr-2" /> Lab Exercises
+                  <ExperimentOutlined className="mr-2" /> Bài thực hành
                 </span>
                 <span className="flex-grow border-t-2 border-blue-600 ml-4"></span>
               </h2>
@@ -289,7 +279,7 @@ const ProductDetail = () => {
                 itemLayout="horizontal"
                 dataSource={packageDetail["package-labs"]}
                 renderItem={(lab) => (
-                  <List.Item className="bg-white rounded-lg shadow-md p-6 mb-4  hover:shadow-lg transition-shadow duration-300 border border-gray-200">
+                  <List.Item className="bg-white rounded-lg shadow-md p-6 mb-4 hover:shadow-lg transition-shadow duration-300 border border-gray-200">
                     <List.Item.Meta
                       className="ml-4"
                       title={
@@ -300,7 +290,7 @@ const ProductDetail = () => {
                       description={
                         <div className="mt-2">
                           <p className="text-gray-700 mb-3">
-                            <span className="font-medium">Author:</span>{" "}
+                            <span className="font-medium">Tác giả:</span>{" "}
                             {lab.author}
                           </p>
                           <div className="flex flex-wrap items-center gap-4">
@@ -308,12 +298,12 @@ const ProductDetail = () => {
                               {lab.level.name}
                             </Tag>
                             <span className="text-sm text-gray-600">
-                              <span className="font-medium">Price:</span>{" "}
+                              <span className="font-medium">Giá:</span>{" "}
                               {lab.price.toLocaleString("vi-VN")} ₫
                             </span>
                             <span className="text-sm text-gray-600">
                               <span className="font-medium">
-                                Max Support Times:
+                                Số lần hỗ trợ tối đa:
                               </span>{" "}
                               {lab["max-support-times"]}
                             </span>
@@ -330,9 +320,7 @@ const ProductDetail = () => {
       </div>
       {/* Kit Description Section */}
       <div className="border-t border-gray-200 pt-8 my-8">
-        <h3 className="text-2xl font-bold mb-4 text-blue-700">
-          Kit Description
-        </h3>
+        <h3 className="text-2xl font-bold mb-4 text-blue-700">Mô tả Kit</h3>
         <div className="bg-blue-50 border-l-4 border-blue-500 p-8 rounded-r-lg">
           <p className="text-gray-700 leading-relaxed">
             {kitDetail.description}

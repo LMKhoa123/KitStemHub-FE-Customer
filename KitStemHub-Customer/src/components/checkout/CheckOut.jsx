@@ -55,7 +55,7 @@ const CheckOut = () => {
       setShippingAddress(userProfile.address || ""); // Đảm bảo địa chỉ không undefined
       setSelectedPhoneNumber(userProfile["phone-number"] || ""); // Đảm bảo số điện thoại không undefined
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("Lỗi khi tải thông tin người dùng:", error);
     }
   };
 
@@ -98,6 +98,7 @@ const CheckOut = () => {
       setErrors((prevErrors) => ({ ...prevErrors, phone: "" }));
     }
   };
+
   const handlePlaceOrder = async () => {
     if (!handleValidation()) {
       message.error("Vui lòng điền đầy đủ thông tin");
@@ -123,8 +124,7 @@ const CheckOut = () => {
         },
       });
 
-      // Log tất cả headers để kiểm tra
-      console.log("Response Headers:", response.headers);
+      console.log("Thông tin phản hồi:", response.headers);
 
       // Kiểm tra headers (chữ thường và chữ hoa)
       const locationHeader =
@@ -132,7 +132,7 @@ const CheckOut = () => {
       console.log(locationHeader);
       if (locationHeader) {
         const orderId = locationHeader.split("/").pop(); // Tách orderId từ URL trong header 'location'
-        console.log("Order ID:", orderId);
+        console.log("Mã đơn hàng:", orderId);
 
         if (paymentMethod === "bank") {
           // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
@@ -148,7 +148,7 @@ const CheckOut = () => {
             paymentResponse.data.details.data.url
           ) {
             const paymentUrl = paymentResponse.data.details.data.url;
-            console.log("Payment URL:", paymentUrl);
+            console.log("URL thanh toán:", paymentUrl);
 
             // Chuyển hướng người dùng đến trang thanh toán
             window.location.href = paymentUrl;
@@ -193,12 +193,12 @@ const CheckOut = () => {
         console.error("Không tìm thấy location trong response headers.");
         notification.destroy();
         notification.error({
-          message: "Không tìm thấy Order ID. Vui lòng thử lại!",
+          message: "Không tìm thấy Mã đơn hàng. Vui lòng thử lại!",
           duration: 3,
         });
       }
     } catch (error) {
-      console.error("Error creating order:", error);
+      console.error("Lỗi khi tạo đơn hàng:", error);
       notification.destroy();
       notification.error({
         message: "Đặt hàng thất bại, vui lòng thử lại!",
@@ -220,7 +220,9 @@ const CheckOut = () => {
         <Step title="Xác nhận" icon={<CheckCircleOutlined />} />
       </Steps>
 
-      <h1 className="text-4xl font-bold mb-8 text-gray-800">Billing Details</h1>
+      <h1 className="text-4xl font-bold mb-8 text-gray-800">
+        Chi tiết thanh toán
+      </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <motion.div
@@ -230,7 +232,7 @@ const CheckOut = () => {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-            Shipping details
+            Thông tin giao hàng
           </h2>
           {/* Địa chỉ giao hàng */}
           <Radio.Group
@@ -272,7 +274,7 @@ const CheckOut = () => {
 
           {/* Số điện thoại */}
           <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-            Phone Number
+            Số điện thoại
           </h2>
           <Radio.Group
             className="space-y-2"
@@ -331,7 +333,7 @@ const CheckOut = () => {
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-            Order Summary
+            Tóm tắt đơn hàng
           </h2>
           {cartItems.map((item) => (
             <div
@@ -349,11 +351,9 @@ const CheckOut = () => {
                     {item.product}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Quantity: {item.quantity}
+                    Số lượng: {item.quantity}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Package: {item.package}
-                  </p>
+                  <p className="text-sm text-gray-500">Gói: {item.package}</p>
                 </div>
               </div>
               <span className="font-bold text-lg text-primary">
@@ -366,12 +366,12 @@ const CheckOut = () => {
 
           <div className="space-y-2">
             <div className="flex justify-between text-gray-600">
-              <span>Subtotal:</span>
+              <span>Tổng phụ:</span>
               <span>{subtotal.toLocaleString("vi-VN")} VND</span>
             </div>
             <div className="flex justify-between text-gray-600">
-              <span>Shipping:</span>
-              <span>Free</span>
+              <span>Phí vận chuyển:</span>
+              <span>Miễn phí</span>
             </div>
             {/* Sử dụng điểm tích lũy */}
             <div className="flex justify-between items-center text-gray-600">
@@ -379,12 +379,12 @@ const CheckOut = () => {
                 checked={usePoints}
                 onChange={() => setUsePoints(!usePoints)}
               >
-                Use Points ({points} points available)
+                Sử dụng điểm ({points} điểm khả dụng)
               </Checkbox>
               <span>-{pointsToMoney.toLocaleString("vi-VN")} VND</span>
             </div>
             <div className="flex justify-between font-bold text-lg text-gray-800">
-              <span>Total:</span>
+              <span>Tổng cộng:</span>
               <span>{total.toLocaleString("vi-VN")} VND</span>
             </div>
           </div>
@@ -392,7 +392,7 @@ const CheckOut = () => {
           <Divider />
 
           <h3 className="text-xl font-semibold mb-4 text-gray-700">
-            Payment Method
+            Phương thức thanh toán
           </h3>
           <Radio.Group
             className="space-y-2"
@@ -403,7 +403,7 @@ const CheckOut = () => {
               <img src="vnpayImage.svg" alt="" className="w-16 h-16" />
             </Radio>
             <Radio value="cash" className="block">
-              Cash on delivery
+              Thanh toán khi nhận hàng
             </Radio>
           </Radio.Group>
 
@@ -414,7 +414,7 @@ const CheckOut = () => {
             className="w-full mt-8 h-12 text-lg font-semibold"
             onClick={handlePlaceOrder}
           >
-            Place Order
+            Đặt hàng
           </Button>
         </motion.div>
       </div>

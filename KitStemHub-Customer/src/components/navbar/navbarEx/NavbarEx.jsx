@@ -12,13 +12,13 @@ function NavbarEx({ childrenItem }) {
           </div>
           <ul className=" basis-2/5 flex items-center justify-between text-md font-normal text-gray-400">
             <li className="kt-menu-item">
-              <NavLink to="/home">Home</NavLink>
+              <NavLink to="/home">Trang Chủ</NavLink>
             </li>
             <li className="kt-menu-item">
-              <NavLink to="/contact">Contact</NavLink>
+              <NavLink to="/contact">Liên Hệ</NavLink>
             </li>
             <li className="kt-menu-item">
-              <NavLink to="about">About</NavLink>
+              <NavLink to="about">About Us</NavLink>
             </li>
           </ul>
 
