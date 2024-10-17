@@ -16,11 +16,10 @@ function LoginInput() {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  ///
   const [verificationEmail, setVerificationEmail] = useState("");
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(false);
-  ///
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const email = urlParams.get("email");
@@ -30,7 +29,7 @@ function LoginInput() {
       setIsVerifying(true);
     }
   }, [location]);
-  ///
+
   useEffect(() => {
     const urlParams = window.location.search.substring(1).split("&");
     console.log(urlParams);
@@ -42,19 +41,19 @@ function LoginInput() {
       if (key === "token") token = decodeURIComponent(value);
     });
 
-    console.log("Email from URL:", email);
-    console.log("Token from URL:", token);
+    // console.log("Email từ URL:", email);
+    // console.log("Token từ URL:", token);
 
     if (email && token) {
       verifyEmail(email, token);
     } else {
-      console.log("Email or token is missing from the URL");
+      // console.log("Email hoặc token không có trong URL");
     }
   }, []);
 
   const verifyEmail = async (email, token) => {
     if (!email || !token) {
-      console.log("Email or token is missing, cannot verify");
+      // console.log("Thiếu email hoặc token, không thể xác thực");
       toast.error("Không thể xác thực email. Thiếu thông tin cần thiết.");
       return;
     }
@@ -63,7 +62,7 @@ function LoginInput() {
       const response = await api.get(
         `users/email/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`
       );
-      console.log("Verification response:", response.data);
+      // console.log("Phản hồi xác thực:", response.data);
       if (response.data.status === "success") {
         toast.success("Xác thực email thành công!");
       } else {
@@ -149,7 +148,6 @@ function LoginInput() {
 
       if (isSignUpMode) {
         if (response.data.status === "success") {
-          //
           setVerificationEmail(values.email);
           setIsModalVisible(true);
         } else {
@@ -256,14 +254,14 @@ function LoginInput() {
             onFinish={handleOnFinish}
             autoComplete="true"
           >
-            <h2 className={styles.title}>Sign in</h2>
+            <h2 className={styles.title}>Đăng nhập</h2>
             <Form.Item
               label="Email"
               name="email"
               rules={[
                 {
                   required: true,
-                  message: "Please input your email!",
+                  message: "Vui lòng nhập email của bạn!",
                 },
               ]}
             >
@@ -274,16 +272,16 @@ function LoginInput() {
             </Form.Item>
             <Form.Item
               name="password"
-              label="Password"
+              label="Mật khẩu"
               rules={[
                 {
                   required: true,
-                  message: "Please input your password!",
+                  message: "Vui lòng nhập mật khẩu của bạn!",
                 },
               ]}
             >
               <Input.Password
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 prefix={<i className="fas fa-lock"></i>}
               />
             </Form.Item>
@@ -292,10 +290,10 @@ function LoginInput() {
               htmlType="submit"
               className={`${styles.btn} ${styles.solid}`}
             >
-              Login
+              Đăng nhập
             </Button>
             <p className={styles.socialText}>
-              Or Sign in with social platforms
+              Hoặc đăng nhập bằng các nền tảng xã hội
             </p>
             <div className="mt-4 flex flex-col lg:flex-row items-center justify-between w-full">
               <div className="w-full  mb-2 lg:mb-0">
@@ -327,7 +325,7 @@ function LoginInput() {
                       d="m419.404 58.936-82.933 67.896C313.136 112.246 285.552 103.82 256 103.82c-66.729 0-123.429 42.957-143.965 102.724l-83.397-68.276h-.014C71.23 56.123 157.06 0 256 0c62.115 0 119.068 22.126 163.404 58.936z"
                     />
                   </svg>{" "}
-                  Sign Up with Google
+                  Đăng nhập bằng Google
                 </button>
               </div>
             </div>
@@ -350,7 +348,7 @@ function LoginInput() {
             }}
             autoComplete="true"
           >
-            <h2 className={styles.title}>Sign up</h2>
+            <h2 className={styles.title}>Đăng ký</h2>
 
             <Form.Item
               label="Email"
@@ -358,7 +356,7 @@ function LoginInput() {
               rules={[
                 {
                   required: true,
-                  message: "Please input your email!",
+                  message: "Vui lòng nhập email của bạn!",
                 },
               ]}
             >
@@ -368,17 +366,17 @@ function LoginInput() {
               />
             </Form.Item>
             <Form.Item
-              label="Password"
+              label="Mật khẩu"
               name="password"
               rules={[
                 {
                   required: true,
-                  message: "Please input your password!",
+                  message: "Vui lòng nhập mật khẩu của bạn!",
                 },
               ]}
             >
               <Input.Password
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 prefix={<i className="fas fa-lock"></i>}
               />
             </Form.Item>
@@ -392,11 +390,11 @@ function LoginInput() {
                 htmlType="submit"
                 className={`${styles.btnBlue} ${styles.transparent} `}
               >
-                Create account
+                Tạo tài khoản
               </Button>
             </Form.Item>
             <p className={styles.socialText}>
-              Or Sign up with social platforms
+              Hoặc đăng ký bằng các nền tảng xã hội
             </p>
             <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
               <div className="w-full mb-2 lg:mb-0">
@@ -428,7 +426,7 @@ function LoginInput() {
                       d="m419.404 58.936-82.933 67.896C313.136 112.246 285.552 103.82 256 103.82c-66.729 0-123.429 42.957-143.965 102.724l-83.397-68.276h-.014C71.23 56.123 157.06 0 256 0c62.115 0 119.068 22.126 163.404 58.936z"
                     />
                   </svg>
-                  Sign In with Google
+                  Đăng ký bằng Google
                 </button>
               </div>
             </div>
@@ -438,10 +436,11 @@ function LoginInput() {
       <div className={styles.panelsContainer}>
         <div className={`${styles.panel} ${styles.leftPanel}`}>
           <div className={styles.content}>
-            <h3>New here?</h3>
+            <h3>Bạn là người mới?</h3>
             <p>
-              Let&apos;s create an account to join our community and get access
-              to exclusive content.
+              Hãy đăng ký tài khoản ngay để trở thành thành viên của cộng đồng
+              chúng tôi và khám phá những nội dung độc quyền, ưu đãi hấp dẫn
+              dành riêng cho bạn.
             </p>
 
             <Button
@@ -450,28 +449,30 @@ function LoginInput() {
               className={`${styles.btn} ${styles.transparent}`}
               onClick={() => setIsSignUpMode(true)}
             >
-              Sign up
+              Đăng ký
             </Button>
           </div>
           <img src="./log.svg" className={styles.image} alt="" />
         </div>
         <div className={`${styles.panel} ${styles.rightPanel}`}>
           <div className={styles.content}>
-            <h3>One of us?</h3>
-            <p>Welcome back! Log in to pick up where you left off.</p>
+            <h3>Đã có tài khoản?</h3>
+            <p>
+              Chào mừng bạn quay trở lại! Hãy đăng nhập để tiếp tục hành trình
+              của bạn ngay từ nơi đã dừng lại.
+            </p>
             <Button
               className={`${styles.btn} ${styles.transparent}`}
               onClick={() => setIsSignUpMode(false)}
             >
-              Sign in
+              Đăng nhập
             </Button>
           </div>
           <img src="./register.svg" className={styles.image} alt="" />
         </div>
       </div>
-      {/* /// */}
       <Modal
-        title="Email Verification Required"
+        title="Yêu cầu xác thực email"
         visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalOk}
@@ -482,9 +483,9 @@ function LoginInput() {
         ]}
       >
         <p>
-          A verification email has been sent to {verificationEmail}. Please
-          check your inbox and click on the verification link to complete your
-          registration.
+          Một email xác thực đã được gửi đến {verificationEmail}. Vui lòng kiểm
+          tra hộp thư đến và nhấp vào liên kết xác thực để hoàn tất đăng ký của
+          bạn.
         </p>
       </Modal>
     </div>
