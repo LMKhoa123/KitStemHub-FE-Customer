@@ -16,63 +16,63 @@ function Footer() {
         </div>
 
         <div className="support text-center md:text-left">
-          <h2 className="text-lg font-semibold mb-2">Support</h2>
+          <h2 className="text-lg font-semibold mb-2">Hỗ trợ</h2>
           <p>111 Bijoy Sarani, Dhaka, DH 1515, Bangladesh.</p>
           <p>exclusive@gmail.com</p>
           <p>+88015-88888-9999</p>
         </div>
 
         <div className="account text-center md:text-left">
-          <h2 className="text-lg font-semibold mb-2">Account</h2>
+          <h2 className="text-lg font-semibold mb-2">Tài khoản</h2>
           <Link
             to="/profile/profileinfo"
             className="block hover:text-pretty mb-1 kt-footer-item "
           >
-            My Account
+            Tài khoản của tôi
           </Link>
 
           <a
             href="#cart"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            Cart
+            Giỏ hàng
           </a>
           <a
             href="#wishlist"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            WishList
+            Danh sách yêu thích
           </a>
           <Link
             to="/home/user"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            Shop
+            Cửa hàng
           </Link>
         </div>
 
         <div className="quickLink text-center md:text-left">
-          <h2 className="text-lg font-semibold mb-2">Quick Links</h2>
+          <h2 className="text-lg font-semibold mb-2">Liên kết nhanh</h2>
           <a
             href="#privacy-policy"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            Privacy Policy
+            Chính sách bảo mật
           </a>
           <a
             href="#terms-of-use"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            Terms Of Use
+            Điều khoản sử dụng
           </a>
           <a
             href="#faq"
             className="block hover:text-pretty mb-1 kt-footer-item"
           >
-            FAQ
+            Câu hỏi thường gặp
           </a>
           <a href="#contact" className="block hover:text-pretty mb-4">
-            Contact
+            Liên hệ
           </a>
 
           <div className="flex justify-center md:justify-start space-x-4">

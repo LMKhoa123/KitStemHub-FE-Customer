@@ -1,22 +1,34 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useCallback } from "react";
-import { Spin, Card, Pagination, Menu } from "antd";
+import {
+  Spin,
+  Card,
+  Pagination,
+  Menu,
+  Slider,
+  Button,
+  Input,
+  Dropdown,
+  Space,
+} from "antd";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
-import { EyeOutlined, HeartOutlined } from "@ant-design/icons";
+import { EyeOutlined, HeartOutlined, DownOutlined } from "@ant-design/icons";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-function HomeProductCarousel({ searchTerm }) {
-  const [dataSource, setDataSource] = useState([]); // Dữ liệu sản phẩm
-  const [filteredData, setFilteredData] = useState([]); // Dữ liệu sau khi lọc
-  const [loading, setLoading] = useState(true); // Trạng thái loading
-  const [currentPage, setCurrentPage] = useState(1); // Trạng thái trang hiện tại
-  // const [totalPages, setTotalPages] = useState(0); // Tổng số trang
-  const [pageSize] = useState(20); // Số lượng sản phẩm trên mỗi trang
-  const [categories, setCategories] = useState([]); // Danh sách categories
-  const [selectedCategory, setSelectedCategory] = useState(null); // Category được chọn
-  const navigate = useNavigate(); // Khởi tạo navigate để điều hướng
+function HomeProductCarousel({ initialSearchTerm }) {
+  const [dataSource, setDataSource] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [priceRange, setPriceRange] = useState([0, 5000000]);
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "");
+  const navigate = useNavigate();
+  const [priceFilter, setPriceFilter] = useState("all");
+  const [customPriceRange, setCustomPriceRange] = useState([0, 5000000]);
 
   useEffect(() => {
     AOS.init({
@@ -26,7 +38,6 @@ function HomeProductCarousel({ searchTerm }) {
     });
   }, []);
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -44,162 +55,238 @@ function HomeProductCarousel({ searchTerm }) {
     try {
       const response = await api.get("kits", {
         params: {
-          page: 0,
-          pageSize: 1000, // Lấy tất cả kit để có thể lọc ở phía client
+          page: currentPage,
+          "kit-name": searchTerm,
+          "category-name": selectedCategory ? selectedCategory.name : "",
+          "from-price": priceRange[0],
+          "to-price": priceRange[1],
         },
       });
-      const products = response.data.details.data.kits.filter(
-        (kit) => kit.status === true
-      );
-      setDataSource(products);
-      filterProducts(products, selectedCategory, searchTerm);
+      const {
+        kits,
+        "total-pages": totalPages,
+        "current-page": currentPageFromApi,
+      } = response.data.details.data;
+      setDataSource(kits);
+      setTotalPages(totalPages);
+      setCurrentPage(currentPageFromApi - 1);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu kit:", error);
+      setDataSource([]);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, searchTerm]);
+  }, [currentPage, searchTerm, selectedCategory, priceRange]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const filterProducts = (products, category, search) => {
-    let filtered = products;
-    if (category) {
-      filtered = filtered.filter(
-        (product) => product["kits-category"].name === category.name
-      );
-    }
-    if (search) {
-      filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-    setFilteredData(filtered);
-    setCurrentPage(1);
-  };
-
-  useEffect(() => {
-    filterProducts(dataSource, selectedCategory, searchTerm);
-  }, [searchTerm, dataSource, selectedCategory]);
-
   const handleProductClick = (kitId) => {
-    navigate(`/productdetail/${kitId}`); // Điều hướng đúng đến URL
+    navigate(`/productdetail/${kitId}`);
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setCurrentPage(page - 1);
   };
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
-    filterProducts(dataSource, category, searchTerm);
+    setCurrentPage(0);
+    fetchProducts();
   };
 
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
+  const handlePriceChange = (value) => {
+    setPriceRange(value);
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setCurrentPage(0);
+    fetchProducts();
+  };
+
+  const handleApplyFilter = () => {
+    setCurrentPage(0);
+    fetchProducts();
+  };
+
+  const handlePriceFilterChange = (value) => {
+    setPriceFilter(value);
+    if (value === "custom") {
+      setPriceRange(customPriceRange);
+    } else if (value === "all") {
+      setPriceRange([0, 5000000]);
+    } else {
+      const [min, max] = value.split("-").map(Number);
+      setPriceRange([min, max]);
+    }
+    setCurrentPage(0);
+    fetchProducts();
+  };
+
+  const handleCustomPriceChange = (value) => {
+    setCustomPriceRange(value);
+    if (priceFilter === "custom") {
+      setPriceRange(value);
+      setCurrentPage(0);
+      fetchProducts();
+    }
+  };
+
+  const priceFilterMenu = (
+    <Menu onClick={({ key }) => handlePriceFilterChange(key)}>
+      <Menu.Item key="all">Tất cả giá</Menu.Item>
+      <Menu.Item key="0-100000">0 - 100,000 VND</Menu.Item>
+      <Menu.Item key="100000-500000">100,000 - 500,000 VND</Menu.Item>
+      <Menu.Item key="500000-1000000">500,000 - 1,000,000 VND</Menu.Item>
+      <Menu.Item key="1000000-2000000">1,000,000 - 2,000,000 VND</Menu.Item>
+      <Menu.Item key="2000000-5000000">2,000,000 - 5,000,000 VND</Menu.Item>
+      <Menu.Item key="custom">Tùy chỉnh</Menu.Item>
+    </Menu>
   );
 
   return (
-    <div className="flex">
-      <div className="w-60 pr-4 mr-28">
-        <h2 className="text-xl font-bold mb-4">Categories</h2>
-        <Menu mode="vertical">
-          <Menu.Item key="all" onClick={() => handleCategoryClick(null)}>
-            All Kits
-          </Menu.Item>
-          {categories.map((category) => (
-            <Menu.Item
-              key={category.id}
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category.name}
-            </Menu.Item>
-          ))}
-        </Menu>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <Space direction="vertical" className="w-full md:w-auto">
+          <Dropdown overlay={priceFilterMenu}>
+            <Button className="w-full md:w-auto">
+              Lọc theo giá <DownOutlined />
+            </Button>
+          </Dropdown>
+          {priceFilter === "custom" && (
+            <Slider
+              range
+              min={0}
+              max={5000000}
+              step={10000}
+              value={customPriceRange}
+              onChange={handleCustomPriceChange}
+              className="w-full md:w-64"
+            />
+          )}
+          <span className="text-sm text-gray-600">
+            {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()}{" "}
+            VND
+          </span>
+        </Space>
+        <Input.Search
+          placeholder="Tìm kiếm sản phẩm"
+          onSearch={handleSearch}
+          className="w-full md:w-64"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
-      <div className="w-3/4">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Spin size="large" />
-          </div>
-        ) : (
-          <div className="flex flex-col items-center">
-            <h2 className="text-2xl font-bold mb-5">
-              {selectedCategory ? `${selectedCategory.name} Kits` : "All Kits"}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 lg:gap-10 w-full">
-              {paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => (
-                  <div
-                    key={index}
-                    data-aos="fade-up"
-                    data-aos-delay={index * 100}
-                    data-aos-anchor-placement="top-bottom"
-                  >
-                    <Card
-                      className="shadow-md hover:shadow-xl cursor-pointer transform transition-all duration-300 hover:scale-105 relative group rounded-xl overflow-hidden"
-                      onClick={() => handleProductClick(item.id)}
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-64">
+          <h2 className="text-xl font-bold mb-4">Danh mục</h2>
+          <Menu mode="vertical" className="bg-gray-50 rounded-lg">
+            <Menu.Item key="all" onClick={() => handleCategoryClick(null)}>
+              Tất cả sản phẩm
+            </Menu.Item>
+            {categories.map((category) => (
+              <Menu.Item
+                key={category.id}
+                onClick={() => handleCategoryClick(category)}
+              >
+                {category.name}
+              </Menu.Item>
+            ))}
+          </Menu>
+        </div>
+        <div className="flex-1">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center">
+              <h2 className="text-2xl font-bold mb-6">
+                {selectedCategory
+                  ? `${selectedCategory.name}`
+                  : "Tất cả sản phẩm"}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {dataSource.length > 0 ? (
+                  dataSource.map((item, index) => (
+                    <div
+                      key={item.id}
+                      data-aos="fade-up"
+                      data-aos-delay={index * 100}
+                      data-aos-anchor-placement="top-bottom"
                     >
-                      <img
-                        className="object-cover w-full h-48 lazy"
-                        src={
-                          item["kit-images"]?.[0]?.url || "default-image-url"
+                      <Card
+                        hoverable
+                        className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                        cover={
+                          <img
+                            alt={item.name || "Hình ảnh sản phẩm"}
+                            src={
+                              item["kit-images"]?.[0]?.url ||
+                              "default-image-url"
+                            }
+                            className="h-48 object-cover"
+                          />
                         }
-                        alt={item.name || "Hình ảnh sản phẩm"}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.src = "default-image-url";
-                        }}
-                      />
-                      <div className="p-4">
-                        <div className="text-center font-semibold mb-2 truncate">
-                          {item.name}
+                        onClick={() => handleProductClick(item.id)}
+                      >
+                        <Card.Meta
+                          title={
+                            <div className="text-center font-semibold truncate">
+                              {item.name}
+                            </div>
+                          }
+                          description={
+                            <div className="text-center text-gray-600">
+                              {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()}`}{" "}
+                              VND
+                            </div>
+                          }
+                        />
+                        <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Button
+                            shape="circle"
+                            icon={<HeartOutlined />}
+                            className="bg-white/80 hover:bg-red-500 hover:text-white transition-colors duration-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Đã nhấn vào biểu tượng tim");
+                            }}
+                          />
+                          <Button
+                            shape="circle"
+                            icon={<EyeOutlined />}
+                            className="bg-white/80 hover:bg-blue-500 hover:text-white transition-colors duration-300"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Đã nhấn vào biểu tượng mắt");
+                            }}
+                          />
                         </div>
-                        <div className="text-center text-gray-600">
-                          {/* {item["purchase-cost"].toLocaleString()} VND */}
-                        </div>
-                      </div>
-                      <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                        <div
-                          className="p-2 transition-all duration-300 ease-in-out bg-black/50 hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Đã nhấn vào biểu tượng tim");
-                          }}
-                        >
-                          <HeartOutlined className="text-white text-sm sm:text-base" />
-                        </div>
-                        <div
-                          className="p-2 transition-all duration-300 ease-in-out bg-black/50 hover:bg-gradient-to-r from-pink-500 to-red-500 hover:scale-110 rounded-full flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log("Đã nhấn vào biểu tượng mắt");
-                          }}
-                        >
-                          <EyeOutlined className="text-white text-sm sm:text-base" />
-                        </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center text-gray-500">
+                    Không tìm thấy sản phẩm nào.
                   </div>
-                ))
-              ) : (
-                <div className="col-span-full text-center text-gray-500">
-                  Không tìm thấy sản phẩm nào.
-                </div>
+                )}
+              </div>
+              {totalPages > 0 && (
+                <Pagination
+                  total={totalPages * 20}
+                  current={currentPage + 1}
+                  pageSize={20}
+                  onChange={handlePageChange}
+                  className="mt-8"
+                />
               )}
             </div>
-            <Pagination
-              total={filteredData.length}
-              current={currentPage}
-              pageSize={pageSize}
-              onChange={handlePageChange}
-              className="mt-8"
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

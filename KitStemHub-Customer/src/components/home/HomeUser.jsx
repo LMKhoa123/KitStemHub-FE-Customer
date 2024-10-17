@@ -28,14 +28,14 @@ function HomeUser() {
               Sản phẩm của chúng tôi
             </h3>
           </div>
-          <div className="flex mb-5 items-center w-1/5">
+          {/* <div className="flex mb-5 items-center w-1/5">
             <Search
               placeholder="Bạn đang tìm kiếm gì?"
               onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
               enterButton
               className="search-product w-full"
             />
-          </div>
+          </div> */}
         </div>
         <h1 className="font-semibold text-3xl mb-10">
           Khám phá sản phẩm của chúng tôi
