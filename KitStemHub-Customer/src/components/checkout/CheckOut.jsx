@@ -73,12 +73,25 @@ const CheckOut = () => {
   // Hàm kiểm tra lỗi và đánh dấu ô trống
   const handleValidation = () => {
     let tempErrors = {};
+
+    // Kiểm tra nếu người dùng yêu cầu nhập địa chỉ mới
     if (useNewAddress && !newAddress) {
       tempErrors.address = "Vui lòng nhập địa chỉ mới";
     }
+    // Kiểm tra nếu địa chỉ đã lưu không tồn tại khi chọn địa chỉ đã lưu
+    else if (!useNewAddress && !shippingAddress) {
+      tempErrors.address = "Vui lòng nhập địa chỉ mới trước khi thanh toán";
+    }
+
+    // Kiểm tra nếu người dùng yêu cầu nhập số điện thoại mới
     if (useNewPhoneNumber && !newPhoneNumber) {
       tempErrors.phone = "Vui lòng nhập số điện thoại mới";
     }
+    // Kiểm tra nếu số điện thoại đã lưu không tồn tại khi chọn số điện thoại đã lưu
+    else if (!useNewPhoneNumber && !selectedPhoneNumber) {
+      tempErrors.phone = "Vui lòng nhập số điện thoại của bạn";
+    }
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0; // Kiểm tra nếu không có lỗi nào
   };
