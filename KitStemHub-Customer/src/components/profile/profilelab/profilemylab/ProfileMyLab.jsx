@@ -6,6 +6,7 @@ import api from "../../../../config/axios";
 function ProfileMyLab({ orderId }) {
   const [labData, setLabData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [supportStatus, setSupportStatus] = useState({}); // Trạng thái hỗ trợ của từng lab
 
   // Gọi API để lấy thông tin lab dựa vào orderId
   const fetchLabData = async () => {
@@ -14,6 +15,13 @@ function ProfileMyLab({ orderId }) {
       const labSupports = response.data.details.data.order["order-supports"];
       console.log("API Response for order supports:", labSupports); // Log response để kiểm tra cấu trúc
 
+      // Thiết lập trạng thái hỗ trợ ban đầu (mặc định là 'success')
+      const initialSupportStatus = labSupports.reduce((acc, lab) => {
+        acc[lab.lab.id] = "success"; // Trạng thái mặc định là "success"
+        return acc;
+      }, {});
+
+      setSupportStatus(initialSupportStatus); // Lưu trạng thái hỗ trợ ban đầu
       setLabData(labSupports); // Lưu dữ liệu lab từ order-supports
       setLoading(false);
     } catch (error) {
@@ -31,6 +39,11 @@ function ProfileMyLab({ orderId }) {
 
   // Hàm gọi API hỗ trợ lab
   const handleSupport = async (labId, packageId) => {
+    // Đặt trạng thái thành "fail" (Đang hỗ trợ) ngay khi bấm nút
+    setSupportStatus((prevStatus) => ({
+      ...prevStatus,
+      [labId]: "fail", // Đang hỗ trợ
+    }));
     try {
       // Kiểm tra các tham số truyền vào
       console.log("Calling support API with:");
@@ -87,14 +100,36 @@ function ProfileMyLab({ orderId }) {
     {
       title: "Hỗ trợ",
       key: "support",
-      render: (record) => (
-        <Button
-          type="primary"
-          onClick={() => handleSupport(record.lab.id, record.package.id)}
-        >
-          Hỗ trợ
-        </Button>
-      ),
+      render: (record) => {
+        const status = supportStatus[record.lab.id];
+        const remainSupportTimes = record["remain-support-times"];
+
+        // Thiết lập màu sắc và nội dung nút dựa trên trạng thái hỗ trợ
+        const getButtonProps = () => {
+          if (remainSupportTimes === 0) {
+            return {
+              disabled: true,
+              children: "Đã hết số lần hỗ trợ",
+              style: { backgroundColor: "#f5f5f5", color: "#d9d9d9" },
+            };
+          }
+
+          if (status === "fail") {
+            return {
+              disabled: true,
+              children: "Đang hỗ trợ",
+              style: { backgroundColor: "orange", color: "white" },
+            };
+          }
+          return {
+            disabled: false,
+            children: "Hỗ trợ",
+            onClick: () => handleSupport(record.lab.id, record.package.id),
+          };
+        };
+
+        return <Button type="primary" {...getButtonProps()} />;
+      },
     },
   ];
 

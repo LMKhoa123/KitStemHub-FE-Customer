@@ -42,7 +42,7 @@ function ProfileSidebar() {
         },
         {
           key: "4",
-          label: <MenuItem label="Bài Lab đã tải" className="text-gray-500" />,
+          label: <MenuItem label="Lịch sử hỗ trợ" className="text-gray-500" />,
           onClick: handleNavigate("/profile/lab"),
         },
       ],

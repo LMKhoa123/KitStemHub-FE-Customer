@@ -1,7 +1,8 @@
 import { Layout } from "antd";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
-import ProfileMyLab from "./profilemylab/ProfileMyLab";
+import ProfileMyLabHistory from "./profilemylab/ProfileMyLabHistory";
+// import ProfileMyLab from "./profilemylab/ProfileMyLab";
 
 const { Content } = Layout;
 
@@ -23,7 +24,8 @@ function ProfileLab() {
             <div className="p-14 ">
               {/* form profile */}
 
-              <ProfileMyLab />
+              {/* <ProfileMyLab /> */}
+              <ProfileMyLabHistory />
             </div>
           </Content>
         </Layout>

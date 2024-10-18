@@ -74,22 +74,28 @@ const CheckOut = () => {
   const handleValidation = () => {
     let tempErrors = {};
 
-    // Kiểm tra nếu người dùng yêu cầu nhập địa chỉ mới
-    if (useNewAddress && !newAddress) {
-      tempErrors.address = "Vui lòng nhập địa chỉ mới";
-    }
-    // Kiểm tra nếu địa chỉ đã lưu không tồn tại khi chọn địa chỉ đã lưu
-    else if (!useNewAddress && !shippingAddress) {
-      tempErrors.address = "Vui lòng nhập địa chỉ mới trước khi thanh toán";
+    // Kiểm tra địa chỉ giao hàng dựa trên radio đang được chọn
+    if (useNewAddress) {
+      if (!newAddress) {
+        tempErrors.address = "Vui lòng nhập địa chỉ mới";
+      }
+    } else {
+      if (!shippingAddress) {
+        tempErrors.address =
+          "Vui lòng nhập địa chỉ của bạn trong thông tin tài khoản";
+      }
     }
 
-    // Kiểm tra nếu người dùng yêu cầu nhập số điện thoại mới
-    if (useNewPhoneNumber && !newPhoneNumber) {
-      tempErrors.phone = "Vui lòng nhập số điện thoại mới";
-    }
-    // Kiểm tra nếu số điện thoại đã lưu không tồn tại khi chọn số điện thoại đã lưu
-    else if (!useNewPhoneNumber && !selectedPhoneNumber) {
-      tempErrors.phone = "Vui lòng nhập số điện thoại của bạn";
+    // Kiểm tra số điện thoại dựa trên radio đang được chọn
+    if (useNewPhoneNumber) {
+      if (!newPhoneNumber) {
+        tempErrors.phone = "Vui lòng nhập số điện thoại mới";
+      }
+    } else {
+      if (!selectedPhoneNumber) {
+        tempErrors.phone =
+          "Vui lòng nhập số điện thoại của bạn trong thông tin tài khoản";
+      }
     }
 
     setErrors(tempErrors);
@@ -155,9 +161,9 @@ const CheckOut = () => {
 
           // Kiểm tra nếu API thanh toán trả về URL giao dịch thành công
           if (
-            paymentResponse.data &&
-            paymentResponse.data.details &&
-            paymentResponse.data.details.data &&
+            // paymentResponse.data &&
+            // paymentResponse.data.details &&
+            // paymentResponse.data.details.data &&
             paymentResponse.data.details.data.url
           ) {
             const paymentUrl = paymentResponse.data.details.data.url;
@@ -250,13 +256,16 @@ const CheckOut = () => {
           {/* Địa chỉ giao hàng */}
           <Radio.Group
             className="space-y-2"
-            onChange={(e) => setUseNewAddress(e.target.value === "new")}
-            defaultValue={"saved"} // Sử dụng địa chỉ đã lưu mặc định
+            onChange={(e) => {
+              setUseNewAddress(e.target.value === "new");
+              setErrors({ ...errors, address: "" }); // Reset lỗi cho address khi thay đổi lựa chọn
+            }}
+            value={useNewAddress ? "new" : "saved"} // Sử dụng địa chỉ đã lưu mặc định
           >
             <Radio value="saved" className="block">
               Sử dụng địa chỉ đã lưu
               <Select
-                className={`w-full ${errors.address ? "border-red-500" : ""}`}
+                className={`w-full ${errors.address && !useNewAddress ? "border-red-500" : ""}`}
                 value={shippingAddress || ""}
                 disabled={!shippingAddress}
                 placeholder="Không có địa chỉ đã lưu"
@@ -265,6 +274,10 @@ const CheckOut = () => {
               >
                 <Option value={shippingAddress}>{shippingAddress}</Option>
               </Select>
+              {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng địa chỉ đã lưu */}
+              {!useNewAddress && errors.address && (
+                <p className="text-red-500">{errors.address}</p>
+              )}
             </Radio>
 
             <Radio value="new" className="block">
@@ -273,7 +286,7 @@ const CheckOut = () => {
                 type="text"
                 placeholder="VD: 123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh"
                 className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  errors.address ? "border-red-500" : ""
+                  errors.address && useNewAddress ? "border-red-500" : ""
                 }`}
                 value={newAddress}
                 onChange={handleAddressChange}
@@ -291,13 +304,16 @@ const CheckOut = () => {
           </h2>
           <Radio.Group
             className="space-y-2"
-            onChange={(e) => setUseNewPhoneNumber(e.target.value === "new")}
-            defaultValue={"saved"} // Sử dụng số điện thoại đã lưu mặc định
+            onChange={(e) => {
+              setUseNewPhoneNumber(e.target.value === "new");
+              setErrors({ ...errors, phone: "" }); // Reset lỗi cho phone khi thay đổi lựa chọn
+            }}
+            value={useNewPhoneNumber ? "new" : "saved"} // Sử dụng số điện thoại đã lưu mặc định
           >
             <Radio value="saved" className="block">
               Số điện thoại đã lưu
               <Select
-                className={`w-full ${errors.phone ? "border-red-500" : ""}`}
+                className={`w-full ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
                 value={selectedPhoneNumber || ""}
                 disabled={!selectedPhoneNumber}
                 placeholder="Không có số điện thoại đã lưu"
@@ -308,6 +324,10 @@ const CheckOut = () => {
                   {selectedPhoneNumber}
                 </Option>
               </Select>
+              {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng số điện thoại đã lưu */}
+              {!useNewPhoneNumber && errors.phone && (
+                <p className="text-red-500">{errors.phone}</p>
+              )}
             </Radio>
 
             <Radio value="new" className="block">
@@ -316,7 +336,7 @@ const CheckOut = () => {
                 type="text"
                 placeholder="VD: 0912345678"
                 className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  errors.phone ? "border-red-500" : ""
+                  errors.phone && useNewPhoneNumber ? "border-red-500" : ""
                 }`}
                 value={newPhoneNumber}
                 onChange={handlePhoneChange}
