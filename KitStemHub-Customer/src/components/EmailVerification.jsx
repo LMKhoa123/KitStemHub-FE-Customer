@@ -16,8 +16,8 @@ function EmailVerification() {
       if (key === "token") token = decodeURIComponent(value);
     });
 
-    console.log("Email from URL:", email);
-    console.log("Token from URL:", token);
+    // console.log("Email from URL:", email);
+    // console.log("Token from URL:", token);
 
     if (email && token) {
       verifyEmail(email, token);
