@@ -61,24 +61,39 @@ function OrderDetail() {
     }
   }, [orderId]);
 
-  const handleLabDownload = async () => {
-    if (selectedLab) {
-      try {
-        const response = await api.get(
-          `labs/${selectedLab}/orders/${orderId}/download`,
-          { responseType: "blob" }
-        );
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `Lab_${selectedLab}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-      } catch (error) {
-        console.error("Error downloading lab:", error);
+  const handleLabDownload = async (labId, labName) => {
+    try {
+      const response = await api.get(
+        `labs/${labId}/orders/${orderId}/download`,
+        { responseType: "blob" }
+      );
+
+      // Sử dụng tên lab được truyền vào
+      let filename = `${labName}.pdf`;
+
+      // Extract filename from Content-Disposition header if available
+      const contentDisposition = response.headers["content-disposition"];
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1];
+        }
       }
-    } else {
-      console.log("No lab selected");
+
+      // Tạo Blob URL cho file download và trigger việc tải xuống
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Optionally, revoke the object URL after some time to free up memory
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+    } catch (error) {
+      console.error("Error downloading the lab:", error);
+      toast.error("Không thể tải xuống bài lab. Vui lòng thử lại sau.");
     }
   };
 
@@ -198,7 +213,7 @@ function OrderDetail() {
                 </Text>
               </Space>
             </div>
-            <Space className="mt-4 md:mt-0">
+            {/* <Space className="mt-4 md:mt-0">
               <Button
                 icon={<FilePdfOutlined />}
                 className="bg-white hover:bg-gray-100"
@@ -215,7 +230,7 @@ function OrderDetail() {
               >
                 Yêu cầu hoàn tiền
               </Button>
-            </Space>
+            </Space> */}
           </div>
 
           <Steps current={currentStep} className="my-8 px-6">
@@ -316,34 +331,32 @@ function OrderDetail() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-8 px-6 mt-8">
-            <div className="mb-6 flex-1  py-6 rounded-lg ">
-              <Title level={4} className="mb-4 text-gray-800">
-                Chọn bài lab để tải xuống
+            <div className="mb-6 flex-1 py-6 rounded-lg bg-white ">
+              <Title level={4} className="mb-6 !text-gray-800 pb-2">
+                Các bài lab có thể tải về:
               </Title>
-              <Radio.Group
-                onChange={(e) => setSelectedLab(e.target.value)}
-                value={selectedLab}
-                className="mb-4 space-y-2"
-              >
+
+              <div className="space-y-2">
                 {labs.map((lab) => (
-                  <Radio key={lab.id} value={lab.id} className="block">
-                    {lab.name}
-                  </Radio>
+                  <div
+                    key={lab.id}
+                    className="flex items-center justify-between rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                  >
+                    <p className="text-base !text-gray-700">{lab.name}</p>
+                    <Button
+                      type="primary"
+                      icon={<DownloadOutlined />}
+                      size="large"
+                      className="bg-green-50 
+                      !text-black hover:!text-white hover:!bg-green-600 border-none h-12 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center !px-4"
+                      disabled={
+                        orderData["shipping-status"] !== "GIAO HÀNG THÀNH CÔNG"
+                      }
+                      onClick={() => handleLabDownload(lab.id, lab.name)}
+                    />
+                  </div>
                 ))}
-              </Radio.Group>
-              <Button
-                type="primary"
-                icon={<DownloadOutlined />}
-                size="large"
-                className="w-1/2 block bg-green-500 hover:!bg-green-600 border-none h-12 text-lg font-semibold transition-colors duration-300"
-                disabled={
-                  !selectedLab ||
-                  orderData["shipping-status"] !== "GIAO HÀNG THÀNH CÔNG"
-                }
-                onClick={handleLabDownload}
-              >
-                Tải xuống bài lab
-              </Button>
+              </div>
             </div>
 
             <div className="mb-6 flex-1 py-6 rounded-lg ">

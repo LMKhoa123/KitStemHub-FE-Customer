@@ -23,6 +23,7 @@ import ProductDetailPage from "./pages/productdetailpage/ProductDetailPageUser";
 import OrderDetail from "./components/order/OrderDetail";
 import EmailVerification from "./components/EmailVerification"; // Import EmailVerification component
 import Result from "./components/result/Result";
+import ResetPassword from "./components/ResetPassword";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -81,6 +82,7 @@ function App() {
             }
           />
           <Route path="/verify" element={<EmailVerification />} />
+          <Route path="/password/reset" element={<ResetPassword />} />
           <Route
             path="/profile"
             element={

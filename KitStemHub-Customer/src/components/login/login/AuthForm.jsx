@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button, Form, Input, Modal } from "antd";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Button, Form, Image, Input, Modal } from "antd";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
 import styles from "./AuthForm.module.css";
@@ -9,6 +9,7 @@ import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 import EmailVerification from "../../EmailVerification";
+import { LockOutlined } from "@ant-design/icons";
 
 function LoginInput() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
@@ -19,6 +20,10 @@ function LoginInput() {
   const [verificationEmail, setVerificationEmail] = useState("");
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResetPasswordModalVisible, setIsResetPasswordModalVisible] =
+    useState(false);
+  const [resetPasswordEmail, setResetPasswordEmail] = useState("");
+  const [isResetPasswordMode, setIsResetPasswordMode] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -223,6 +228,25 @@ function LoginInput() {
     setIsSignUpMode(false);
   };
 
+  const handleSendPasswordResetToken = async () => {
+    try {
+      const response = await api.post("users/sendpasswordresettoken", {
+        email: resetPasswordEmail,
+      });
+      if (response.data.status === "success") {
+        toast.success(
+          "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn."
+        );
+        setIsResetPasswordModalVisible(false);
+      } else {
+        toast.error("Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu đặt lại mật khẩu:", error);
+      toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+    }
+  };
+
   if (isVerifying) {
     return <EmailVerification />;
   }
@@ -233,7 +257,7 @@ function LoginInput() {
 
   return (
     <div
-      className={`${styles.container} ${isSignUpMode ? styles.signUpMode : ""} `}
+      className={`${styles.container} ${isSignUpMode ? styles.signUpMode : ""}`}
     >
       <div className={styles.formsContainer}>
         <div className={styles.signinSignup}>
@@ -292,6 +316,13 @@ function LoginInput() {
             >
               Đăng nhập
             </Button>
+            {/* Thêm nút "Quên mật khẩu" vào form đăng nhập */}
+            <Link
+              onClick={() => setIsResetPasswordMode(true)}
+              className="ml-4 text-blue-500 hover:text-blue-700 font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out hover:bg-blue-100"
+            >
+              Quên mật khẩu?
+            </Link>
             <p className={styles.socialText}>
               Hoặc đăng nhập bằng các nền tảng xã hội
             </p>
@@ -487,6 +518,66 @@ function LoginInput() {
           tra hộp thư đến và nhấp vào liên kết xác thực để hoàn tất đăng ký của
           bạn.
         </p>
+      </Modal>
+
+      <Modal
+        title="Yêu cầu cài lại mật khẩu"
+        visible={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalOk}
+        footer={[
+          <Button key="ok" type="primary" onClick={handleModalOk}>
+            OK
+          </Button>,
+        ]}
+      >
+        <p>
+          Chúng tôi đã gửi một email xác thực đến địa chỉ {verificationEmail}.
+          Vui lòng kiểm tra hộp thư của bạn và làm theo hướng dẫn để hoàn tất
+          việc thay đổi mật khẩu!
+        </p>
+      </Modal>
+
+      {/* Modal for password reset */}
+      <Modal
+        visible={isResetPasswordMode}
+        onCancel={() => setIsResetPasswordMode(false)}
+        footer={null}
+        className="reset-password-modal"
+      >
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Gặp sự cố đăng nhập?</h2>
+          <p className="text-gray-600 mb-4">
+            Nhập email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để truy
+            cập lại vào tài khoản.
+          </p>
+          <Input
+            placeholder="VD: user@example.com"
+            value={resetPasswordEmail}
+            onChange={(e) => setResetPasswordEmail(e.target.value)}
+            className="mb-4"
+          />
+          <Button
+            type="primary"
+            onClick={handleSendPasswordResetToken}
+            className="w-full mb-4"
+          >
+            Gửi liên kết xác thực
+          </Button>
+          <p className="text-gray-600 mb-4">HOẶC</p>
+          <Button
+            onClick={() => {
+              setIsSignUpMode(true);
+              setIsResetPasswordMode(false);
+            }}
+            className="w-full mb-4"
+          >
+            Tạo tài khoản mới
+          </Button>
+          <Button onClick={() => setIsResetPasswordMode(false)} type="link">
+            Quay lại đăng nhập
+          </Button>
+        </div>
       </Modal>
     </div>
   );
