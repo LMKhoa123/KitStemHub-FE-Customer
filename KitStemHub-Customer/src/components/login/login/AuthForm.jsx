@@ -546,16 +546,13 @@ function LoginInput() {
         className="reset-password-modal"
       >
         <div className="text-center">
-          <div className="mb-4">
-            <LockOutlined style={{ fontSize: "48px", color: "#1890ff" }} />
-          </div>
           <h2 className="text-2xl font-bold mb-4">Gặp sự cố đăng nhập?</h2>
           <p className="text-gray-600 mb-4">
-            Nhập email, số điện thoại hoặc tên người dùng của bạn và chúng tôi
-            sẽ gửi cho bạn một liên kết để truy cập lại vào tài khoản.
+            Nhập email của bạn và chúng tôi sẽ gửi cho bạn một liên kết để truy
+            cập lại vào tài khoản.
           </p>
           <Input
-            placeholder="Email, số điện thoại hoặc tên người dùng"
+            placeholder="VD: user@example.com"
             value={resetPasswordEmail}
             onChange={(e) => setResetPasswordEmail(e.target.value)}
             className="mb-4"
@@ -565,10 +562,16 @@ function LoginInput() {
             onClick={handleSendPasswordResetToken}
             className="w-full mb-4"
           >
-            Gửi liên kết đăng nhập
+            Gửi liên kết xác thực
           </Button>
           <p className="text-gray-600 mb-4">HOẶC</p>
-          <Button onClick={() => setIsSignUpMode(true)} className="w-full mb-4">
+          <Button
+            onClick={() => {
+              setIsSignUpMode(true);
+              setIsResetPasswordMode(false);
+            }}
+            className="w-full mb-4"
+          >
             Tạo tài khoản mới
           </Button>
           <Button onClick={() => setIsResetPasswordMode(false)} type="link">

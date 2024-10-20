@@ -213,7 +213,7 @@ function OrderDetail() {
                 </Text>
               </Space>
             </div>
-            <Space className="mt-4 md:mt-0">
+            {/* <Space className="mt-4 md:mt-0">
               <Button
                 icon={<FilePdfOutlined />}
                 className="bg-white hover:bg-gray-100"
@@ -230,7 +230,7 @@ function OrderDetail() {
               >
                 Yêu cầu hoàn tiền
               </Button>
-            </Space>
+            </Space> */}
           </div>
 
           <Steps current={currentStep} className="my-8 px-6">
