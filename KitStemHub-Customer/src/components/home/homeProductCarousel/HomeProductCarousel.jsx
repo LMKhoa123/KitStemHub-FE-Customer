@@ -10,6 +10,7 @@ import {
   Input,
   Dropdown,
   Space,
+  Select,
 } from "antd";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
@@ -91,8 +92,8 @@ function HomeProductCarousel({ initialSearchTerm }) {
     setCurrentPage(page - 1);
   };
 
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
+  const handleCategoryChange = (value) => {
+    setSelectedCategory(value ? categories.find((c) => c.id === value) : null);
     setCurrentPage(0);
     fetchProducts();
   };
@@ -149,55 +150,63 @@ function HomeProductCarousel({ initialSearchTerm }) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <Space direction="vertical" className="w-full md:w-auto">
-          <Dropdown overlay={priceFilterMenu}>
-            <Button className="w-full md:w-auto">
-              Lọc theo giá <DownOutlined />
-            </Button>
-          </Dropdown>
-          {priceFilter === "custom" && (
-            <Slider
-              range
-              min={0}
-              max={5000000}
-              step={10000}
-              value={customPriceRange}
-              onChange={handleCustomPriceChange}
-              className="w-full md:w-64"
-            />
-          )}
-          <span className="text-sm text-gray-600">
-            {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()}{" "}
-            VND
-          </span>
-        </Space>
-        <Input.Search
-          placeholder="Tìm kiếm sản phẩm"
-          onSearch={handleSearch}
-          className="w-full md:w-64"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
       <div className="flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-64">
-          <h2 className="text-xl font-bold mb-4">Danh mục</h2>
-          <Menu mode="vertical" className="bg-gray-50 rounded-lg">
-            <Menu.Item key="all" onClick={() => handleCategoryClick(null)}>
-              Tất cả sản phẩm
-            </Menu.Item>
-            {categories.map((category) => (
-              <Menu.Item
-                key={category.id}
-                onClick={() => handleCategoryClick(category)}
+        {/* Left column: Filters */}
+        <div className="w-full md:w-1/4">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold mb-4">Bộ lọc</h3>
+            <Space direction="vertical" className="w-full">
+              <Input.Search
+                placeholder="Tìm kiếm sản phẩm"
+                onSearch={handleSearch}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Select
+                style={{ width: "100%" }}
+                placeholder="Chọn danh mục"
+                onChange={handleCategoryChange}
+                value={selectedCategory ? selectedCategory.id : undefined}
               >
-                {category.name}
-              </Menu.Item>
-            ))}
-          </Menu>
+                <Select.Option value={undefined}>Tất cả sản phẩm</Select.Option>
+                {categories.map((category) => (
+                  <Select.Option key={category.id} value={category.id}>
+                    {category.name}
+                  </Select.Option>
+                ))}
+              </Select>
+              <Dropdown overlay={priceFilterMenu}>
+                <Button className="w-full">
+                  Lọc theo giá <DownOutlined />
+                </Button>
+              </Dropdown>
+              {priceFilter === "custom" && (
+                <Slider
+                  range
+                  min={0}
+                  max={5000000}
+                  step={10000}
+                  value={customPriceRange}
+                  onChange={handleCustomPriceChange}
+                />
+              )}
+              <span className="text-sm text-gray-600">
+                {priceRange[0].toLocaleString()} -{" "}
+                {priceRange[1].toLocaleString()} VND
+              </span>
+              <Button
+                type="primary"
+                onClick={handleApplyFilter}
+                className="w-full"
+              >
+                Áp dụng bộ lọc
+              </Button>
+            </Space>
+          </div>
         </div>
-        <div className="flex-1">
+
+        {/* Right column: Product list */}
+        <div className="w-full md:w-3/4">
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <Spin size="large" />
@@ -209,7 +218,7 @@ function HomeProductCarousel({ initialSearchTerm }) {
                   ? `${selectedCategory.name}`
                   : "Tất cả sản phẩm"}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-3 gap-6">
                 {dataSource.length > 0 ? (
                   dataSource.map((item, index) => (
                     <div
@@ -219,6 +228,11 @@ function HomeProductCarousel({ initialSearchTerm }) {
                       data-aos-anchor-placement="top-bottom"
                     >
                       <Card
+                        bodyStyle={{
+                          padding: "0", // Loại bỏ tất cả padding
+                          paddingTop: "24px", // Thiết lập lại paddingTop
+                          paddingBottom: "24px", // Thiết lập lại paddingBottom
+                        }}
                         hoverable
                         className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
                         cover={
@@ -234,13 +248,14 @@ function HomeProductCarousel({ initialSearchTerm }) {
                         onClick={() => handleProductClick(item.id)}
                       >
                         <Card.Meta
+                          className=""
                           title={
-                            <div className="text-center font-semibold truncate">
+                            <div className="text-center font-semibold truncate px-2">
                               {item.name}
                             </div>
                           }
                           description={
-                            <div className="text-center text-gray-600">
+                            <div className="text-center text-gray-600 px-2 pb-2">
                               {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()}`}{" "}
                               VND
                             </div>
@@ -281,6 +296,7 @@ function HomeProductCarousel({ initialSearchTerm }) {
                   current={currentPage + 1}
                   pageSize={20}
                   onChange={handlePageChange}
+                  showSizeChanger={false}
                   className="mt-8"
                 />
               )}

@@ -18,7 +18,7 @@ function Footer() {
         <div className="support text-center md:text-left">
           <h2 className="text-lg font-semibold mb-2">Hỗ trợ</h2>
           <p>111 Bijoy Sarani, Dhaka, DH 1515, Bangladesh.</p>
-          <p>exclusive@gmail.com</p>
+          <p>kitstemhub@gmail.com</p>
           <p>+88015-88888-9999</p>
         </div>
 
