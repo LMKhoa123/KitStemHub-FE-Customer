@@ -4,32 +4,30 @@ import ProfileSidebar from "../profilesidebar/ProfileSidebar";
 import ProfileMyLabHistory from "./profilemylab/ProfileMyLabHistory";
 // import ProfileMyLab from "./profilemylab/ProfileMyLab";
 
-const { Content } = Layout;
-
 function ProfileLab() {
   return (
-    <Layout className="h-screen">
-      <Content className="px-12">
+    <Layout className="min-h-screen">
+      <div className="px-11">
         {/* Nav profile */}
         <ProfileNav />
 
         <Layout className="">
           {/* side bar */}
 
-          <Content className="flex justify-center flex-wrap">
-            <div className="pr-1 max-w-xs">
+          <div className="flex flex-row min-h-screen ml-28">
+            <div className="w-1/4">
               <ProfileSidebar />
             </div>
 
-            <div className="p-14 ">
+            <div className="w-3/4 mt-14">
               {/* form profile */}
 
               {/* <ProfileMyLab /> */}
               <ProfileMyLabHistory />
             </div>
-          </Content>
+          </div>
         </Layout>
-      </Content>
+      </div>
     </Layout>
   );
 }
