@@ -88,8 +88,13 @@ const CheckOut = () => {
 
     // Kiểm tra số điện thoại dựa trên radio đang được chọn
     if (useNewPhoneNumber) {
-      if (!newPhoneNumber) {
-        tempErrors.phone = "Vui lòng nhập số điện thoại mới";
+      if (
+        !newPhoneNumber ||
+        newPhoneNumber.length !== 10 ||
+        !/^[0-9]+$/.test(newPhoneNumber)
+      ) {
+        tempErrors.phone =
+          "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số.";
       }
     } else {
       if (!selectedPhoneNumber) {
@@ -112,10 +117,19 @@ const CheckOut = () => {
 
   // Xoá lỗi khi bắt đầu nhập số điện thoại mới
   const handlePhoneChange = (e) => {
-    setNewPhoneNumber(e.target.value);
-    if (e.target.value) {
-      setErrors((prevErrors) => ({ ...prevErrors, phone: "" }));
+    const phoneValue = e.target.value;
+
+    // Kiểm tra độ dài của số điện thoại
+    if (phoneValue.length === 10 && /^[0-9]+$/.test(phoneValue)) {
+      setErrors((prevErrors) => ({ ...prevErrors, phone: "" })); // Xoá lỗi nếu hợp lệ
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        phone: "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số.",
+      }));
     }
+
+    setNewPhoneNumber(phoneValue); // Cập nhật số điện thoại mới
   };
 
   const handlePlaceOrder = async () => {
@@ -333,7 +347,7 @@ const CheckOut = () => {
             <Radio value="new" className="block">
               Nhập số điện thoại mới
               <input
-                type="text"
+                type="number"
                 placeholder="VD: 0912345678"
                 className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
                   errors.phone && useNewPhoneNumber ? "border-red-500" : ""
