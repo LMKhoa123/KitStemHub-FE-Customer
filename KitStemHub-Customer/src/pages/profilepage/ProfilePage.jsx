@@ -4,9 +4,11 @@ import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 
 function ProfilePage() {
   return (
-    <div className="w-full h-screen">
+    <div className="w-full min-h-screen">
       <NavbarUser />
-      <Outlet />
+      <div className="flex-grow">
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );

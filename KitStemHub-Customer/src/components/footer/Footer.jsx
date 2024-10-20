@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <footer className="bg-gray-800 text-white py-5 ">
+    <footer className="bg-gray-800 text-white py-5">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="logo flex flex-col items-center md:items-start font-medium text-pretty">
           <p className="text-2xl mb-4">KitStemhub</p>

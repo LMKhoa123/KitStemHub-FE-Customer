@@ -7,22 +7,30 @@ import ProfileMyLab from "../../profilelab/profilemylab/ProfileMyLab";
 function CartMyProfile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isLabModalVisible, setIsLabModalVisible] = useState(false); // State to control modal visibility
-  const [selectedOrderId, setSelectedOrderId] = useState(null); // Store selected orderId for labs
-  const [selectedNote, setSelectedNote] = useState(null); // State to store selected note
-  const [isNoteModalVisible, setIsNoteModalVisible] = useState(false); // State to control note modal visibility
+  const [isLabModalVisible, setIsLabModalVisible] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [isNoteModalVisible, setIsNoteModalVisible] = useState(false);
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại
+  const [currentPage, setCurrentPage] = useState(1); // Giao diện bắt đầu từ trang 1
   const [totalPages, setTotalPages] = useState(0); // Tổng số trang
+  const pageSize = 20; // Số lượng order trên mỗi trang
 
   // Gọi API để lấy dữ liệu đơn hàng
-  const fetchOrders = async (page = 0) => {
+  const fetchOrders = async (page = 1) => {
+    setLoading(true);
     try {
-      const response = await api.get(`/orders/customers?page=${page}`);
+      const response = await api.get(`/orders/customers?page=${page - 1}`); // Truyền page - 1 để phù hợp với API
       const { data } = response.data.details;
-      setOrders(data.orders);
-      setTotalPages(data["total-pages"]);
-      setCurrentPage(data["current-page"]);
+
+      // Kiểm tra dữ liệu trả về và cập nhật state
+      if (data.orders && data.orders.length > 0) {
+        setOrders(data.orders); // Cập nhật đơn hàng
+        setTotalPages(data["total-pages"]); // Cập nhật tổng số trang
+      } else {
+        setOrders([]); // Đảm bảo orders là một mảng rỗng nếu không có dữ liệu
+      }
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -31,15 +39,15 @@ function CartMyProfile() {
   };
 
   useEffect(() => {
-    fetchOrders(currentPage); // Lấy dữ liệu khi component được render hoặc khi currentPage thay đổi
+    fetchOrders(currentPage); // Gọi API khi trang hiện tại thay đổi
   }, [currentPage]);
 
   const handleTableChange = (pagination) => {
-    const page = pagination.current - 1;
-    fetchOrders(page);
+    const page = pagination.current; // Trang hiện tại được chọn từ giao diện người dùng
+    setCurrentPage(page); // Cập nhật trang hiện tại (hiển thị)
+    fetchOrders(page); // Gọi API với trang chính xác
   };
 
-  // Xử lý format ngày tháng và giờ
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return (
@@ -47,7 +55,6 @@ function CartMyProfile() {
     );
   };
 
-  // Xử lý trạng thái giao hàng với màu sắc khác nhau
   const renderShippingStatus = (status) => {
     let colorClass = "bg-gray-500";
     if (status === "GIAO HÀNG THÀNH CÔNG") colorClass = "bg-green-600";
@@ -66,27 +73,24 @@ function CartMyProfile() {
     navigate(`/order/${record.id}`, { state: { orderId: record.id } });
   };
 
-  // Hàm mở modal và truyền orderId
   const showLabModal = (orderId) => {
-    setSelectedOrderId(orderId); // Lưu orderId để truyền vào modal
-    setIsLabModalVisible(true); // Hiển thị modal
+    setSelectedOrderId(orderId);
+    setIsLabModalVisible(true);
   };
 
   const handleLabModalClose = () => {
-    setIsLabModalVisible(false); // Đóng modal
+    setIsLabModalVisible(false);
   };
 
-  // Hàm mở modal ghi chú và hiển thị ghi chú
   const handleShowNoteModal = (note) => {
-    setSelectedNote(note); // Lưu ghi chú đã chọn
-    setIsNoteModalVisible(true); // Hiển thị modal ghi chú
+    setSelectedNote(note);
+    setIsNoteModalVisible(true);
   };
 
   const handleNoteModalClose = () => {
-    setIsNoteModalVisible(false); // Đóng modal ghi chú
+    setIsNoteModalVisible(false);
   };
 
-  // Cấu hình các cột của bảng
   const columns = [
     {
       title: "Đơn hàng",
@@ -158,33 +162,30 @@ function CartMyProfile() {
 
   return (
     <div className="bg-white p-14 max-w-6xl shadow-lg rounded mb-6 ">
-      {/* Hiển thị bảng đơn hàng */}
+      <h1 className="text-2xl font-semibold mb-6">Đơn hàng của bạn</h1>
       <Table
-        dataSource={orders}
+        dataSource={orders} // Hiển thị danh sách đơn hàng
         columns={columns}
         rowKey="id"
         loading={loading}
         pagination={{
-          current: currentPage + 1,
-          total: totalPages * 5,
-          pageSize: 5,
-          onChange: (page) => handleTableChange({ current: page }),
+          current: currentPage, // Hiển thị trang hiện tại, bắt đầu từ 1
+          total: totalPages * pageSize, // Tổng số lượng đơn hàng
+          pageSize: pageSize, // Số lượng bản ghi trên mỗi trang
+          onChange: handleTableChange, // Xử lý khi người dùng chuyển trang
         }}
       />
 
-      {/* Modal xem Lab & Hỗ trợ */}
       <Modal
         title="Chi tiết hỗ trợ"
         visible={isLabModalVisible}
         onCancel={handleLabModalClose}
-        footer={null} // Remove default footer
-        width={800} // Set width of modal
+        footer={null}
+        width={800}
       >
-        {/* Gọi ProfileMyLab và truyền selectedOrderId */}
         <ProfileMyLab orderId={selectedOrderId} />
       </Modal>
 
-      {/* Modal hiển thị ghi chú */}
       <Modal
         title="Ghi chú đơn hàng"
         visible={isNoteModalVisible}
