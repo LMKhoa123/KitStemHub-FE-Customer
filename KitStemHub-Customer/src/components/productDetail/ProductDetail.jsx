@@ -37,10 +37,12 @@ const ProductDetail = () => {
     setLoading(true);
     try {
       const kitResponse = await api.get(`kits/${kitId}`);
-      const kitData = kitResponse.data.details.data.kit[0];
+      // console.log(kitResponse);
+      const kitData = kitResponse.data.details.data.kit;
+      // console.log(kitData);
       setKitDetail(kitData);
       setKitImage(kitData["kit-images"][0].url);
-
+      // console.log("check:" + kitData["kit-images"][0].url);
       const packageResponse = await api.get(`kits/${kitId}/packages`);
       const packageData = packageResponse.data.details.data.packages;
       setPackages(packageData);

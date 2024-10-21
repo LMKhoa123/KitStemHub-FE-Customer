@@ -20,7 +20,7 @@ function HomeUser() {
       {/* side bar */}
 
       {/* our product */}
-      <div className="flex flex-col ml-20 mr-4 mt-16">
+      <div className="flex flex-col ml-4 mr-4 mt-16">
         <div className="flex justify-between">
           <div className="flex mb-5 items-center">
             <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
