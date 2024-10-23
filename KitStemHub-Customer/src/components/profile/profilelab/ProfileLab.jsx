@@ -14,16 +14,16 @@ function ProfileLab() {
         <Layout className="">
           {/* side bar */}
 
-          <div className="flex flex-row min-h-screen ml-28">
-            <div className="w-1/4">
-              <ProfileSidebar />
+          <div className="flex flex-row min-h-screen gap-10 ml-44">
+            <div className="">
+              <ProfileSidebar className="w-1/4" />
             </div>
 
-            <div className="w-3/4 mt-14">
+            <div className="mt-14">
               {/* form profile */}
 
               {/* <ProfileMyLab /> */}
-              <ProfileMyLabHistory />
+              <ProfileMyLabHistory className="w-3/4" />
             </div>
           </div>
         </Layout>

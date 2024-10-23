@@ -20,7 +20,7 @@ function CartMyProfile() {
   const fetchOrders = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await api.get(`/orders/customers?page=${page - 1}`); // Truyền page - 1 để phù hợp với API
+      const response = await api.get(`/orders/customers?page=${page - 1}`);
       const { data } = response.data.details;
 
       // Kiểm tra dữ liệu trả về và cập nhật state
