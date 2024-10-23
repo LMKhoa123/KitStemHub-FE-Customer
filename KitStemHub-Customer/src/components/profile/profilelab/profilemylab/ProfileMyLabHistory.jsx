@@ -118,6 +118,13 @@ function ProfileMyLabHistory() {
     }
   };
 
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return (
+      date.toLocaleDateString("vi-VN") + " " + date.toLocaleTimeString("vi-VN")
+    );
+  };
+
   // Cấu hình các cột của bảng
   const columns = [
     {
@@ -129,6 +136,13 @@ function ProfileMyLabHistory() {
         return firstName || lastName ? `${firstName} ${lastName}` : "Chưa có";
       },
       width: 200,
+    },
+    {
+      title: "Ngày",
+      dataIndex: "created-at",
+      key: "created-at",
+      render: (text) => formatDateTime(text),
+      width: 250,
     },
     {
       title: "Tên Lab",
