@@ -1,4 +1,4 @@
-import { notification, Spin, Table, Rate, Input, Button } from "antd";
+import { notification, Spin, Table, Rate, Input, Button, Tag } from "antd";
 import { useEffect, useState } from "react";
 import api from "../../../../config/axios";
 
@@ -191,16 +191,19 @@ function ProfileMyLabHistory() {
       dataIndex: "is-finished",
       key: "is-finished",
       render: (isFinished) => (
-        <span className={isFinished ? "text-green-500" : "text-red-500"}>
+        <Tag
+          color={isFinished ? "green" : "red"}
+          className="px-2 py-1 text-sm font-medium rounded-full"
+        >
           {isFinished ? "Hoàn thành" : "Chưa hoàn thành"}
-        </span>
+        </Tag>
       ),
       width: 150,
     },
   ];
 
   return (
-    <div className="bg-white p-14 max-w-6xl shadow-lg rounded mb-6 ">
+    <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
       <h1 className="text-2xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
       <Spin spinning={loading}>
         <Table

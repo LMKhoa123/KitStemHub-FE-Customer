@@ -44,12 +44,12 @@ function NavbarUser() {
           <li className="hover:text-gray-800 transition p-4 text-xl">
             <Badge
               count={99}
-              overflowCount={10}
+              overflowCount={0}
               className="scale-75" // Giảm kích thước của Badge
             >
               <ShoppingCartOutlined
                 onClick={handleNavigate("/cart")}
-                className="text-2xl" // Điều chỉnh kích thước biểu tượng
+                className="text-3xl" // Điều chỉnh kích thước biểu tượng
               />
             </Badge>
           </li>

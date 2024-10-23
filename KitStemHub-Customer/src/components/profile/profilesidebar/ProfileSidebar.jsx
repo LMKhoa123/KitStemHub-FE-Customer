@@ -49,7 +49,7 @@ function ProfileSidebar() {
     },
   ];
   return (
-    <Layout className="shrink p-14 pl-14">
+    <Layout className="shrink pt-14 pl-14">
       <Sider width={200}>
         <Menu
           mode="inline"

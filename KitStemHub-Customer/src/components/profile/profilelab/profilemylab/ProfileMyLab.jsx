@@ -6,23 +6,26 @@ import api from "../../../../config/axios";
 function ProfileMyLab({ orderId }) {
   const [labData, setLabData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [supportStatus, setSupportStatus] = useState({}); // Trạng thái hỗ trợ của từng lab
+  const [supportStatus, setSupportStatus] = useState({});
 
   // Gọi API để lấy thông tin lab dựa vào orderId
   const fetchLabData = async () => {
     try {
-      const response = await api.get(`/orders/${orderId}`);
+      const response = await api.get(`orders/${orderId}`);
       const labSupports = response.data.details.data.order["order-supports"];
-      console.log("API Response for order supports:", labSupports); // Log response để kiểm tra cấu trúc
 
-      // Thiết lập trạng thái hỗ trợ ban đầu (mặc định là 'success')
+      // Kiểm tra trạng thái từ localStorage
+      const storedStatus =
+        JSON.parse(localStorage.getItem("supportStatus")) || {};
+
+      // Lưu trạng thái từ API hoặc localStorage
       const initialSupportStatus = labSupports.reduce((acc, lab) => {
-        acc[lab.lab.id] = "success"; // Trạng thái mặc định là "success"
+        acc[lab.lab.id] = storedStatus[lab.lab.id] || "success"; // Nếu có trạng thái từ localStorage, dùng nó
         return acc;
       }, {});
 
-      setSupportStatus(initialSupportStatus); // Lưu trạng thái hỗ trợ ban đầu
-      setLabData(labSupports); // Lưu dữ liệu lab từ order-supports
+      setSupportStatus(initialSupportStatus);
+      setLabData(labSupports);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching lab data:", error);
@@ -32,69 +35,62 @@ function ProfileMyLab({ orderId }) {
 
   useEffect(() => {
     if (orderId) {
-      console.log("Received orderId in ProfileMyLab:", orderId);
-      fetchLabData(); // Gọi API khi có orderId
+      fetchLabData();
     }
   }, [orderId]);
 
-  // Hàm gọi API hỗ trợ lab
+  // Hàm hỗ trợ lab
   const handleSupport = async (labId, packageId) => {
-    // Đặt trạng thái thành "fail" (Đang hỗ trợ) ngay khi bấm nút
-    setSupportStatus((prevStatus) => ({
-      ...prevStatus,
-      [labId]: "fail", // Đang hỗ trợ
-    }));
-    try {
-      // Kiểm tra các tham số truyền vào
-      console.log("Calling support API with:");
-      console.log("Order ID:", orderId);
-      console.log("Lab ID:", labId);
-      console.log("Package ID:", packageId);
+    setSupportStatus((prevStatus) => {
+      const updatedStatus = { ...prevStatus, [labId]: "fail" };
+      localStorage.setItem("supportStatus", JSON.stringify(updatedStatus));
+      return updatedStatus;
+    });
 
+    try {
       const response = await api.post(
-        `/labsupports/orders/${orderId}/packages/${packageId}/labs/${labId}`
+        `labsupports/orders/${orderId}/packages/${packageId}/labs/${labId}`
       );
 
-      console.log("API Response for lab support:", response.data); // Log response để kiểm tra cấu trúc
-
-      // Hiển thị thông báo thành công
-      notification.destroy();
       notification.success({
-        message: response.data.detail.message,
+        message: response.data.detailss.message,
         duration: 3,
       });
     } catch (error) {
-      console.error("Error in supporting lab:", error);
-
-      // Hiển thị thông báo lỗi
-      notification.destroy();
       notification.error({
-        message: error.response?.data?.detail?.message || "Có lỗi xảy ra!",
+        message: error.response?.data?.detailss?.message || "Có lỗi xảy ra!",
         duration: 3,
+      });
+
+      // Khôi phục trạng thái nếu lỗi
+      setSupportStatus((prevStatus) => {
+        const updatedStatus = { ...prevStatus, [labId]: "success" };
+        localStorage.setItem("supportStatus", JSON.stringify(updatedStatus));
+        return updatedStatus;
       });
     }
   };
 
-  // Cấu hình các cột của bảng trong modal
+  // Cấu hình các cột của bảng
   const columns = [
     {
       title: "Tên Lab",
-      dataIndex: ["lab", "name"], // Tên lab từ order-supports
+      dataIndex: ["lab", "name"],
       key: "lab-name",
     },
     {
       title: "Tên Kit",
-      dataIndex: ["lab", "kit", "name"], // Tên kit từ order-supports
+      dataIndex: ["lab", "kit", "name"],
       key: "kit-name",
     },
     {
       title: "Tên Package",
-      dataIndex: ["package", "name"], // Tên package từ order-supports
+      dataIndex: ["package", "name"],
       key: "package-name",
     },
     {
       title: "Số lần hỗ trợ còn lại",
-      dataIndex: "remain-support-times", // remain-support-times từ order-supports
+      dataIndex: "remain-support-times",
       key: "remain-support-times",
     },
     {
@@ -104,7 +100,7 @@ function ProfileMyLab({ orderId }) {
         const status = supportStatus[record.lab.id];
         const remainSupportTimes = record["remain-support-times"];
 
-        // Thiết lập màu sắc và nội dung nút dựa trên trạng thái hỗ trợ
+        // Cấu hình nút Hỗ trợ
         const getButtonProps = () => {
           if (remainSupportTimes === 0) {
             return {
@@ -121,6 +117,7 @@ function ProfileMyLab({ orderId }) {
               style: { backgroundColor: "orange", color: "white" },
             };
           }
+
           return {
             disabled: false,
             children: "Hỗ trợ",

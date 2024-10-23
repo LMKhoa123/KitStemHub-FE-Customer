@@ -11,15 +11,15 @@ function ProfileCart() {
         <ProfileNav />
 
         {/* Flex container để sidebar và profile cùng một hàng */}
-        <div className="flex flex-row min-h-screen ml-28">
+        <div className="flex flex-row gap-10 min-h-screen ml-44">
           {/* Sidebar */}
-          <div className="w-1/4">
-            <ProfileSidebar />
+          <div className="">
+            <ProfileSidebar className="w-1/4" />
           </div>
 
           {/* Nội dung chi tiết đơn hàng */}
-          <div className="w-3/4 mt-14">
-            <CartMyProfile />
+          <div className="mt-14">
+            <CartMyProfile className="w-3/4" />
           </div>
         </div>
       </div>
