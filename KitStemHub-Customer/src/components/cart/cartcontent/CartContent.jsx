@@ -83,7 +83,18 @@ function CartContent() {
       const updatedCartItems = cartItems.filter(
         (item) => item.packageId !== packageId
       );
+
+      // Cập nhật lại giỏ hàng trong state
       setCartItems(updatedCartItems);
+
+      // Lưu lại giỏ hàng cập nhật vào localStorage
+      localStorage.setItem("cart", JSON.stringify(updatedCartItems));
+
+      // Gửi sự kiện cartUpdate để cập nhật badge
+      const cartEvent = new Event("cartUpdate");
+      window.dispatchEvent(cartEvent);
+
+      // Cập nhật lại tổng sau khi xóa sản phẩm
       updateTotals(updatedCartItems); // Cập nhật lại tổng sau khi xóa
     } catch (error) {
       notification.error({
@@ -106,6 +117,11 @@ function CartContent() {
       });
       setCartItems([]);
       updateTotals([]);
+      localStorage.removeItem("cart"); // Xóa giỏ hàng trong localStorage
+
+      // Phát sự kiện để cập nhật badge giỏ hàng
+      const cartEvent = new Event("cartUpdate");
+      window.dispatchEvent(cartEvent);
     } catch (error) {
       notification.error({
         message: "Thất bại",
