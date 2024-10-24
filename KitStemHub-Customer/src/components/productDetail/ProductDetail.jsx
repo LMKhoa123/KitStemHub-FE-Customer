@@ -88,8 +88,34 @@ const ProductDetail = () => {
       });
 
       if (response.data && response.data.status === "success") {
-        message.success(`Đã thêm ${quantity} vào giỏ hàng`);
-        setQuantity(1);
+        // Lấy giỏ hàng hiện tại từ localStorage
+        const cartData = JSON.parse(localStorage.getItem("cart")) || [];
+
+        // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
+        const existingProductIndex = cartData.findIndex(
+          (item) => item.id === packageDetail.id
+        );
+
+        if (existingProductIndex !== -1) {
+          // Nếu sản phẩm đã tồn tại, chỉ cập nhật số lượng
+          cartData[existingProductIndex].quantity += quantity;
+          message.success(`Đã cập nhật số lượng sản phẩm trong giỏ hàng.`);
+        } else {
+          // Nếu là sản phẩm mới, thêm vào giỏ hàng
+          cartData.push({ ...packageDetail, quantity });
+          message.success(`Đã thêm ${quantity} vào giỏ hàng.`);
+
+          // Cập nhật Badge ngay lập tức (chỉ khi thêm sản phẩm mới)
+          const cartEvent = new Event("cartUpdate"); // Tạo event để cập nhật badge
+          window.dispatchEvent(cartEvent); // Dispatch event để cập nhật badge
+        }
+
+        // Lưu lại giỏ hàng vào localStorage
+        localStorage.setItem("cart", JSON.stringify(cartData));
+        const cartEvent = new Event("cartUpdate");
+        window.dispatchEvent(cartEvent);
+
+        setQuantity(1); // Đặt lại số lượng sau khi thêm sản phẩm
       } else {
         throw new Error("Không thể thêm vào giỏ hàng");
       }
