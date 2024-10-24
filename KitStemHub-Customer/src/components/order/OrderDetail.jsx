@@ -10,12 +10,10 @@ import {
   Typography,
   Divider,
   Breadcrumb,
-  Radio,
 } from "antd";
 import { motion } from "framer-motion";
 import {
   DownloadOutlined,
-  FilePdfOutlined,
   HomeOutlined,
   PhoneOutlined,
 } from "@ant-design/icons";
@@ -23,6 +21,7 @@ import { Link } from "react-router-dom";
 
 import api from "../../config/axios";
 import Loading from "../Loading";
+import { toast } from "react-toastify";
 
 const { Step } = Steps;
 const { Title, Text } = Typography;
@@ -32,7 +31,6 @@ function OrderDetail() {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [labs, setLabs] = useState([]);
-  const [selectedLab, setSelectedLab] = useState(null);
 
   useEffect(() => {
     const fetchOrderData = async () => {
@@ -41,12 +39,28 @@ function OrderDetail() {
         const response = await api.get(`orders/${orderId}`);
         // console.log(response.data.details.data.order);
         setOrderData(response.data.details.data.order);
-        setLabs(
-          response.data.details.data.order["order-supports"].map((support) => ({
-            id: support.lab.id,
-            name: support.lab.name,
-          }))
-        );
+
+        const packageOrders =
+          response.data.details.data.order["package-orders"];
+        if (packageOrders && Array.isArray(packageOrders)) {
+          const allLabs = packageOrders.flatMap(
+            (po) => po.package["package-labs"] || []
+          );
+          setLabs(
+            allLabs.map((lab) => ({
+              id: lab.id,
+              name: lab.name,
+              price: lab.price,
+              maxSupportTimes: lab["max-support-times"],
+              author: lab.author,
+              status: lab.status,
+              level: lab.level ? lab.level.name : null,
+            }))
+          );
+        } else {
+          setLabs([]);
+        }
+        console.log(labs);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching order data:", error);
@@ -374,12 +388,14 @@ function OrderDetail() {
                     -{formatCurrency(orderData.discount)}
                   </Text>
                 </div>
-                <Divider className="my-2" />
+                <br />
+
+                <Divider />
                 <div className="flex justify-between items-center">
-                  <Text strong className="text-xl text-gray-800">
+                  <Text strong className="text-xl text-gray-800 pt-4">
                     Tổng cộng
                   </Text>
-                  <Text strong className="text-2xl text-green-600">
+                  <Text strong className="text-2xl text-green-600 pt-4">
                     {formatCurrency(orderData["total-price"])}
                   </Text>
                 </div>
