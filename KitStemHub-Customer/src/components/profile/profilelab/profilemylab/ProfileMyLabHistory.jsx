@@ -44,6 +44,7 @@ function ProfileMyLabHistory() {
           });
         } else {
           setDataSource([]); // Không có dữ liệu
+          notification.destroy();
           notification.info({
             message: "Không có dữ liệu",
             description: "Không có hỗ trợ phòng lab cho trang này.",
@@ -51,6 +52,7 @@ function ProfileMyLabHistory() {
         }
       } else {
         setDataSource([]);
+        notification.destroy();
         notification.error({
           message: "Lỗi",
           description: "Không có dữ liệu hỗ trợ phòng lab!",

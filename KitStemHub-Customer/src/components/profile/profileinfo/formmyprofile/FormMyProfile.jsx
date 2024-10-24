@@ -2,15 +2,25 @@ import { useEffect, useState } from "react";
 import api from "../../../../config/axios";
 import Swal from "sweetalert2";
 
+const baseURL = "https://vn-public-apis.fpo.vn";
 function FormMyProfile() {
   const [profileData, setProfileData] = useState({
     firstName: "",
     lastName: "",
     userName: "",
-    phoneNumber: "", // Thêm phoneNumber vào state
+    phoneNumber: "",
     address: "",
     points: 0,
   });
+  const [provinceList, setProvinceList] = useState([]);
+  const [districtList, setDistrictList] = useState([]);
+  const [wardList, setWardList] = useState([]);
+
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [specificAddress, setSpecificAddress] = useState(""); // Địa chỉ nhà cụ thể
+  const [fullAddress, setFullAddress] = useState(""); // Địa chỉ đầy đủ
   const [isUpdated, setIsUpdated] = useState(false);
 
   // Fetch profile data
@@ -25,23 +35,87 @@ function FormMyProfile() {
         firstName: userProfile["first-name"] || "",
         lastName: userProfile["last-name"] || "",
         userName: userProfile["user-name"] || "",
-        phoneNumber: userProfile["phone-number"] || "", // Lấy phoneNumber từ API
+        phoneNumber: userProfile["phone-number"] || "",
         address: userProfile["address"] || "",
         points: userProfile["points"] || 0,
       });
+
+      setSpecificAddress(""); // Hiển thị địa chỉ đầy đủ ngay khi fetch
     } catch (error) {
       console.log("Lấy dữ liệu thất bại", error);
     }
   };
 
-  // Update profile data (PUT request)
+  // Fetch provinces
+  const fetchProvinces = async () => {
+    try {
+      const response = await fetch(`${baseURL}/provinces/getAll?limit=-1`);
+      const data = await response.json();
+      const provincesArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setProvinceList(provincesArray);
+      console.log("Updated provinceList:", provincesArray); // Debug log to verify data
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách tỉnh:", error);
+    }
+  };
+
+  // Fetch districts based on provinceCode
+  const fetchDistricts = async (provinceCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/districts/getByProvince?provinceCode=${provinceCode}&limit=-1`
+      );
+      const data = await response.json();
+      const districtsArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setDistrictList(districtsArray);
+      console.log("Updated districtList:", districtsArray);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách quận:", error);
+      setDistrictList([]); // Reset danh sách nếu có lỗi
+    }
+  };
+
+  // Fetch wards based on districtCode
+  const fetchWards = async (districtCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/wards/getByDistrict?districtCode=${districtCode}&limit=-1`
+      );
+      const data = await response.json();
+
+      console.log("Wards API response:", data); // Kiểm tra phản hồi API
+
+      const wardsArray = Array.isArray(data.data.data) ? data.data.data : []; // Truy cập đúng thuộc tính của API
+      setWardList(wardsArray);
+      console.log("Updated wardList:", wardsArray); // Kiểm tra dữ liệu danh sách phường
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách phường:", error);
+      setWardList([]); // Đảm bảo đặt giá trị mặc định nếu có lỗi
+    }
+  };
+
   const updateProfile = async () => {
-    // Chỉ gửi những trường cần thiết
+    // Tìm tên đầy đủ của tỉnh, quận, phường
+    const selectedProvinceObj = provinceList.find(
+      (province) => province.code === selectedProvince
+    );
+    const selectedDistrictObj = districtList.find(
+      (district) => district.code === selectedDistrict
+    );
+    const selectedWardObj = wardList.find((ward) => ward.code === selectedWard);
+
+    // Tạo địa chỉ đầy đủ từ các giá trị name_with_type
+    const completeAddress = `${specificAddress}, ${selectedWardObj?.name_with_type || ""}, ${selectedDistrictObj?.name_with_type || ""}, ${selectedProvinceObj?.name_with_type || ""}`;
+
     const cleanData = {
       "first-name": profileData.firstName || "",
       "last-name": profileData.lastName || "",
       "phone-number": profileData.phoneNumber || "",
-      address: profileData.address || "",
+      address: completeAddress || "",
     };
 
     console.log("Payload gửi đi:", cleanData);
@@ -63,6 +137,7 @@ function FormMyProfile() {
       }).then((result) => {
         if (result.isConfirmed) {
           setProfileData(response.data);
+          setFullAddress(completeAddress); // Hiển thị địa chỉ đầy đủ
           setIsUpdated(true);
           Swal.fire("Saved!", "", "success");
         } else if (result.isDenied) {
@@ -71,196 +146,167 @@ function FormMyProfile() {
       });
     } catch (error) {
       console.log("Error updating profile:", error);
-
-      // Xử lý lỗi theo status code
-      if (error.response) {
-        const status = error.response.status;
-
-        if (status === 400) {
-          // Lỗi 400 - Bad Request
-          Swal.fire({
-            icon: "error",
-            title: "Lỗi 400",
-            text: "Dữ liệu bạn nhập không hợp lệ. Vui lòng kiểm tra lại!",
-          });
-        } else if (status === 401) {
-          // Lỗi 401 - Unauthorized
-          Swal.fire({
-            icon: "warning",
-            title: "Lỗi 401",
-            text: "Bạn chưa đăng nhập hoặc phiên đã hết hạn. Vui lòng đăng nhập lại.",
-          }).then(() => {
-            // Điều hướng người dùng đến trang đăng nhập
-            window.location.href = "/login";
-          });
-        } else {
-          // Các lỗi khác
-          Swal.fire({
-            icon: "error",
-            title: `Lỗi ${status}`,
-            text: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
-          });
-        }
-      } else if (error.request) {
-        // Lỗi request không nhận được phản hồi từ server
-        Swal.fire({
-          icon: "error",
-          title: "Lỗi kết nối",
-          text: "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.",
-        });
-      } else {
-        // Lỗi xảy ra khi cấu hình yêu cầu
-        Swal.fire({
-          icon: "error",
-          title: "Lỗi",
-          text: `Đã xảy ra lỗi: ${error.message}`,
-        });
-      }
+      Swal.fire("Error", "Something went wrong, please try again.", "error");
     }
   };
 
   useEffect(() => {
     fetchProfile();
+    fetchProvinces();
   }, []);
 
   useEffect(() => {
     if (isUpdated) {
-      fetchProfile(); // Gọi lại fetchProfile để lấy dữ liệu mới
-      setIsUpdated(false); // Reset lại cờ isUpdated
+      fetchProfile();
+      setIsUpdated(false);
     }
   }, [isUpdated]);
 
   return (
-    <div className="bg-white p-14 rounded-lg shadow-lg max-w-4xl">
-      <h1 className="mb-6 text-red-500 text-2xl font-medium">
-        Edit Your Profile
+    <div className="bg-white p-10 rounded-lg shadow-md max-w-5xl mx-auto">
+      <h1 className="text-3xl font-semibold text-center text-rose-600 mb-8">
+        Cập nhật thông tin cá nhân
       </h1>
-      <div className="form-container flex gap-6">
-        <form className="flex flex-col md:w-1/2">
-          <div className="form-group flex flex-col">
-            <div className="w-full px-3 mb-6">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="firstName"
-              >
-                Họ
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="firstName"
-                type="text"
-                value={profileData.firstName}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, firstName: e.target.value })
-                }
-              />
-            </div>
-            <div className="w-full px-3 mb-6">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="lastName"
-              >
-                Tên
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="lastName"
-                type="text"
-                value={profileData.lastName}
-                onChange={(e) =>
-                  setProfileData({ ...profileData, lastName: e.target.value })
-                }
-              />
-            </div>
 
-            <div className="w-full mb-6 px-3">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <input
-                className="appearance-none block w-64 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                id="email"
-                type="email"
-                value={profileData.userName}
-                disabled
-              />
-            </div>
-          </div>
-        </form>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mb-4">
+          <label className="text-gray-700 font-semibold">Họ</label>
+          <input
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={profileData.firstName}
+            onChange={(e) =>
+              setProfileData({ ...profileData, firstName: e.target.value })
+            }
+          />
+        </div>
 
-        <form className="flex flex-col md:w-1/2">
-          <div className="form-group flex flex-col">
-            {/* Số điện thoại */}
-            <div className="w-full px-3 mb-6">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="phoneNumber"
-              >
-                Số điện thoại
-              </label>
-              <input
-                className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-                id="phoneNumber"
-                type="number"
-                value={profileData.phoneNumber}
-                onChange={(e) =>
-                  setProfileData({
-                    ...profileData,
-                    phoneNumber: e.target.value,
-                  })
-                }
-              />
-            </div>
+        <div className="mb-4">
+          <label className="text-gray-700 font-semibold">Tên</label>
+          <input
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={profileData.lastName}
+            onChange={(e) =>
+              setProfileData({ ...profileData, lastName: e.target.value })
+            }
+          />
+        </div>
 
-            {/* points */}
-            <div className="w-full px-3 mb-10">
-              <label
-                className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                htmlFor="points"
-              >
-                Số điểm thưởng:
-              </label>
-              <input
-                className="appearance-none block w-full text-xl text-gray-700 border border-gray-200 rounded py-3 mb-3 px-4"
-                id="points"
-                type="text"
-                value={profileData.points}
-                readOnly
-              />
-            </div>
-          </div>
-        </form>
+        <div className="mb-4">
+          <label className="text-gray-700 font-semibold">Số điện thoại</label>
+          <input
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={profileData.phoneNumber}
+            onChange={(e) =>
+              setProfileData({ ...profileData, phoneNumber: e.target.value })
+            }
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="text-gray-700 font-semibold">Email</label>
+          <input
+            className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
+            value={profileData.userName}
+            disabled
+          />
+        </div>
       </div>
 
-      {/* Địa chỉ */}
-      <div className="w-full px-3 mb-6">
-        <label
-          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          htmlFor="address"
-        >
-          Địa chỉ
-        </label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <div>
+          <label className="text-gray-700 font-semibold">Tỉnh/Thành phố</label>
+          <select
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={selectedProvince}
+            onChange={(e) => {
+              const provinceCode = e.target.value;
+              setSelectedProvince(provinceCode);
+              fetchDistricts(provinceCode);
+            }}
+          >
+            <option value="">Chọn Tỉnh/Thành phố</option>
+            {Array.isArray(provinceList) &&
+              provinceList.map((province) => (
+                <option key={province.code} value={province.code}>
+                  {province.name_with_type}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-gray-700 font-semibold">Quận/Huyện</label>
+          <select
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={selectedDistrict}
+            onChange={(e) => {
+              const districtCode = e.target.value;
+              setSelectedDistrict(districtCode);
+              fetchWards(districtCode);
+            }}
+          >
+            <option value="">Chọn Quận/Huyện</option>
+            {Array.isArray(districtList) && districtList.length > 0 ? (
+              districtList.map((district) => (
+                <option key={district.code} value={district.code}>
+                  {district.name_with_type}
+                </option>
+              ))
+            ) : (
+              <option value="">Không có dữ liệu</option>
+            )}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-gray-700 font-semibold">Phường/Xã</label>
+          <select
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            value={selectedWard}
+            onChange={(e) => {
+              setSelectedWard(e.target.value);
+            }}
+          >
+            <option value="">Chọn Phường/Xã</option>
+            {Array.isArray(wardList) && wardList.length > 0 ? (
+              wardList.map((ward) => (
+                <option key={ward.code} value={ward.code}>
+                  {ward.name_with_type}
+                </option>
+              ))
+            ) : (
+              <option value="">Không có dữ liệu</option>
+            )}
+          </select>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <label className="text-gray-700 font-semibold">Địa chỉ cụ thể</label>
         <input
-          className="appearance-none block w-full text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
-          id="address"
-          type="text"
-          value={profileData.address}
-          onChange={(e) =>
-            setProfileData({ ...profileData, address: e.target.value })
-          }
+          className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+          placeholder="123 Đường ABC"
+          value={specificAddress}
+          onChange={(e) => setSpecificAddress(e.target.value)}
         />
       </div>
 
-      <div className="flex justify-end">
-        <div
-          className="flex bg-red-600 justify-center align-middle p-3 rounded-lg text-white font-medium w-32"
+      <div className="mt-6">
+        <label className="text-gray-700 font-semibold">Địa chỉ đầy đủ</label>
+        <input
+          className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
+          value={profileData.address}
+          readOnly
+        />
+      </div>
+
+      <div className="mt-8 flex justify-end">
+        <button
+          className="px-6 py-2 bg-rose-600 text-white font-bold rounded-md hover:bg-rose-700 transition duration-300"
           onClick={updateProfile}
         >
-          <a>Save Changes</a>
-        </div>
+          Save Changes
+        </button>
       </div>
     </div>
   );
