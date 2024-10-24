@@ -1,309 +1,156 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState, useCallback } from "react";
-import {
-  Spin,
-  Card,
-  Pagination,
-  Menu,
-  Slider,
-  Button,
-  Input,
-  Dropdown,
-  Space,
-  Select,
-} from "antd";
+import { useEffect, useState } from "react";
+import { Card, Button, Spin } from "antd";
+import { RightOutlined, HeartOutlined, EyeOutlined } from "@ant-design/icons";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
-import { EyeOutlined, HeartOutlined, DownOutlined } from "@ant-design/icons";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-function HomeProductCarousel({ initialSearchTerm }) {
-  const [dataSource, setDataSource] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [priceRange, setPriceRange] = useState([0, 5000000]);
-  const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "");
+function HomeProductCarousel() {
   const navigate = useNavigate();
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [customPriceRange, setCustomPriceRange] = useState([0, 5000000]);
+  const [categoriesWithProducts, setCategoriesWithProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     AOS.init({
-      duration: 1000,
+      duration: 800,
       once: true,
       mirror: false,
     });
   }, []);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoriesAndProducts = async () => {
       try {
-        const response = await api.get("categories");
-        setCategories(response.data.details.data.categories);
+        const categoriesResponse = await api.get("categories");
+        const categories = categoriesResponse.data.details.data.categories;
+
+        const categoriesWithProductsData = await Promise.all(
+          categories.map(async (category) => {
+            const productsResponse = await api.get("kits", {
+              params: {
+                "category-name": category.name,
+                page: 0,
+                "per-page": 5,
+              },
+            });
+            return {
+              ...category,
+              products: productsResponse.data.details.data.kits,
+            };
+          })
+        );
+
+        setCategoriesWithProducts(categoriesWithProductsData);
+        setLoading(false);
       } catch (error) {
-        console.error("Lỗi khi tải danh sách categories:", error);
+        console.error("Error fetching categories and products:", error);
+        setLoading(false);
       }
     };
-    fetchCategories();
+
+    fetchCategoriesAndProducts();
   }, []);
-
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get("kits", {
-        params: {
-          page: currentPage,
-          "kit-name": searchTerm,
-          "category-name": selectedCategory ? selectedCategory.name : "",
-          "from-price": priceRange[0],
-          "to-price": priceRange[1],
-        },
-      });
-      const {
-        kits,
-        "total-pages": totalPages,
-        "current-page": currentPageFromApi,
-      } = response.data.details.data;
-      setDataSource(kits);
-      setTotalPages(totalPages);
-      setCurrentPage(currentPageFromApi - 1);
-    } catch (error) {
-      console.error("Lỗi khi tải dữ liệu kit:", error);
-      setDataSource([]);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, searchTerm, selectedCategory, priceRange]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   const handleProductClick = (kitId) => {
     navigate(`/productdetail/${kitId}`);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page - 1);
-  };
-
-  const handleCategoryChange = (value) => {
-    setSelectedCategory(value ? categories.find((c) => c.id === value) : null);
-    setCurrentPage(0);
-    fetchProducts();
-  };
-
-  const handlePriceChange = (value) => {
-    setPriceRange(value);
-  };
-
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    setCurrentPage(0);
-    fetchProducts();
-  };
-
-  const handleApplyFilter = () => {
-    setCurrentPage(0);
-    fetchProducts();
-  };
-
-  const handlePriceFilterChange = (value) => {
-    setPriceFilter(value);
-    if (value === "custom") {
-      setPriceRange(customPriceRange);
-    } else if (value === "all") {
-      setPriceRange([0, 5000000]);
-    } else {
-      const [min, max] = value.split("-").map(Number);
-      setPriceRange([min, max]);
-    }
-    setCurrentPage(0);
-    fetchProducts();
-  };
-
-  const handleCustomPriceChange = (value) => {
-    setCustomPriceRange(value);
-    if (priceFilter === "custom") {
-      setPriceRange(value);
-      setCurrentPage(0);
-      fetchProducts();
-    }
-  };
-
-  const priceFilterMenu = (
-    <Menu onClick={({ key }) => handlePriceFilterChange(key)}>
-      <Menu.Item key="all">Tất cả giá</Menu.Item>
-      <Menu.Item key="0-100000">0 - 100,000 VND</Menu.Item>
-      <Menu.Item key="100000-500000">100,000 - 500,000 VND</Menu.Item>
-      <Menu.Item key="500000-1000000">500,000 - 1,000,000 VND</Menu.Item>
-      <Menu.Item key="1000000-2000000">1,000,000 - 2,000,000 VND</Menu.Item>
-      <Menu.Item key="2000000-5000000">2,000,000 - 5,000,000 VND</Menu.Item>
-      <Menu.Item key="custom">Tùy chỉnh</Menu.Item>
-    </Menu>
-  );
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto  py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Left column: Filters */}
-        <div className="w-full md:w-1/4">
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Bộ lọc</h3>
-            <Space direction="vertical" className="w-full">
-              <Input.Search
-                placeholder="Tìm kiếm sản phẩm"
-                onSearch={handleSearch}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Select
-                style={{ width: "100%" }}
-                placeholder="Chọn danh mục"
-                onChange={handleCategoryChange}
-                value={selectedCategory ? selectedCategory.id : undefined}
+    <div className="container mx-auto py-8 px-4 bg-white">
+      {categoriesWithProducts.map((category, index) => (
+        <div
+          key={category.id}
+          className="mb-16"
+          data-aos="fade-up"
+          data-aos-delay={index * 50}
+        >
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 relative">
+              {category.name}
+              <span className="absolute bottom-0 left-0 w-4/5 h-1 bg-blue-600"></span>
+            </h2>
+            <Button
+              type="link"
+              className="text-blue-600 hover:text-blue-800 transition-colors duration-300 text-lg font-semibold"
+              onClick={() => navigate(`/category/${category.name}`)}
+            >
+              Xem tất cả <RightOutlined />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {category.products.slice(0, 5).map((product, productIndex) => (
+              <Card
+                key={product.id}
+                hoverable
+                className={`group shadow-lg hover:shadow-2xl transition-shadow duration-300 rounded-lg border border-gray-200 bg-white overflow-hidden
+                  ${productIndex >= 1 ? "hidden " : "block"}
+                  ${productIndex >= 2 ? "hidden " : "sm:block"}
+                  ${productIndex >= 3 ? "hidden" : " md:block"}
+                  ${productIndex >= 4 ? "hidden " : "lg:block"}
+                   ${productIndex >= 5 ? "hidden " : "xl:block"}
+                `}
+                cover={
+                  <img
+                    alt={product.name}
+                    src={product["kit-images"]?.[0]?.url || "default-image-url"}
+                    className="h-48 w-full object-cover"
+                  />
+                }
+                onClick={() => handleProductClick(product.id)}
+                bodyStyle={{
+                  padding: "0",
+                  paddingTop: "24px",
+                  paddingBottom: "24px",
+                }}
               >
-                <Select.Option value={undefined}>Tất cả sản phẩm</Select.Option>
-                {categories.map((category) => (
-                  <Select.Option key={category.id} value={category.id}>
-                    {category.name}
-                  </Select.Option>
-                ))}
-              </Select>
-              <Dropdown overlay={priceFilterMenu}>
-                <Button className="w-full">
-                  Lọc theo giá <DownOutlined />
-                </Button>
-              </Dropdown>
-              {priceFilter === "custom" && (
-                <Slider
-                  range
-                  min={0}
-                  max={5000000}
-                  step={10000}
-                  value={customPriceRange}
-                  onChange={handleCustomPriceChange}
+                <Card.Meta
+                  title={
+                    <div className="text-center font-semibold truncate px-2">
+                      {product.name}
+                    </div>
+                  }
+                  description={
+                    <div className="text-center text-gray-600 px-2 pb-2">
+                      {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
+                    </div>
+                  }
                 />
-              )}
-              <span className="text-sm text-gray-600">
-                {priceRange[0].toLocaleString()} -{" "}
-                {priceRange[1].toLocaleString()} VND
-              </span>
-              <Button
-                type="primary"
-                onClick={handleApplyFilter}
-                className="w-full"
-              >
-                Áp dụng bộ lọc
-              </Button>
-            </Space>
+                <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
+                  <Button
+                    shape="circle"
+                    icon={<HeartOutlined />}
+                    className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Đã nhấn vào biểu tượng tim");
+                    }}
+                  />
+                  <Button
+                    shape="circle"
+                    icon={<EyeOutlined />}
+                    className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Đã nhấn vào biểu tượng mắt");
+                    }}
+                  />
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
-
-        {/* Right column: Product list */}
-        <div className="w-full md:w-3/4">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Spin size="large" />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center">
-              <h2 className="text-2xl font-bold mb-6">
-                {selectedCategory
-                  ? `${selectedCategory.name}`
-                  : "Tất cả sản phẩm"}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {dataSource.length > 0 ? (
-                  dataSource.map((item, index) => (
-                    <div
-                      key={item.id}
-                      data-aos="fade-up"
-                      data-aos-delay={index * 100}
-                      data-aos-anchor-placement="top-bottom"
-                    >
-                      <Card
-                        bodyStyle={{
-                          padding: "0", // Loại bỏ tất cả padding
-                          paddingTop: "24px", // Thiết lập lại paddingTop
-                          paddingBottom: "24px", // Thiết lập lại paddingBottom
-                        }}
-                        hoverable
-                        className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                        cover={
-                          <img
-                            alt={item.name || "Hình ảnh sản phẩm"}
-                            src={
-                              item["kit-images"]?.[0]?.url ||
-                              "default-image-url"
-                            }
-                            className="h-48 object-cover"
-                          />
-                        }
-                        onClick={() => handleProductClick(item.id)}
-                      >
-                        <Card.Meta
-                          className=""
-                          title={
-                            <div className="text-center font-semibold truncate px-2">
-                              {item.name}
-                            </div>
-                          }
-                          description={
-                            <div className="text-center text-gray-600 px-2 pb-2">
-                              {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()}`}{" "}
-                              VND
-                            </div>
-                          }
-                        />
-                        <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Button
-                            shape="circle"
-                            icon={<HeartOutlined />}
-                            className="bg-white/80 hover:bg-red-500 hover:text-white transition-colors duration-300"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Đã nhấn vào biểu tượng tim");
-                            }}
-                          />
-                          <Button
-                            shape="circle"
-                            icon={<EyeOutlined />}
-                            className="bg-white/80 hover:bg-blue-500 hover:text-white transition-colors duration-300"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Đã nhấn vào biểu tượng mắt");
-                            }}
-                          />
-                        </div>
-                      </Card>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center text-gray-500">
-                    Không tìm thấy sản phẩm nào.
-                  </div>
-                )}
-              </div>
-              {totalPages > 0 && (
-                <Pagination
-                  total={totalPages * 20}
-                  current={currentPage + 1}
-                  pageSize={20}
-                  onChange={handlePageChange}
-                  showSizeChanger={false}
-                  className="mt-8"
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

@@ -7,15 +7,14 @@ import {
   List,
   Tag,
   message,
-  Select,
   Spin,
+  Radio,
+  Image,
 } from "antd";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
-
-const { Option } = Select;
 
 const ProductDetail = () => {
   const { kitId } = useParams();
@@ -141,7 +140,7 @@ const ProductDetail = () => {
   }
 
   // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
-  const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
+  // const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
 
   // const handleThumbnailClick = (index) => {
   //   setSelectedImage(index);
@@ -174,7 +173,7 @@ const ProductDetail = () => {
             </div> */}
           <TransformWrapper>
             <TransformComponent>
-              <img
+              <Image
                 src={kitImage}
                 alt="Sản phẩm đã chọn"
                 className="w-full rounded-lg"
@@ -203,18 +202,26 @@ const ProductDetail = () => {
 
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Chọn gói:</h3>
-            <Select
-              style={{ width: "100%" }}
-              placeholder="Chọn một gói"
-              onChange={handlePackageSelect}
-              defaultValue={packageDetail?.id}
+            <Radio.Group
+              onChange={(e) => handlePackageSelect(e.target.value)}
+              value={packageDetail?.id}
+              className="w-full space-y-2"
             >
               {packages.map((pkg) => (
-                <Option key={pkg.id} value={pkg.id}>
-                  {pkg.name}
-                </Option>
+                <Radio
+                  key={pkg.id}
+                  value={pkg.id}
+                  className="flex items-center p-1 rounded-lg transition-shadow duration-300 cursor-pointer"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-base font-medium">{pkg.name}</span>
+                    <span className="text-sm text-gray-500">
+                      {pkg.description}
+                    </span>
+                  </div>
+                </Radio>
               ))}
-            </Select>
+            </Radio.Group>
           </div>
           <p className="text-2xl font-bold text-red-600 mb-4">
             {packageDetail.price.toLocaleString("vi-VN")} ₫
