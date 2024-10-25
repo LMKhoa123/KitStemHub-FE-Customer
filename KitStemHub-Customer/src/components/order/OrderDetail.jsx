@@ -186,7 +186,7 @@ function OrderDetail() {
       >
         <Breadcrumb className="mb-6 text-sm">
           <Breadcrumb.Item>
-            <Link to="/" className="text-blue-500 hover:text-blue-700">
+            <Link to="/home" className="text-blue-500 hover:text-blue-700">
               <HomeOutlined className="mr-1" />
               Trang chủ
             </Link>

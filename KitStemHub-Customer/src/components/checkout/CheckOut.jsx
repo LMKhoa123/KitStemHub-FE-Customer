@@ -511,8 +511,7 @@ const CheckOut = () => {
             <div className="space-y-2">
               <Select
                 className="w-full mb-2"
-                placeholder="Chọn tỉnh/thành phố"
-                value={selectedProvince}
+                value={selectedProvince || "Chọn tỉnh/thành phố"}
                 onChange={(value) => handleNewAddressChange("province", value)}
               >
                 {provinceList.map((province) => (
@@ -523,8 +522,7 @@ const CheckOut = () => {
               </Select>
               <Select
                 className="w-full mb-2"
-                placeholder="Chọn quận/huyện"
-                value={selectedDistrict}
+                value={selectedDistrict || "Chọn quận/huyện"}
                 onChange={(value) => handleNewAddressChange("district", value)}
                 disabled={!selectedProvince}
               >
@@ -536,8 +534,7 @@ const CheckOut = () => {
               </Select>
               <Select
                 className="w-full mb-2"
-                placeholder="Chọn phường/xã"
-                value={selectedWard}
+                value={selectedWard || "Chọn phường/xã"}
                 onChange={(value) => handleNewAddressChange("ward", value)}
                 disabled={!selectedDistrict}
               >
@@ -585,25 +582,21 @@ const CheckOut = () => {
           >
             <Radio value="saved" className="block">
               Số điện thoại đã lưu
-              <Select
-                className={`w-full ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
+              <input
+                type="text"
+                className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
                 value={selectedPhoneNumber || ""}
                 disabled={!selectedPhoneNumber}
                 placeholder="Không có số điện thoại đã lưu"
-                onChange={(value) => setSelectedPhoneNumber(value)}
-                size="large"
-              >
-                <Option value={selectedPhoneNumber}>
-                  {selectedPhoneNumber}
-                </Option>
-              </Select>
+                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
+              />
               {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng số điện thoại đã lưu */}
               {!useNewPhoneNumber && errors.phone && (
                 <p className="text-red-500">{errors.phone}</p>
               )}
             </Radio>
 
-            <Radio value="new" className="block">
+            {/* <Radio value="new" className="block">
               Nhập số điện thoại mới
               <input
                 type="text"
@@ -618,7 +611,7 @@ const CheckOut = () => {
               {useNewPhoneNumber && errors.phone && (
                 <p className="text-red-500">{errors.phone}</p>
               )}
-            </Radio>
+            </Radio> */}
           </Radio.Group>
 
           {/* Ghi chú */}
