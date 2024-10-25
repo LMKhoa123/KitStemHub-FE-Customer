@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../../config/axios";
 import Swal from "sweetalert2";
+import { Button, Modal } from "antd";
 
 const baseURL = "https://vn-public-apis.fpo.vn";
 function FormMyProfile() {
@@ -22,6 +23,33 @@ function FormMyProfile() {
   const [specificAddress, setSpecificAddress] = useState(""); // Địa chỉ nhà cụ thể
   const [fullAddress, setFullAddress] = useState(""); // Địa chỉ đầy đủ
   const [isUpdated, setIsUpdated] = useState(false);
+  const [isAddressModalVisible, setIsAddressModalVisible] = useState(false); // Trạng thái modal
+
+  // Hàm để hiển thị modal chỉnh sửa địa chỉ
+  const showAddressModal = () => {
+    setIsAddressModalVisible(true);
+  };
+
+  // Hàm để đóng modal chỉnh sửa địa chỉ
+  const handleAddressModalClose = () => {
+    setIsAddressModalVisible(false);
+  };
+
+  // Hàm để xác nhận thông tin từ modal và hiển thị địa chỉ đầy đủ trên trang
+  const handleModalOk = () => {
+    const selectedProvinceObj = provinceList.find(
+      (province) => province.code === selectedProvince
+    );
+    const selectedDistrictObj = districtList.find(
+      (district) => district.code === selectedDistrict
+    );
+    const selectedWardObj = wardList.find((ward) => ward.code === selectedWard);
+
+    const completeAddress = `${specificAddress}, ${selectedWardObj?.name_with_type || ""}, ${selectedDistrictObj?.name_with_type || ""}, ${selectedProvinceObj?.name_with_type || ""}`;
+
+    setFullAddress(completeAddress); // Hiển thị địa chỉ đầy đủ trên giao diện
+    setIsAddressModalVisible(false); // Đóng modal
+  };
 
   // Fetch profile data
   const fetchProfile = async () => {
@@ -40,7 +68,7 @@ function FormMyProfile() {
         points: userProfile["points"] || 0,
       });
 
-      setSpecificAddress(""); // Hiển thị địa chỉ đầy đủ ngay khi fetch
+      setFullAddress(userProfile["address"]); // Hiển thị địa chỉ ban đầu từ API
     } catch (error) {
       console.log("Lấy dữ liệu thất bại", error);
     }
@@ -99,23 +127,11 @@ function FormMyProfile() {
   };
 
   const updateProfile = async () => {
-    // Tìm tên đầy đủ của tỉnh, quận, phường
-    const selectedProvinceObj = provinceList.find(
-      (province) => province.code === selectedProvince
-    );
-    const selectedDistrictObj = districtList.find(
-      (district) => district.code === selectedDistrict
-    );
-    const selectedWardObj = wardList.find((ward) => ward.code === selectedWard);
-
-    // Tạo địa chỉ đầy đủ từ các giá trị name_with_type
-    const completeAddress = `${specificAddress}, ${selectedWardObj?.name_with_type || ""}, ${selectedDistrictObj?.name_with_type || ""}, ${selectedProvinceObj?.name_with_type || ""}`;
-
     const cleanData = {
       "first-name": profileData.firstName || "",
       "last-name": profileData.lastName || "",
       "phone-number": profileData.phoneNumber || "",
-      address: completeAddress || "",
+      address: fullAddress || profileData.address,
     };
 
     console.log("Payload gửi đi:", cleanData);
@@ -137,7 +153,6 @@ function FormMyProfile() {
       }).then((result) => {
         if (result.isConfirmed) {
           setProfileData(response.data);
-          setFullAddress(completeAddress); // Hiển thị địa chỉ đầy đủ
           setIsUpdated(true);
           Swal.fire("Saved!", "", "success");
         } else if (result.isDenied) {
@@ -194,6 +209,7 @@ function FormMyProfile() {
         <div className="mb-4">
           <label className="text-gray-700 font-semibold">Số điện thoại</label>
           <input
+            type="number"
             className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
             value={profileData.phoneNumber}
             onChange={(e) =>
@@ -212,90 +228,136 @@ function FormMyProfile() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <div>
-          <label className="text-gray-700 font-semibold">Tỉnh/Thành phố</label>
-          <select
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-            value={selectedProvince}
-            onChange={(e) => {
-              const provinceCode = e.target.value;
-              setSelectedProvince(provinceCode);
-              fetchDistricts(provinceCode);
-            }}
-          >
-            <option value="">Chọn Tỉnh/Thành phố</option>
-            {Array.isArray(provinceList) &&
-              provinceList.map((province) => (
-                <option key={province.code} value={province.code}>
-                  {province.name_with_type}
-                </option>
-              ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-gray-700 font-semibold">Quận/Huyện</label>
-          <select
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-            value={selectedDistrict}
-            onChange={(e) => {
-              const districtCode = e.target.value;
-              setSelectedDistrict(districtCode);
-              fetchWards(districtCode);
-            }}
-          >
-            <option value="">Chọn Quận/Huyện</option>
-            {Array.isArray(districtList) && districtList.length > 0 ? (
-              districtList.map((district) => (
-                <option key={district.code} value={district.code}>
-                  {district.name_with_type}
-                </option>
-              ))
-            ) : (
-              <option value="">Không có dữ liệu</option>
-            )}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-gray-700 font-semibold">Phường/Xã</label>
-          <select
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-            value={selectedWard}
-            onChange={(e) => {
-              setSelectedWard(e.target.value);
-            }}
-          >
-            <option value="">Chọn Phường/Xã</option>
-            {Array.isArray(wardList) && wardList.length > 0 ? (
-              wardList.map((ward) => (
-                <option key={ward.code} value={ward.code}>
-                  {ward.name_with_type}
-                </option>
-              ))
-            ) : (
-              <option value="">Không có dữ liệu</option>
-            )}
-          </select>
-        </div>
-      </div>
-
+      {/* Nút để mở modal chỉnh sửa địa chỉ */}
       <div className="mt-6">
-        <label className="text-gray-700 font-semibold">Địa chỉ cụ thể</label>
-        <input
-          className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-          placeholder="123 Đường ABC"
-          value={specificAddress}
-          onChange={(e) => setSpecificAddress(e.target.value)}
-        />
+        <Button type="primary" onClick={showAddressModal}>
+          Chỉnh sửa địa chỉ
+        </Button>
       </div>
+
+      {/* Modal chứa form chỉnh sửa địa chỉ */}
+      <Modal
+        title={
+          <div className="ml-5 mt-5">
+            <span className="text-2xl font-bold">Chỉnh sửa địa chỉ</span>
+          </div>
+        }
+        visible={isAddressModalVisible}
+        onCancel={handleAddressModalClose}
+        onOk={handleModalOk}
+        width="800px"
+        footer={[
+          <Button
+            key="back"
+            onClick={handleAddressModalClose}
+            className="px-8 py-4 font-medium"
+          >
+            Hủy
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleModalOk}
+            className="px-8 py-4 bg-rose-600 text-white hover:bg-rose-700 mr-5 font-medium"
+          >
+            Lưu địa chỉ
+          </Button>,
+        ]}
+        bodyStyle={{ padding: "20px", height: "300px" }} // Thêm padding để tạo khoảng cách cho nội dung
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
+          <div>
+            <label className="block text-gray-700 font-semibold mb-4">
+              Tỉnh/Thành phố
+            </label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+              value={selectedProvince}
+              onChange={(e) => {
+                const provinceCode = e.target.value;
+                setSelectedProvince(provinceCode);
+                fetchDistricts(provinceCode);
+              }}
+            >
+              <option value="">Chọn Tỉnh/Thành phố</option>
+              {Array.isArray(provinceList) &&
+                provinceList.map((province) => (
+                  <option key={province.code} value={province.code}>
+                    {province.name_with_type}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-semibold mb-4">
+              Quận/Huyện
+            </label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+              value={selectedDistrict}
+              onChange={(e) => {
+                const districtCode = e.target.value;
+                setSelectedDistrict(districtCode);
+                fetchWards(districtCode);
+              }}
+            >
+              <option value="">Chọn Quận/Huyện</option>
+              {Array.isArray(districtList) && districtList.length > 0 ? (
+                districtList.map((district) => (
+                  <option key={district.code} value={district.code}>
+                    {district.name_with_type}
+                  </option>
+                ))
+              ) : (
+                <option value="">Không có dữ liệu</option>
+              )}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-semibold mb-4">
+              Phường/Xã
+            </label>
+            <select
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+              value={selectedWard}
+              onChange={(e) => {
+                setSelectedWard(e.target.value);
+              }}
+            >
+              <option value="">Chọn Phường/Xã</option>
+              {Array.isArray(wardList) && wardList.length > 0 ? (
+                wardList.map((ward) => (
+                  <option key={ward.code} value={ward.code}>
+                    {ward.name_with_type}
+                  </option>
+                ))
+              ) : (
+                <option value="">Không có dữ liệu</option>
+              )}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <label className="block text-gray-700 font-semibold mb-4">
+            Địa chỉ cụ thể
+          </label>
+          <input
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            placeholder="123 Đường ABC"
+            value={specificAddress}
+            onChange={(e) => setSpecificAddress(e.target.value)}
+          />
+        </div>
+      </Modal>
 
       <div className="mt-6">
         <label className="text-gray-700 font-semibold">Địa chỉ đầy đủ</label>
         <input
           className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
-          value={profileData.address}
+          value={fullAddress}
           readOnly
         />
       </div>

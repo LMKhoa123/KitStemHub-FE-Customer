@@ -133,14 +133,41 @@ function CartContent() {
   };
 
   // Hàm xử lý khi thay đổi số lượng sản phẩm
-  const handleQuantityChange = (value, record) => {
+  const handleQuantityChange = async (value, record) => {
     const newCartItems = cartItems.map((item) =>
       item.key === record.key
         ? { ...item, quantity: value, subtotal: item.price * value }
         : item
     );
+
     setCartItems(newCartItems);
     updateTotals(newCartItems);
+
+    try {
+      // Gửi request PUT để cập nhật số lượng sản phẩm
+      await api.put("http://54.66.193.22:5001/api/carts", {
+        "package-id": record.packageId,
+        "package-quantity": value,
+      });
+
+      // Hiển thị thông báo thành công
+      notification.success({
+        message: "Thành công",
+        description: "Số lượng sản phẩm đã được cập nhật.",
+        placement: "topRight",
+      });
+    } catch (error) {
+      // Hiển thị thông báo lỗi
+      notification.error({
+        message: "Thất bại",
+        description: "Cập nhật số lượng sản phẩm thất bại.",
+        placement: "topRight",
+      });
+      console.error(
+        "Error updating quantity:",
+        error.response || error.message
+      );
+    }
   };
 
   // Hàm xử lý khi quay lại trang Home
