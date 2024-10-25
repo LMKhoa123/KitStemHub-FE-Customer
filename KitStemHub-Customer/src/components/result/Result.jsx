@@ -50,6 +50,7 @@ const Result = () => {
           });
 
           if (response.data.status === "success") {
+            localStorage.removeItem("cart");
             setPaymentStatus("success");
             setShowConfetti(true); // Hiển thị hiệu ứng pháo hoa
             notification.destroy();

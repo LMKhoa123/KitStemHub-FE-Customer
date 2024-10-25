@@ -145,7 +145,7 @@ function CartContent() {
 
     try {
       // Gửi request PUT để cập nhật số lượng sản phẩm
-      await api.put("http://54.66.193.22:5001/api/carts", {
+      await api.put("carts", {
         "package-id": record.packageId,
         "package-quantity": value,
       });

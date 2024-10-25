@@ -216,7 +216,7 @@ const CheckOut = () => {
             window.location.href = paymentUrl;
             notification.destroy();
             notification.success({
-              message: "Đơn hàng đã đợc đặt thành công!",
+              message: "Đơn hàng đã được đặt thành công!",
               duration: 3,
             });
             setCurrentStep(2);
