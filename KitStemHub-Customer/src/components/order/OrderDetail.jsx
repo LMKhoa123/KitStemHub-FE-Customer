@@ -383,6 +383,12 @@ function OrderDetail() {
                   <Text strong>{formatCurrency(orderData.price)}</Text>
                 </div>
                 <div className="flex justify-between items-center">
+                  <Text className="text-gray-600">Phí Vận Chuyển</Text>
+                  <Text strong>
+                    {formatCurrency(orderData["shipping-fee"])}
+                  </Text>
+                </div>
+                <div className="flex justify-between items-center">
                   <Text className="text-gray-600">Giảm giá</Text>
                   <Text strong className="text-gray-500">
                     -{formatCurrency(orderData.discount)}

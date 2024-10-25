@@ -38,6 +38,18 @@ const CheckOut = () => {
   const [usePoints, setUsePoints] = useState(false); // Xác định có sử dụng điểm không
   const [points, setPoints] = useState(0); // Số điểm của user, fetch từ API profile
   const [errors, setErrors] = useState({}); // Lưu trữ lỗi
+  const [shippingFee, setShippingFee] = useState(0);
+  ///
+  const baseURL = "https://vn-public-apis.fpo.vn";
+  const [provinceList, setProvinceList] = useState([]);
+  const [districtList, setDistrictList] = useState([]);
+  const [wardList, setWardList] = useState([]);
+
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [specificAddress, setSpecificAddress] = useState(""); // Địa chỉ nhà cụ thể
+  const [fullAddress, setFullAddress] = useState(""); // Địa chỉ đầy đủ
   const navigate = useNavigate();
 
   // Fetch dữ liệu profile (bao gồm điểm)
@@ -45,15 +57,20 @@ const CheckOut = () => {
     try {
       const response = await api.get("users/profile");
       const userProfile = response.data.details.data["user-profile-dto"];
-
       if (!userProfile) {
         throw new Error("Dữ liệu người dùng không tồn tại");
       }
 
       setPoints(userProfile.points || 0); // Đảm bảo số điểm không undefined
       setProfileData(userProfile);
-      setShippingAddress(userProfile.address || ""); // Đảm bảo địa chỉ không undefined
-      setSelectedPhoneNumber(userProfile["phone-number"] || ""); // Đảm bảo số điện thoại không undefined
+      setShippingAddress(userProfile.address || "");
+      setSelectedPhoneNumber(userProfile["phone-number"] || "");
+
+      // Fetch shipping fee
+      const responseShippingFee = await api.get(`orders/shippingfees`, {
+        params: { address: userProfile.address || newAddress },
+      });
+      setShippingFee(responseShippingFee.data.details.data.price);
     } catch (error) {
       console.error("Lỗi khi tải thông tin người dùng:", error);
     }
@@ -67,8 +84,8 @@ const CheckOut = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const pointsToMoney = usePoints ? Math.min(points, subtotal) : 0; // Quy đổi điểm thành tiền, tối đa không vượt quá subtotal
-  const total = subtotal - pointsToMoney; // Tổng tiền sau khi sử dụng điểm
+  const pointsToMoney = usePoints ? Math.min(points, subtotal) : 0;
+  const total = subtotal + shippingFee - pointsToMoney; // Include shipping fee in total
 
   // Hàm kiểm tra lỗi và đánh dấu ô trống
   const handleValidation = () => {
@@ -76,17 +93,25 @@ const CheckOut = () => {
 
     // Kiểm tra địa chỉ giao hàng dựa trên radio đang được chọn
     if (useNewAddress) {
-      if (!newAddress) {
-        tempErrors.address = "Vui lòng nhập địa chỉ mới";
+      if (!selectedProvince) {
+        tempErrors.province = "Vui lòng chọn tỉnh/thành phố";
+      }
+      if (!selectedDistrict) {
+        tempErrors.district = "Vui lòng chọn quận/huyện";
+      }
+      if (!selectedWard) {
+        tempErrors.ward = "Vui lòng chọn phường/xã";
+      }
+      if (!specificAddress) {
+        tempErrors.specificAddress = "Vui lòng nhập địa chỉ cụ thể";
       }
     } else {
       if (!shippingAddress) {
-        tempErrors.address =
-          "Vui lòng nhập địa chỉ của bạn trong thông tin tài khoản";
+        tempErrors.address = "Vui lòng chọn địa chỉ giao hàng";
       }
     }
 
-    // Kiểm tra số điện thoại dựa trên radio đang được chọn
+    // Kiểm tra số điện thoại
     if (useNewPhoneNumber) {
       if (
         !newPhoneNumber ||
@@ -104,7 +129,7 @@ const CheckOut = () => {
     }
 
     setErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0; // Kiểm tra nếu không có lỗi nào
+    return Object.keys(tempErrors).length === 0;
   };
 
   // Xoá lỗi khi bắt đầu nhập địa chỉ mới
@@ -141,9 +166,13 @@ const CheckOut = () => {
     try {
       await fetchUserProfile();
 
-      const shippingAddr = useNewAddress
-        ? newAddress
-        : shippingAddress || "Địa chỉ không xác định";
+      let shippingAddr;
+      if (useNewAddress) {
+        shippingAddr = buildFullAddress(true); // Sử dụng địa chỉ mới đầy đủ
+      } else {
+        shippingAddr = shippingAddress || "Địa chỉ không xác định";
+      }
+
       const phoneNumber = useNewPhoneNumber
         ? newPhoneNumber
         : selectedPhoneNumber || "Số điện thoại không xác định";
@@ -187,7 +216,7 @@ const CheckOut = () => {
             window.location.href = paymentUrl;
             notification.destroy();
             notification.success({
-              message: "Đơn hàng đã được đặt thành công!",
+              message: "Đơn hàng đã đợc đặt thành công!",
               duration: 3,
             });
             setCurrentStep(2);
@@ -240,6 +269,189 @@ const CheckOut = () => {
     }
   };
 
+  // Fetch provinces
+  const fetchProvinces = async () => {
+    try {
+      const response = await fetch(`${baseURL}/provinces/getAll?limit=-1`);
+      const data = await response.json();
+      const provincesArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setProvinceList(provincesArray);
+      console.log("Updated provinceList:", provincesArray); // Debug log to verify data
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách tỉnh:", error);
+    }
+  };
+
+  // Fetch districts based on provinceCode
+  const fetchDistricts = async (provinceCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/districts/getByProvince?provinceCode=${provinceCode}&limit=-1`
+      );
+      const data = await response.json();
+      const districtsArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setDistrictList(districtsArray);
+      console.log("Updated districtList:", districtsArray);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách quận:", error);
+      setDistrictList([]); // Reset danh sách nếu có lỗi
+    }
+  };
+
+  // Fetch wards based on districtCode
+  const fetchWards = async (districtCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/wards/getByDistrict?districtCode=${districtCode}&limit=-1`
+      );
+      const data = await response.json();
+
+      console.log("Wards API response:", data); // Kiểm tra phản hồi API
+
+      const wardsArray = Array.isArray(data.data.data) ? data.data.data : []; // Truy cập đúng thuộc tính của API
+      setWardList(wardsArray);
+      console.log("Updated wardList:", wardsArray); // Kiểm tra dữ liệu danh sách phường
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách phường:", error);
+      setWardList([]); // Đảm bảo đặt giá trị mặc định nếu có lỗi
+    }
+  };
+
+  useEffect(() => {
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      fetchDistricts(selectedProvince);
+      setSelectedDistrict("");
+      setSelectedWard("");
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      fetchWards(selectedDistrict);
+      setSelectedWard("");
+    }
+  }, [selectedDistrict]);
+
+  useEffect(() => {
+    if (useNewAddress) {
+      // Chỉ cập nhật phí vận chuyển khi địa chỉ mới thay đổi và đã đầy đủ
+      if (fullAddress) {
+        updateShippingFee(fullAddress);
+      }
+    } else {
+      // Sử dụng địa chỉ đã lưu
+      updateShippingFee(shippingAddress);
+    }
+  }, [useNewAddress, fullAddress, shippingAddress]);
+
+  const updateShippingFee = async (address) => {
+    try {
+      const addressForApi = useNewAddress ? buildFullAddress(false) : address;
+      const responseShippingFee = await api.get(`orders/shippingfees`, {
+        params: { address: addressForApi },
+      });
+      setShippingFee(responseShippingFee.data.details.data.price);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật phí vận chuyển:", error);
+      // Có thể thêm xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
+    }
+  };
+
+  const buildFullAddress = (includeSpecific = true) => {
+    const province =
+      provinceList.find((p) => p.code === selectedProvince)?.name || "";
+    const district =
+      districtList.find((d) => d.code === selectedDistrict)?.name || "";
+    const ward = wardList.find((w) => w.code === selectedWard)?.name || "";
+    const parts = includeSpecific
+      ? [specificAddress, ward, district, province]
+      : [ward, district, province];
+    return parts.filter(Boolean).join(", ");
+  };
+
+  useEffect(() => {
+    if (useNewAddress) {
+      const newFullAddress = buildFullAddress(true);
+      setFullAddress(newFullAddress);
+      if (selectedProvince && selectedDistrict && selectedWard) {
+        updateShippingFee(buildFullAddress(false));
+      }
+    }
+  }, [
+    useNewAddress,
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+    specificAddress,
+  ]);
+
+  const handleAddressTypeChange = (e) => {
+    const isNewAddress = e.target.value === "new";
+    setUseNewAddress(isNewAddress);
+    setErrors({ ...errors, address: "" });
+
+    if (isNewAddress) {
+      if (selectedProvince && selectedDistrict && selectedWard) {
+        updateShippingFee(buildFullAddress(false));
+      }
+    } else {
+      updateShippingFee(shippingAddress);
+    }
+  };
+
+  // Cập nhật hàm này để gọi updateShippingFee khi địa chỉ mới thay đổi
+  const handleNewAddressChange = (type, value) => {
+    switch (type) {
+      case "province":
+        setSelectedProvince(value);
+        setSelectedDistrict("");
+        setSelectedWard("");
+        break;
+      case "district":
+        setSelectedDistrict(value);
+        setSelectedWard("");
+        break;
+      case "ward":
+        setSelectedWard(value);
+        break;
+      case "specific":
+        if (value.length > 0 && /^[a-zA-Z0-9À-ỹ\s,.-]+$/.test(value)) {
+          setSpecificAddress(value);
+          setErrors((prev) => ({ ...prev, specificAddress: "" }));
+        } else if (value.length === 0) {
+          setSpecificAddress(value);
+          setErrors((prev) => ({
+            ...prev,
+            specificAddress: "Vui lòng nhập địa chỉ cụ thể.",
+          }));
+        } else {
+          setSpecificAddress(value);
+          setErrors((prev) => ({
+            ...prev,
+            specificAddress:
+              "Địa chỉ cụ thể không hợp lệ. Vui lòng chỉ sử dụng chữ cái, số, dấu phẩy, dấu chấm và dấu cách.",
+          }));
+        }
+        break;
+    }
+
+    if (useNewAddress && type !== "specific") {
+      const newFullAddress = buildFullAddress(true);
+      setFullAddress(newFullAddress);
+      if (selectedProvince && selectedDistrict && selectedWard) {
+        updateShippingFee(buildFullAddress(false));
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -269,15 +481,16 @@ const CheckOut = () => {
           </h2>
           {/* Địa chỉ giao hàng */}
           <Radio.Group
-            className="space-y-2"
-            onChange={(e) => {
-              setUseNewAddress(e.target.value === "new");
-              setErrors({ ...errors, address: "" }); // Reset lỗi cho address khi thay đổi lựa chọn
-            }}
-            value={useNewAddress ? "new" : "saved"} // Sử dụng địa chỉ đã lưu mặc định
+            className="space-y-2 mb-4"
+            onChange={handleAddressTypeChange}
+            value={useNewAddress ? "new" : "saved"}
           >
-            <Radio value="saved" className="block">
-              Sử dụng địa chỉ đã lưu
+            <Radio value="saved">Sử dụng địa chỉ đã lưu</Radio>
+            <Radio value="new">Nhập địa chỉ giao hàng mới</Radio>
+          </Radio.Group>
+
+          {!useNewAddress && (
+            <div className="mb-4">
               <Select
                 className={`w-full ${errors.address && !useNewAddress ? "border-red-500" : ""}`}
                 value={shippingAddress || ""}
@@ -288,29 +501,75 @@ const CheckOut = () => {
               >
                 <Option value={shippingAddress}>{shippingAddress}</Option>
               </Select>
-              {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng địa chỉ đã lưu */}
               {!useNewAddress && errors.address && (
-                <p className="text-red-500">{errors.address}</p>
+                <p className="text-red-500 mt-1">{errors.address}</p>
               )}
-            </Radio>
+            </div>
+          )}
 
-            <Radio value="new" className="block">
-              Nhập địa chỉ giao hàng mới
+          {useNewAddress && (
+            <div className="space-y-2">
+              <Select
+                className="w-full mb-2"
+                placeholder="Chọn tỉnh/thành phố"
+                value={selectedProvince}
+                onChange={(value) => handleNewAddressChange("province", value)}
+              >
+                {provinceList.map((province) => (
+                  <Option key={province.code} value={province.code}>
+                    {province.name}
+                  </Option>
+                ))}
+              </Select>
+              <Select
+                className="w-full mb-2"
+                placeholder="Chọn quận/huyện"
+                value={selectedDistrict}
+                onChange={(value) => handleNewAddressChange("district", value)}
+                disabled={!selectedProvince}
+              >
+                {districtList.map((district) => (
+                  <Option key={district.code} value={district.code}>
+                    {district.name}
+                  </Option>
+                ))}
+              </Select>
+              <Select
+                className="w-full mb-2"
+                placeholder="Chọn phường/xã"
+                value={selectedWard}
+                onChange={(value) => handleNewAddressChange("ward", value)}
+                disabled={!selectedDistrict}
+              >
+                {wardList.map((ward) => (
+                  <Option key={ward.code} value={ward.code}>
+                    {ward.name}
+                  </Option>
+                ))}
+              </Select>
               <input
                 type="text"
-                placeholder="VD: 123 Đường ABC, Phường 1, Quận 1, TP. Hồ Chí Minh"
+                placeholder="Số nhà, tên đường"
                 className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
                   errors.address && useNewAddress ? "border-red-500" : ""
                 }`}
-                value={newAddress}
-                onChange={handleAddressChange}
-                disabled={!useNewAddress}
+                value={specificAddress}
+                onChange={(e) =>
+                  handleNewAddressChange("specific", e.target.value)
+                }
+              />
+              <input
+                type="text"
+                placeholder="Địa chỉ đầy đủ"
+                className="w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                value={fullAddress}
+                readOnly
               />
               {useNewAddress && errors.address && (
                 <p className="text-red-500">{errors.address}</p>
               )}
-            </Radio>
-          </Radio.Group>
+            </div>
+          )}
 
           {/* Số điện thoại */}
           <h2 className="text-2xl font-semibold mb-6 text-gray-700">
@@ -347,7 +606,7 @@ const CheckOut = () => {
             <Radio value="new" className="block">
               Nhập số điện thoại mới
               <input
-                type="number"
+                type="text"
                 placeholder="VD: 0912345678"
                 className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
                   errors.phone && useNewPhoneNumber ? "border-red-500" : ""
@@ -418,7 +677,7 @@ const CheckOut = () => {
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Phí vận chuyển:</span>
-              <span>Miễn phí</span>
+              <span>{shippingFee.toLocaleString("vi-VN")} VND</span>
             </div>
             {/* Sử dụng điểm tích lũy */}
             <div className="flex justify-between items-center text-gray-600">
