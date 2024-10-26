@@ -107,30 +107,30 @@ function CartContent() {
   };
 
   // Hàm xóa tất cả sản phẩm trong giỏ hàng
-  const deleteAllCarts = async () => {
-    try {
-      await api.delete("carts"); // Gọi API xóa tất cả sản phẩm
-      notification.success({
-        message: "Thành công",
-        description: "Tất cả sản phẩm đã được xóa khỏi giỏ hàng.",
-        placement: "topRight",
-      });
-      setCartItems([]);
-      updateTotals([]);
-      localStorage.removeItem("cart"); // Xóa giỏ hàng trong localStorage
+  // const deleteAllCarts = async () => {
+  //   try {
+  //     await api.delete("carts"); // Gọi API xóa tất cả sản phẩm
+  //     notification.success({
+  //       message: "Thành công",
+  //       description: "Tất cả sản phẩm đã được xóa khỏi giỏ hàng.",
+  //       placement: "topRight",
+  //     });
+  //     setCartItems([]);
+  //     updateTotals([]);
+  //     localStorage.removeItem("cart"); // Xóa giỏ hàng trong localStorage
 
-      // Phát sự kiện để cập nhật badge giỏ hàng
-      const cartEvent = new Event("cartUpdate");
-      window.dispatchEvent(cartEvent);
-    } catch (error) {
-      notification.error({
-        message: "Thất bại",
-        description: "Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.",
-        placement: "topRight",
-      });
-      console.error("Error deleting all carts:", error);
-    }
-  };
+  //     // Phát sự kiện để cập nhật badge giỏ hàng
+  //     const cartEvent = new Event("cartUpdate");
+  //     window.dispatchEvent(cartEvent);
+  //   } catch (error) {
+  //     notification.error({
+  //       message: "Thất bại",
+  //       description: "Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.",
+  //       placement: "topRight",
+  //     });
+  //     console.error("Error deleting all carts:", error);
+  //   }
+  // };
 
   // Hàm xử lý khi thay đổi số lượng sản phẩm
   const handleQuantityChange = async (value, record) => {
@@ -188,7 +188,7 @@ function CartContent() {
 
   const columns = [
     {
-      title: "Product",
+      title: "Sản phẩm",
       dataIndex: "product",
       key: "product",
       width: "30%",
@@ -201,7 +201,7 @@ function CartContent() {
     },
 
     {
-      title: "Price",
+      title: "Giá",
       dataIndex: "price",
       key: "price",
       width: "15%",
@@ -209,7 +209,7 @@ function CartContent() {
     },
 
     {
-      title: "Quantity",
+      title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
       width: "10%",
@@ -226,7 +226,7 @@ function CartContent() {
     },
 
     {
-      title: "Package",
+      title: "Gói",
       key: "package",
       width: "15%",
       render: (text, record) => (
@@ -246,12 +246,12 @@ function CartContent() {
             setLabModalVisible(true);
           }}
         >
-          View Labs
+          Xem Labs
         </Button>
       ),
     },
     {
-      title: "Subtotal",
+      title: "Tổng cộng",
       dataIndex: "subtotal",
       key: "subtotal",
       width: "15%",
@@ -283,14 +283,14 @@ function CartContent() {
       {/* Kiểm tra nếu giỏ hàng trống */}
       {cartItems.length === 0 && !loading ? (
         <div className="text-center my-10">
-          <h2 className="text-xl font-semibold">Your shopping cart is empty</h2>
+          <h2 className="text-xl font-semibold">Giỏ hàng của bạn đang trống</h2>
           <Button
             type="default"
             icon={<HomeOutlined />}
             onClick={handleGoHome}
             className="mt-5"
           >
-            Return to Home
+            Quay lại trang chủ
           </Button>
         </div>
       ) : (
@@ -304,11 +304,11 @@ function CartContent() {
               onClick={handleGoHome}
               className="h-10 bg-red-500 text-white font-semibold"
             >
-              Continue Shopping
+              Tiếp tục mua sắm
             </Button>
 
             {/* Nút Xóa tất cả sản phẩm */}
-            <Popconfirm
+            {/* <Popconfirm
               title="Bạn có chắc chắn muốn xóa tất cả các sản phẩm không?"
               onConfirm={deleteAllCarts} // Xóa tất cả sản phẩm
               okText="Yes"
@@ -323,20 +323,20 @@ function CartContent() {
               >
                 Delete all
               </Button>
-            </Popconfirm>
+            </Popconfirm> */}
           </div>
 
           {/* Cart Total section */}
           <Card
-            title="Cart Total"
+            title="Tổng giá tiền trong giỏ hàng"
             className="border border-gray-300 rounded-md p-5 mt-16"
           >
-            <div className="flex justify-between mb-3 font-medium">
+            {/* <div className="flex justify-between mb-3 font-medium">
               <span>Subtotal:</span>
               <span>{subtotal.toLocaleString("vi-VN")} VND</span>
-            </div>
+            </div> */}
             <div className="flex justify-between mb-3 font-medium">
-              <span>Total:</span>
+              <span>Tổng:</span>
               <span>{total.toLocaleString("vi-VN")} VND</span>
             </div>
 
@@ -345,7 +345,7 @@ function CartContent() {
               className="w-full bg-red-500 text-white mt-3 font-semibold"
               onClick={handleProceedToCheckout}
             >
-              Proceed to checkout
+              Tiến hành thanh toán
             </Button>
           </Card>
         </>

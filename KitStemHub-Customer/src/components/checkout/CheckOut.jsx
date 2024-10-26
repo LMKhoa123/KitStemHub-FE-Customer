@@ -196,9 +196,12 @@ const CheckOut = () => {
         const orderId = locationHeader.split("/").pop(); // Tách orderId từ URL trong header 'location'
         console.log("Mã đơn hàng:", orderId);
 
+        // Lưu `orderId` vào `localStorage` để dùng khi người dùng quay lại từ VNPay
+        localStorage.setItem("orderId", orderId);
+
         if (paymentMethod === "bank") {
           // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
-          const paymentResponse = await api.post("/payments/vnpay", {
+          const paymentResponse = await api.post("payments/vnpay", {
             "order-id": orderId,
           });
 
@@ -214,6 +217,7 @@ const CheckOut = () => {
 
             // Chuyển hướng người dùng đến trang thanh toán
             window.location.href = paymentUrl;
+            localStorage.setItem("paymentMethod", "vnpay");
             notification.destroy();
             notification.success({
               message: "Đơn hàng đã được đặt thành công!",
@@ -241,7 +245,7 @@ const CheckOut = () => {
               duration: 3,
             });
             // Chuyển hướng sang trang kết quả sau khi đặt hàng COD thành công
-            navigate("/order/result", { state: { orderId } });
+            navigate("/order/result", { state: { orderId, paymentMethod } });
             setCurrentStep(2);
           } else {
             notification.destroy();

@@ -7,12 +7,17 @@ function ProfileMyLab({ orderId }) {
   const [labData, setLabData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [supportStatus, setSupportStatus] = useState({});
+  const [shippingStatus, setShippingStatus] = useState(""); // Thêm state cho trạng thái giao hàng
 
   // Gọi API để lấy thông tin lab dựa vào orderId
   const fetchLabData = async () => {
     try {
       const response = await api.get(`orders/${orderId}`);
       const labSupports = response.data.details.data.order["order-supports"];
+      const orderDetails = response.data.details.data.order;
+
+      // Lấy trạng thái giao hàng
+      setShippingStatus(orderDetails["shipping-status"]); // Lưu trạng thái giao hàng vào state
 
       // Kiểm tra trạng thái từ localStorage
       const storedStatus =
@@ -102,6 +107,10 @@ function ProfileMyLab({ orderId }) {
 
         // Cấu hình nút Hỗ trợ
         const getButtonProps = () => {
+          if (shippingStatus !== "ĐÃ XÁC NHẬN") {
+            return null;
+          }
+
           if (remainSupportTimes === 0) {
             return {
               disabled: true,
@@ -125,7 +134,8 @@ function ProfileMyLab({ orderId }) {
           };
         };
 
-        return <Button type="primary" {...getButtonProps()} />;
+        const buttonProps = getButtonProps();
+        return buttonProps ? <Button type="primary" {...buttonProps} /> : null;
       },
     },
   ];

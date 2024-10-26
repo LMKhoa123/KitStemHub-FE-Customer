@@ -24,6 +24,7 @@ function FormMyProfile() {
   const [fullAddress, setFullAddress] = useState(""); // Địa chỉ đầy đủ
   const [isUpdated, setIsUpdated] = useState(false);
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false); // Trạng thái modal
+  const [errors, setErrors] = useState({});
 
   // Hàm để hiển thị modal chỉnh sửa địa chỉ
   const showAddressModal = () => {
@@ -126,7 +127,34 @@ function FormMyProfile() {
     }
   };
 
+  // Hàm kiểm tra tính hợp lệ của họ, tên và số điện thoại
+  const validateProfileData = () => {
+    const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/; // Chỉ cho phép chữ cái và khoảng trắng
+    const phoneRegex = /^\d{10}$/; // Chỉ cho phép 10 chữ số
+    const newErrors = {};
+
+    if (!nameRegex.test(profileData.firstName)) {
+      newErrors.firstName =
+        "Họ chỉ được chứa chữ cái và không có ký tự đặc biệt.";
+    }
+
+    if (!nameRegex.test(profileData.lastName)) {
+      newErrors.lastName =
+        "Tên chỉ được chứa chữ cái và không có ký tự đặc biệt.";
+    }
+
+    if (!phoneRegex.test(profileData.phoneNumber)) {
+      newErrors.phoneNumber = "Số điện thoại phải có đúng 10 chữ số.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
+  };
+
   const updateProfile = async () => {
+    // Kiểm tra dữ liệu đầu vào
+    if (!validateProfileData()) return;
+
     const cleanData = {
       "first-name": profileData.firstName || "",
       "last-name": profileData.lastName || "",
@@ -145,23 +173,23 @@ function FormMyProfile() {
       });
       console.log("Profile updated successfully", response.data);
       Swal.fire({
-        title: "Do you want to save the changes?",
+        title: "Bạn có muốn lưu những thay đổi không?",
         showDenyButton: true,
         showCancelButton: true,
-        confirmButtonText: "Save",
-        denyButtonText: `Don't save`,
+        confirmButtonText: "Lưu",
+        denyButtonText: `Không lưu`,
       }).then((result) => {
         if (result.isConfirmed) {
           setProfileData(response.data);
           setIsUpdated(true);
-          Swal.fire("Saved!", "", "success");
+          Swal.fire("Đã lưu!", "", "thành công");
         } else if (result.isDenied) {
-          Swal.fire("Changes are not saved", "", "info");
+          Swal.fire("Những thay đổi không được lưu", "", "thông tin");
         }
       });
     } catch (error) {
       console.log("Error updating profile:", error);
-      Swal.fire("Error", "Something went wrong, please try again.", "error");
+      Swal.fire("Lỗi", "Có lỗi xảy ra, vui lòng thử lại.", "lỗi");
     }
   };
 
@@ -187,35 +215,50 @@ function FormMyProfile() {
         <div className="mb-4">
           <label className="text-gray-700 font-semibold">Họ</label>
           <input
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
+              errors.firstName ? "border-red-500" : "border-gray-300"
+            }`}
             value={profileData.firstName}
             onChange={(e) =>
               setProfileData({ ...profileData, firstName: e.target.value })
             }
           />
+          {errors.firstName && (
+            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+          )}
         </div>
 
         <div className="mb-4">
           <label className="text-gray-700 font-semibold">Tên</label>
           <input
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
+              errors.lastName ? "border-red-500" : "border-gray-300"
+            }`}
             value={profileData.lastName}
             onChange={(e) =>
               setProfileData({ ...profileData, lastName: e.target.value })
             }
           />
+          {errors.lastName && (
+            <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+          )}
         </div>
 
         <div className="mb-4">
           <label className="text-gray-700 font-semibold">Số điện thoại</label>
           <input
             type="number"
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+            className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
+              errors.phoneNumber ? "border-red-500" : "border-gray-300"
+            }`}
             value={profileData.phoneNumber}
             onChange={(e) =>
               setProfileData({ ...profileData, phoneNumber: e.target.value })
             }
           />
+          {errors.phoneNumber && (
+            <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>
+          )}
         </div>
 
         <div className="mb-4">
@@ -367,7 +410,7 @@ function FormMyProfile() {
           className="px-6 py-2 bg-rose-600 text-white font-bold rounded-md hover:bg-rose-700 transition duration-300"
           onClick={updateProfile}
         >
-          Save Changes
+          Lưu thay đổi
         </button>
       </div>
     </div>

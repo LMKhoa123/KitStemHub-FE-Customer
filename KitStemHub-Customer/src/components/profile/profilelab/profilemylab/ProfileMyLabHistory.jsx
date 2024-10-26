@@ -39,7 +39,7 @@ function ProfileMyLabHistory() {
           notification.destroy();
           notification.success({
             message: "Thành công",
-            description: "Lấy danh sách hỗ trợ phòng lab thành công!",
+            description: "Lấy danh sách lịch sử hỗ trợ lab thành công!",
             duration: 3,
           });
         } else {
@@ -47,7 +47,7 @@ function ProfileMyLabHistory() {
           notification.destroy();
           notification.info({
             message: "Không có dữ liệu",
-            description: "Không có hỗ trợ phòng lab cho trang này.",
+            description: "Không có lịch sử hỗ trợ lab cho trang này.",
           });
         }
       } else {
@@ -55,14 +55,14 @@ function ProfileMyLabHistory() {
         notification.destroy();
         notification.error({
           message: "Lỗi",
-          description: "Không có dữ liệu hỗ trợ phòng lab!",
+          description: "Không có dữ liệu lịch sử hỗ trợ lab!",
         });
       }
     } catch (error) {
       console.error("Error fetching lab supports:", error);
       notification.error({
         message: "Lỗi",
-        description: "Có lỗi xảy ra khi lấy dữ liệu hỗ trợ phòng lab!",
+        description: "Có lỗi xảy ra khi lấy dữ liệu lịch sử hỗ trợ lab!",
         duration: 3,
       });
     } finally {
