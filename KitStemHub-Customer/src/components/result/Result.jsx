@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, notification, Typography } from "antd";
+import { Button, notification, Spin, Typography } from "antd";
 import api from "../../config/axios";
 import Confetti from "react-confetti";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
@@ -12,7 +12,10 @@ const Result = () => {
   const navigate = useNavigate();
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false); // Hiệu ứng pháo hoa
-  const orderId = location.state?.orderId; // Lấy orderId từ state (khi COD)
+  const orderId = location.state?.orderId || localStorage.getItem("orderId");
+  const [loading, setLoading] = useState(true); // Trạng thái loading
+  console.log("Order ID:", orderId); // Log ra orderId để kiểm tra giá trị
+  console.log("Location state:", location.state);
 
   // Hàm để lấy query parameters từ URL
   const getQueryParams = (search) => {
@@ -43,6 +46,7 @@ const Result = () => {
 
     // Nếu có thông tin thanh toán VNPay, gọi API để xác nhận thanh toán
     const confirmPayment = async () => {
+      setLoading(true);
       if (queryParams.vnp_TransactionStatus) {
         try {
           const response = await api.get("payments/vnpay/callback", {
@@ -50,7 +54,6 @@ const Result = () => {
           });
 
           if (response.data.status === "success") {
-            localStorage.removeItem("cart");
             setPaymentStatus("success");
             setShowConfetti(true); // Hiển thị hiệu ứng pháo hoa
             notification.destroy();
@@ -67,9 +70,6 @@ const Result = () => {
             });
             navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
           }
-
-          // Sau khi xử lý xong, xóa query string khỏi URL
-          window.history.replaceState(null, "", "/order/result"); // Thay thế URL mà không có query string
         } catch (error) {
           console.log(error);
           setPaymentStatus("fail");
@@ -79,6 +79,9 @@ const Result = () => {
             duration: 3,
           });
           navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
+        } finally {
+          setLoading(false);
+          window.history.replaceState(null, "", "/order/result");
         }
       } else if (orderId) {
         // Nếu không phải VNPay mà là thanh toán COD (orderId có trong state)
@@ -89,11 +92,25 @@ const Result = () => {
           message: "Đơn hàng COD đã được đặt thành công!",
           duration: 3,
         });
+        setLoading(false);
+        // Xóa `orderId` khỏi `localStorage` sau khi hoàn tất
+        localStorage.removeItem("orderId");
       }
     };
 
     confirmPayment();
   }, [location.search, navigate, orderId]);
+
+  // Hàm xử lý khi bấm "Quay về trang chủ"
+  const handleGoHome = () => {
+    // Chỉ xóa cart khi bấm "Quay về trang chủ"
+    localStorage.removeItem("cart");
+    navigate("/home");
+  };
+
+  const paymentMethod =
+    location.state?.paymentMethod || localStorage.getItem("paymentMethod");
+  console.log("Received paymentMethod in Result:", paymentMethod);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white">
@@ -103,61 +120,86 @@ const Result = () => {
       )}
 
       <div className="bg-white border shadow-lg p-10 text-center max-w-xl rounded-lg">
-        <div className="flex justify-center items-center mb-4">
-          {paymentStatus === "success" && (
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+        {loading ? (
+          <div className="flex justify-center items-center">
+            <Spin size="large" tip="Đang xử lý thanh toán..." />
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-center items-center mb-4">
+              {paymentStatus === "success" ? (
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <Title level={2} className="text-rose-500">
-          {paymentStatus === "success"
-            ? "Thực hiện giao dịch thanh toán thành công!"
-            : "Đã có lỗi xảy ra khi thanh toán!"}
-        </Title>
-        <Text className="text-black text-lg">
-          {paymentStatus === "success"
-            ? "Cảm ơn bạn đã đặt hàng với chúng tôi."
-            : "Vui lòng thử lại."}
-        </Text>
-        <br />
-        <br />
-        <div className="flex justify-around items-center gap-4">
-          <Button
-            type="primary"
-            onClick={() => navigate("/home")}
-            className="bg-rose-500 hover:bg-rose-600 font-semibold"
-            icon={<LeftOutlined />}
-          >
-            Quay về trang chủ
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              const storedOrderId = localStorage.getItem("orderId");
-              navigate(`/order/${storedOrderId || orderId}`, {
-                state: { orderId: storedOrderId || orderId },
-              });
-            }}
-            className="bg-rose-500 hover:bg-rose-600 font-semibold"
-          >
-            Xem đơn hàng {<RightOutlined />}
-          </Button>
-        </div>
+            <Title level={2} className="text-rose-500">
+              {paymentStatus === "success"
+                ? "Thực hiện giao dịch thanh toán thành công!"
+                : "Đã có lỗi xảy ra khi thanh toán!"}
+            </Title>
+            <Text className="text-black text-lg">
+              {paymentStatus === "success"
+                ? "Cảm ơn bạn đã đặt hàng với chúng tôi."
+                : "Vui lòng thử lại."}
+            </Text>
+            <br />
+            <br />
+            <div className="flex justify-around items-center gap-4">
+              <Button
+                type="primary"
+                onClick={handleGoHome}
+                className="bg-rose-500 hover:bg-rose-600 font-semibold"
+                icon={<LeftOutlined />}
+              >
+                Quay về trang chủ
+              </Button>
+              <Button
+                type="primary"
+                onClick={() => {
+                  const storedOrderId = localStorage.getItem("orderId");
+                  navigate(`/order/${storedOrderId || orderId}`, {
+                    state: { orderId: storedOrderId || orderId, paymentMethod },
+                  });
+                }}
+                className="bg-rose-500 hover:bg-rose-600 font-semibold"
+              >
+                Xem đơn hàng {<RightOutlined />}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

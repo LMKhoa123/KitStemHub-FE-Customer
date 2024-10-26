@@ -20,15 +20,18 @@ function CartMyProfile() {
   const fetchOrders = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await api.get(`/orders/customers?page=${page - 1}`);
+      // Lấy dữ liệu từ API, giảm `page` để phù hợp với zero-based indexing của API
+      const response = await api.get(`orders/customers?page=${page - 1}`);
+      console.log(response.data);
       const { data } = response.data.details;
 
-      // Kiểm tra dữ liệu trả về và cập nhật state
       if (data.orders && data.orders.length > 0) {
-        setOrders(data.orders); // Cập nhật đơn hàng
-        setTotalPages(data["total-pages"]); // Cập nhật tổng số trang
+        setOrders(data.orders); // Cập nhật danh sách đơn hàng
+        setTotalPages(data["total-pages"]); // Cập nhật tổng số trang từ API
+        setCurrentPage(data["current-page"] + 1); // Điều chỉnh `current-page` để phù hợp với giao diện
+        console.log("Updated currentPage:", data["current-page"] + 1);
       } else {
-        setOrders([]); // Đảm bảo orders là một mảng rỗng nếu không có dữ liệu
+        setOrders([]);
       }
 
       setLoading(false);
@@ -43,9 +46,10 @@ function CartMyProfile() {
   }, [currentPage]);
 
   const handleTableChange = (pagination) => {
-    const page = pagination.current; // Trang hiện tại được chọn từ giao diện người dùng
-    setCurrentPage(page); // Cập nhật trang hiện tại (hiển thị)
-    fetchOrders(page); // Gọi API với trang chính xác
+    const page = pagination?.current;
+    console.log("Changing to page:", page);
+    setCurrentPage(page);
+    fetchOrders(page);
   };
 
   const formatDateTime = (dateString) => {
@@ -56,19 +60,36 @@ function CartMyProfile() {
   };
 
   const renderShippingStatus = (status) => {
-    let colorClass = "bg-gray-500";
-    if (status === "GIAO HÀNG THÀNH CÔNG") colorClass = "bg-green-600";
-    if (status === "GIAO HÀNG THẤT BẠI") colorClass = "bg-red-600";
-    if (status === "ĐANG GIAO HÀNG") colorClass = "bg-slate-600";
+    let colorClass = "";
+
+    switch (status) {
+      case "ĐÃ XÁC NHẬN":
+        colorClass = "bg-blue-100 text-blue-500 border border-blue-500";
+        break;
+      case "ĐANG GIAO HÀNG":
+        colorClass = "bg-orange-100 text-orange-600 border border-orange-600";
+        break;
+      case "GIAO HÀNG THÀNH CÔNG":
+        colorClass = "bg-green-100 text-green-600 border border-green-600";
+        break;
+      case "GIAO HÀNG THẤT BẠI":
+        colorClass = "bg-red-100 text-red-600 border border-red-600";
+        break;
+      case "CHỜ XÁC NHẬN":
+        colorClass = "bg-gray-100 text-gray-600 border border-gray-600";
+        break;
+      default:
+        colorClass = "bg-gray-500 text-white";
+    }
+
     return (
       <span
-        className={`p-1 ${colorClass} rounded-lg text-white block text-center w-40 shadow-xl`}
+        className={`p-1 ${colorClass} rounded-lg block text-center w-40 shadow-xl`}
       >
         {status}
       </span>
     );
   };
-
   const handleViewDetail = (record) => {
     navigate(`/order/${record.id}`, { state: { orderId: record.id } });
   };
@@ -169,11 +190,12 @@ function CartMyProfile() {
         rowKey="id"
         loading={loading}
         pagination={{
-          current: currentPage, // Hiển thị trang hiện tại, bắt đầu từ 1
-          total: totalPages * pageSize, // Tổng số lượng đơn hàng
-          pageSize: pageSize, // Số lượng bản ghi trên mỗi trang
-          onChange: handleTableChange, // Xử lý khi người dùng chuyển trang
+          current: currentPage,
+          total: totalPages * pageSize,
+          pageSize: pageSize,
+          showSizeChanger: false,
         }}
+        onChange={(pagination) => handleTableChange(pagination)} // Gắn onChange trực tiếp
       />
 
       <Modal

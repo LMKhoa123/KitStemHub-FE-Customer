@@ -186,7 +186,11 @@ function OrderDetail() {
       >
         <Breadcrumb className="mb-6 text-sm">
           <Breadcrumb.Item>
-            <Link to="/home" className="text-blue-500 hover:text-blue-700">
+            <Link
+              to="/home"
+              className="text-blue-500 hover:text-blue-700"
+              onClick={() => localStorage.removeItem("cart")}
+            >
               <HomeOutlined className="mr-1" />
               Trang chủ
             </Link>
@@ -195,6 +199,7 @@ function OrderDetail() {
             <Link
               to="/profile/cart"
               className="text-blue-500 hover:text-blue-700"
+              onClick={() => localStorage.removeItem("cart")}
             >
               Đơn hàng
             </Link>
