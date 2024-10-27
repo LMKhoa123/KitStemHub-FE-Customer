@@ -88,34 +88,21 @@ const ProductDetail = () => {
       });
 
       if (response.data && response.data.status === "success") {
-        // Lấy giỏ hàng hiện tại từ localStorage
-        const cartData = JSON.parse(localStorage.getItem("cart")) || [];
+        // Thông báo thành công
+        message.success(`Đã thêm ${quantity} vào giỏ hàng.`);
 
-        // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
-        const existingProductIndex = cartData.findIndex(
-          (item) => item.id === packageDetail.id
-        );
+        // Gọi API get carts để lấy danh sách giỏ hàng cập nhật từ server
+        const cartResponse = await api.get("carts");
+        const updatedCartItems = cartResponse.data.details.data.carts;
 
-        if (existingProductIndex !== -1) {
-          // Nếu sản phẩm đã tồn tại, chỉ cập nhật số lượng
-          cartData[existingProductIndex].quantity += quantity;
-          message.success(`Đã cập nhật số lượng sản phẩm trong giỏ hàng.`);
-        } else {
-          // Nếu là sản phẩm mới, thêm vào giỏ hàng
-          cartData.push({ ...packageDetail, quantity });
-          message.success(`Đã thêm ${quantity} vào giỏ hàng.`);
-
-          // Cập nhật Badge ngay lập tức (chỉ khi thêm sản phẩm mới)
-          const cartEvent = new Event("cartUpdate"); // Tạo event để cập nhật badge
-          window.dispatchEvent(cartEvent); // Dispatch event để cập nhật badge
-        }
-
-        // Lưu lại giỏ hàng vào localStorage
-        localStorage.setItem("cart", JSON.stringify(cartData));
-        const cartEvent = new Event("cartUpdate");
+        // Cập nhật badge ngay lập tức với sự kiện cartUpdate
+        const cartEvent = new CustomEvent("cartUpdate", {
+          detail: updatedCartItems.length, // Truyền số lượng package
+        });
         window.dispatchEvent(cartEvent);
 
-        setQuantity(1); // Đặt lại số lượng sau khi thêm sản phẩm
+        // Đặt lại số lượng sau khi thêm sản phẩm
+        setQuantity(1);
       } else {
         throw new Error("Không thể thêm vào giỏ hàng");
       }

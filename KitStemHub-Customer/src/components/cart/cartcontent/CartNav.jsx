@@ -9,7 +9,6 @@ function CartNav() {
           <Breadcrumb.Item>
             <Link to="/">Trang Chủ</Link>
           </Breadcrumb.Item>
-
           <Breadcrumb.Item>Giỏ Hàng</Breadcrumb.Item>
         </Breadcrumb>
       </div>

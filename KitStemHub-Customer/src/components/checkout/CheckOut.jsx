@@ -132,14 +132,6 @@ const CheckOut = () => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  // Xoá lỗi khi bắt đầu nhập địa chỉ mới
-  const handleAddressChange = (e) => {
-    setNewAddress(e.target.value);
-    if (e.target.value) {
-      setErrors((prevErrors) => ({ ...prevErrors, address: "" }));
-    }
-  };
-
   // Xoá lỗi khi bắt đầu nhập số điện thoại mới
   const handlePhoneChange = (e) => {
     const phoneValue = e.target.value;
@@ -198,70 +190,25 @@ const CheckOut = () => {
 
         // Lưu `orderId` vào `localStorage` để dùng khi người dùng quay lại từ VNPay
         localStorage.setItem("orderId", orderId);
-
+        localStorage.setItem("paymentMethod", paymentMethod);
         if (paymentMethod === "bank") {
           // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
           const paymentResponse = await api.post("payments/vnpay", {
             "order-id": orderId,
           });
-
-          // Kiểm tra nếu API thanh toán trả về URL giao dịch thành công
-          if (
-            // paymentResponse.data &&
-            // paymentResponse.data.details &&
-            // paymentResponse.data.details.data &&
-            paymentResponse.data.details.data.url
-          ) {
-            const paymentUrl = paymentResponse.data.details.data.url;
-            console.log("URL thanh toán:", paymentUrl);
-
-            // Chuyển hướng người dùng đến trang thanh toán
+          const paymentUrl = paymentResponse.data.details.data.url;
+          if (paymentUrl) {
             window.location.href = paymentUrl;
-            localStorage.setItem("paymentMethod", "vnpay");
-            notification.destroy();
-            notification.success({
-              message: "Đơn hàng đã được đặt thành công!",
-              duration: 3,
-            });
-            setCurrentStep(2);
           } else {
-            notification.destroy();
             notification.error({
-              message:
-                "Không lấy được URL giao dịch thanh toán. Vui lòng thử lại.",
-              duration: 3,
+              message: "Không lấy được URL thanh toán. Vui lòng thử lại.",
             });
           }
         } else if (paymentMethod === "cash") {
-          // Nếu thanh toán bằng COD
-          const cashResponse = await api.post("payments/cash", {
-            "order-id": orderId,
-          });
-
-          if (cashResponse.data && cashResponse.data.status === "success") {
-            notification.destroy();
-            notification.success({
-              message: "Đơn hàng COD đã được đặt thành công!",
-              duration: 3,
-            });
-            // Chuyển hướng sang trang kết quả sau khi đặt hàng COD thành công
-            navigate("/order/result", { state: { orderId, paymentMethod } });
-            setCurrentStep(2);
-          } else {
-            notification.destroy();
-            notification.error({
-              message: "Đặt hàng COD thất bại. Vui lòng thử lại!",
-              duration: 3,
-            });
-          }
+          navigate("/order/result");
         }
       } else {
-        console.error("Không tìm thấy location trong response headers.");
-        notification.destroy();
-        notification.error({
-          message: "Không tìm thấy Mã đơn hàng. Vui lòng thử lại!",
-          duration: 3,
-        });
+        notification.error({ message: "Không tìm thấy Mã đơn hàng." });
       }
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng:", error);

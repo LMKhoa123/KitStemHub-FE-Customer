@@ -6,6 +6,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import Loading from "../../Loading";
 import { Badge } from "antd";
+import api from "../../../config/axios";
 
 function NavbarUser() {
   const navigate = useNavigate();
@@ -30,26 +31,39 @@ function NavbarUser() {
   };
 
   // Hàm tính tổng số lượng sản phẩm trong giỏ hàng
-  const calculateCartItemCount = () => {
-    const cartData = JSON.parse(localStorage.getItem("cart")) || [];
-    // Tính tổng số lượng tất cả các sản phẩm (bao gồm cả các sản phẩm giống nhau)
-
-    setCartItemCount(cartData.length);
+  const calculateCartItemCount = async () => {
+    try {
+      const response = await api.get("carts");
+      const cartData = response.data.details.data.carts;
+      // const totalItems = cartData.reduce(
+      //   (total, item) => total + item["package-quantity"],
+      //   0
+      // );
+      setCartItemCount(cartData.length);
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
+    }
   };
 
   useEffect(() => {
-    // Tính toán số lượng sản phẩm khi trang được render
-    calculateCartItemCount();
-
-    // Lắng nghe sự kiện khi có thay đổi giỏ hàng
-    const handleCartUpdate = () => {
-      calculateCartItemCount();
+    const fetchCartCount = async () => {
+      try {
+        const response = await api.get("/carts");
+        setCartItemCount(response.data.details.data.carts.length);
+      } catch (error) {
+        console.error("Error fetching cart count:", error);
+      }
     };
 
-    // Lắng nghe sự kiện cập nhật giỏ hàng
+    fetchCartCount(); // Lấy số lượng khi component được render lần đầu
+
+    const handleCartUpdate = (event) => {
+      setCartItemCount(event.detail); // Cập nhật số lượng từ event detail
+    };
+
+    // Thêm event listener
     window.addEventListener("cartUpdate", handleCartUpdate);
 
-    // Cleanup khi component bị hủy
     return () => {
       window.removeEventListener("cartUpdate", handleCartUpdate);
     };
