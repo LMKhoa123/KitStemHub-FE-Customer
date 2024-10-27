@@ -48,25 +48,38 @@ const Result = () => {
     const confirmPayment = async () => {
       setLoading(true);
       try {
-        if (paymentMethod === "vnpay") {
+        const queryParams = getQueryParams(location.search);
+
+        if (paymentMethod === "cash") {
+          // Nếu phương thức thanh toán là COD
+          console.log("COD Payment confirmed");
+          setPaymentStatus("success");
+          setShowConfetti(true);
+          notification.destroy();
+          notification.success({
+            message: "Đơn hàng COD đã được đặt thành công!",
+          });
+        } else if (queryParams.vnp_TransactionStatus) {
+          // Nếu phương thức thanh toán là VNPay
           const response = await api.get("payments/vnpay/callback", {
-            params: getQueryParams(window.location.search),
+            params: queryParams,
           });
 
           if (response.data.status === "success") {
             setPaymentStatus("success");
             setShowConfetti(true);
-            notification.success({ message: "Thanh toán thành công!" });
+            notification.destroy();
+            notification.success({
+              message: "Thanh toán thành công!",
+            });
           } else {
+            console.error("VNPay callback failed:", response.data);
             setPaymentStatus("fail");
             notification.error({ message: "Thanh toán thất bại!" });
           }
-        } else {
-          setPaymentStatus("success");
-          setShowConfetti(true);
-          notification.success({ message: "Đơn hàng đặt thành công!" });
         }
       } catch (error) {
+        console.error("Error in payment confirmation:", error);
         setPaymentStatus("fail");
         notification.error({
           message: "Thanh toán thất bại, vui lòng thử lại!",

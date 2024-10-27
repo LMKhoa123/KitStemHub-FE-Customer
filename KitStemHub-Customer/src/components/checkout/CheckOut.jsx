@@ -205,7 +205,15 @@ const CheckOut = () => {
             });
           }
         } else if (paymentMethod === "cash") {
-          navigate("/order/result");
+          try {
+            await api.post("payments/cash", { "order-id": orderId });
+            navigate("/order/result");
+          } catch (error) {
+            console.error("Lỗi khi gọi API thanh toán COD:", error);
+            notification.error({
+              message: "Đặt hàng thất bại, vui lòng thử lại!",
+            });
+          }
         }
       } else {
         notification.error({ message: "Không tìm thấy Mã đơn hàng." });
