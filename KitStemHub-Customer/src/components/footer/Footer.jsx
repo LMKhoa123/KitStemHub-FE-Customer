@@ -51,7 +51,7 @@ function Footer() {
           </Link>
         </div>
 
-        <div className="quickLink text-center md:text-left">
+        <div className="quickLink text-center md:text-left w-1/2">
           <h2 className="text-lg font-semibold mb-2">Liên kết nhanh</h2>
           <a
             href="#privacy-policy"

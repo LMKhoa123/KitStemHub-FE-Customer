@@ -4,16 +4,25 @@ import {
   Spin,
   Card,
   Pagination,
-  Menu,
-  Slider,
   Button,
   Input,
+  Checkbox,
+  Tag,
+  Tooltip,
+  Menu,
   Dropdown,
+  Slider,
+  Radio,
   Space,
 } from "antd";
 import api from "./../../config/axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { EyeOutlined, HeartOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  HeartOutlined,
+  CloseOutlined,
+  DownOutlined,
+} from "@ant-design/icons";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -24,10 +33,14 @@ function KitCategory({ initialSearchTerm }) {
   const [totalPages, setTotalPages] = useState(0);
   const [priceRange, setPriceRange] = useState([0, 5000000]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "");
+  const [tempSearchTerm, setTempSearchTerm] = useState(initialSearchTerm || "");
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
+  const { categoryName } = useParams();
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [priceFilter, setPriceFilter] = useState("all");
   const [customPriceRange, setCustomPriceRange] = useState([0, 5000000]);
-  const { categoryName } = useParams();
+
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -63,12 +76,24 @@ function KitCategory({ initialSearchTerm }) {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, priceRange]);
+  }, [currentPage, searchTerm, categoryName, priceRange]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
+  useEffect(() => {
+    // Gọi API để lấy danh sách danh mục
+    const fetchCategories = async () => {
+      try {
+        const categoriesResponse = await api.get("categories");
+        setCategories(categoriesResponse.data.details.data.categories);
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
   const handleProductClick = (kitId) => {
     navigate(`/productdetail/${kitId}`);
   };
@@ -77,8 +102,8 @@ function KitCategory({ initialSearchTerm }) {
     setCurrentPage(page - 1);
   };
 
-  const handleSearch = (value) => {
-    setSearchTerm(value);
+  const handleSearch = () => {
+    setSearchTerm(tempSearchTerm);
     setCurrentPage(0);
     fetchProducts();
   };
@@ -88,7 +113,8 @@ function KitCategory({ initialSearchTerm }) {
     fetchProducts();
   };
 
-  const handlePriceFilterChange = (value) => {
+  const handlePriceFilterChange = (e) => {
+    const value = e.target.value;
     setPriceFilter(value);
     if (value === "custom") {
       setPriceRange(customPriceRange);
@@ -110,157 +136,201 @@ function KitCategory({ initialSearchTerm }) {
       fetchProducts();
     }
   };
+  // const priceFilterMenu = (
+  //   <Menu onClick={({ key }) => handlePriceFilterChange(key)}>
+  //     <Menu.Item key="all">Tất cả giá</Menu.Item>
+  //     <Menu.Item key="0-100000">0 - 100,000 VND</Menu.Item>
+  //     <Menu.Item key="100000-500000">100,000 - 500,000 VND</Menu.Item>
+  //     <Menu.Item key="500000-1000000">500,000 - 1,000,000 VND</Menu.Item>
+  //     <Menu.Item key="1000000-2000000">1,000,000 - 2,000,000 VND</Menu.Item>
+  //     <Menu.Item key="2000000-5000000">2,000,000 - 5,000,000 VND</Menu.Item>
+  //     <Menu.Item key="custom">Tùy chỉnh</Menu.Item>
+  //   </Menu>
+  // );
 
-  const priceFilterMenu = (
-    <Menu onClick={({ key }) => handlePriceFilterChange(key)}>
-      <Menu.Item key="all">Tất cả giá</Menu.Item>
-      <Menu.Item key="0-100000">0 - 100,000 VND</Menu.Item>
-      <Menu.Item key="100000-500000">100,000 - 500,000 VND</Menu.Item>
-      <Menu.Item key="500000-1000000">500,000 - 1,000,000 VND</Menu.Item>
-      <Menu.Item key="1000000-2000000">1,000,000 - 2,000,000 VND</Menu.Item>
-      <Menu.Item key="2000000-5000000">2,000,000 - 5,000,000 VND</Menu.Item>
-      <Menu.Item key="custom">Tùy chỉnh</Menu.Item>
-    </Menu>
-  );
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
+  const handleSearchInputChange = (e) => {
+    setTempSearchTerm(e.target.value);
+  };
 
   return (
-    <div className="container mx-auto  py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Left column: Filters */}
-        <div className="w-full md:w-1/4">
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Bộ lọc</h3>
-            <Space direction="vertical" className="w-full">
-              <Input.Search
-                placeholder="Tìm kiếm sản phẩm"
-                onSearch={handleSearch}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-
-              <Dropdown overlay={priceFilterMenu}>
-                <Button className="w-full">
-                  Lọc theo giá <DownOutlined />
-                </Button>
-              </Dropdown>
-              {priceFilter === "custom" && (
-                <Slider
-                  range
-                  min={0}
-                  max={5000000}
-                  step={10000}
-                  value={customPriceRange}
-                  onChange={handleCustomPriceChange}
-                />
-              )}
-              <span className="text-sm text-gray-600">
-                {priceRange[0].toLocaleString()} -{" "}
-                {priceRange[1].toLocaleString()} VND
-              </span>
-              <Button
-                type="primary"
-                onClick={handleApplyFilter}
-                className="w-full"
-              >
-                Áp dụng bộ lọc
-              </Button>
-            </Space>
-          </div>
+    <div className="container mx-auto py-8 px-4">
+      {/* Tiêu đề và nút lọc */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">
+          {categoryName || "Tất cả sản phẩm"} (
+          {loading ? "Đang tải..." : dataSource.length} sản phẩm)
+        </h2>
+        <div className="flex items-center space-x-4">
+          <Button onClick={toggleSidebar}>
+            {sidebarVisible ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+          </Button>
         </div>
+      </div>
 
-        {/* Right column: Product list */}
-        <div className="w-full md:w-3/4">
+      {/* Khu vực nội dung chính */}
+      <div className="flex">
+        {/* Lưới sản phẩm */}
+        <div
+          className={`w-full ${sidebarVisible ? "pr-[300px]" : ""} transition-all duration-300`}
+        >
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <Spin size="large" />
             </div>
           ) : (
-            <div className="flex flex-col items-center">
-              <h2 className="text-2xl font-bold mb-6">{categoryName}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2  lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {dataSource.length > 0 ? (
-                  dataSource.map((item, index) => (
-                    <div
-                      key={item.id}
-                      data-aos="fade-up"
-                      data-aos-delay={index * 50}
-                      data-aos-anchor-placement="top-bottom"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {dataSource.length > 0 ? (
+                dataSource.map((item) => (
+                  <div
+                    key={item.id}
+                    data-aos="fade-up"
+                    data-aos-anchor-placement="top-bottom"
+                  >
+                    <Card
+                      hoverable
+                      className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                      cover={
+                        <img
+                          alt={item.name || "Hình ảnh sản phẩm"}
+                          src={
+                            item["kit-images"]?.[0]?.url || "default-image-url"
+                          }
+                          className="h-60 object-cover"
+                        />
+                      }
+                      onClick={() => handleProductClick(item.id)}
                     >
-                      <Card
-                        bodyStyle={{
-                          padding: "0", // Loại bỏ tất cả padding
-                          paddingTop: "24px", // Thiết lập lại paddingTop
-                          paddingBottom: "24px", // Thiết lập lại paddingBottom
-                        }}
-                        hoverable
-                        className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
-                        cover={
-                          <img
-                            alt={item.name || "Hình ảnh sản phẩm"}
-                            src={
-                              item["kit-images"]?.[0]?.url ||
-                              "default-image-url"
-                            }
-                            className="h-48 object-cover"
-                          />
-                        }
-                        onClick={() => handleProductClick(item.id)}
-                      >
-                        <Card.Meta
-                          className=""
-                          title={
-                            <div className="text-center font-semibold truncate px-2">
+                      <Card.Meta
+                        title={
+                          <Tooltip title={item.name}>
+                            <div className="text-lg font-semibold truncate">
                               {item.name}
                             </div>
-                          }
-                          description={
-                            <div className="text-center text-gray-600 px-2 pb-2">
-                              {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()}`}{" "}
-                              VND
+                          </Tooltip>
+                        }
+                        description={
+                          <>
+                            <p className="text-sm text-gray-500 mb-2 truncate">
+                              {item.brief}
+                            </p>
+                            <div className="flex justify-between items-center">
+                              <span className="text-green-800 font-semibold">
+                                {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()} VND`}
+                              </span>
+                              <Tag color="blue">
+                                {item["kits-category"].name}
+                              </Tag>
                             </div>
-                          }
+                          </>
+                        }
+                      />
+                      <div className="absolute top-2 right-2 flex flex-col space-y-2">
+                        <Button
+                          shape="circle"
+                          icon={<HeartOutlined />}
+                          className="bg-white/80 hover:bg-red-500 hover:text-white transition-colors duration-300"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Đã nhấn vào biểu tượng tim");
+                          }}
                         />
-                        <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Button
-                            shape="circle"
-                            icon={<HeartOutlined />}
-                            className="bg-white/80 hover:bg-red-500 hover:text-white transition-colors duration-300"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Đã nhấn vào biểu tượng tim");
-                            }}
-                          />
-                          <Button
-                            shape="circle"
-                            icon={<EyeOutlined />}
-                            className="bg-white/80 hover:bg-blue-500 hover:text-white transition-colors duration-300"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Đã nhấn vào biểu tượng mắt");
-                            }}
-                          />
-                        </div>
-                      </Card>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full text-center text-gray-500">
-                    Không tìm thấy sản phẩm nào.
+                        <Button
+                          shape="circle"
+                          icon={<EyeOutlined />}
+                          className="bg-white/80 hover:bg-blue-500 hover:text-white transition-colors duration-300"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log("Đã nhấn vào biểu tượng mắt");
+                          }}
+                        />
+                      </div>
+                    </Card>
                   </div>
-                )}
-              </div>
-              {totalPages > 0 && (
-                <Pagination
-                  total={totalPages * 20}
-                  current={currentPage + 1}
-                  pageSize={20}
-                  onChange={handlePageChange}
-                  showSizeChanger={false}
-                  className="mt-8"
-                />
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500">
+                  Không tìm thấy sản phẩm nào.
+                </div>
               )}
             </div>
           )}
+          {totalPages > 0 && (
+            <Pagination
+              total={totalPages * 20}
+              current={currentPage + 1}
+              pageSize={20}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+              className="mt-8 text-center"
+            />
+          )}
+        </div>
+
+        {/* Thanh bên */}
+        <div
+          className={`fixed top-0 right-0 h-screen w-[300px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+            sidebarVisible ? "translate-x-0" : "translate-x-full"
+          } overflow-hidden`}
+        >
+          <div className="h-full flex flex-col">
+            <div className="p-6 flex-grow overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold">Bộ lọc</h3>
+                <Button
+                  icon={<CloseOutlined />}
+                  onClick={toggleSidebar}
+                  type="text"
+                />
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-2">Tìm kiếm theo tên Kit</h4>
+                  <Input.Search
+                    placeholder="Nhập tên kit"
+                    onSearch={handleSearch}
+                    value={tempSearchTerm}
+                    onChange={handleSearchInputChange} // cập nhật giá trị tạm thời khi người dùng nhập
+                  />
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Lọc theo giá</h4>
+                  <Radio.Group
+                    onChange={handlePriceFilterChange}
+                    value={priceFilter}
+                  >
+                    <Space direction="vertical">
+                      <Radio value="all">Tất cả giá</Radio>
+                      <Radio value="0-100000">0 - 100,000 VND</Radio>
+                      <Radio value="100000-500000">100,000 - 500,000 VND</Radio>
+                      <Radio value="500000-1000000">
+                        500,000 - 1,000,000 VND
+                      </Radio>
+                      <Radio value="1000000-2000000">
+                        1,000,000 - 2,000,000 VND
+                      </Radio>
+                      <Radio value="2000000-5000000">
+                        2,000,000 - 5,000,000 VND
+                      </Radio>
+                    </Space>
+                  </Radio.Group>
+                  <h4 className="mt-6 font-medium">Danh mục</h4>
+                  {categories.map((category) => (
+                    <Button
+                      key={category.id}
+                      type="link"
+                      onClick={() => navigate(`/category/${category.name}`)}
+                    >
+                      {category.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
