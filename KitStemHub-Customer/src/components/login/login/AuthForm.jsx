@@ -155,9 +155,19 @@ function LoginInput() {
         if (response.data.status === "success") {
           setVerificationEmail(values.email);
           setIsModalVisible(true);
-        } else {
+        } else if (response.data.status === "fail") {
           const error = response.data.details?.errors || {};
           console.log(error);
+          if (error.password) {
+            toast.error(error.password, {
+              autoClose: 1500,
+            });
+          } else {
+            toast.error(response.data.details.message, {
+              autoClose: 1500,
+            });
+          }
+        } else {
           toast.error("Đăng ký không thành công. Vui lòng thử lại.");
         }
       } else {
