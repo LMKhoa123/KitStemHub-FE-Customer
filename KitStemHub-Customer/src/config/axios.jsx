@@ -31,17 +31,41 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    console.log(originalRequest);
-    console.log("hello" + error.config);
-    console.log("Error Config:", error.config);
-    console.log("Error Response Status:", error.response.status);
-    console.log("Error Message:", error.message);
-    // If the error status is 401 and there is no originalRequest._retry flag,
-    // it means the token has expired and we need to refresh it
+
+    // Xử lý lỗi 400
+    if (error.response.status === 400) {
+      const errorDetails = error.response.data.details;
+      if (errorDetails && errorDetails.errors) {
+        if (errorDetails.errors.password) {
+          toast.error(errorDetails.errors.password, {
+            autoClose: 3000,
+          });
+        } else if (errorDetails.errors["unavailable-username"]) {
+          toast.error(errorDetails.errors["unavailable-username"], {
+            autoClose: 3000,
+          });
+        } else {
+          // Hiển thị thông báo lỗi chung nếu không có lỗi cụ thể
+          toast.error(
+            errorDetails.message || "Thông tin yêu cầu không chính xác!",
+            {
+              autoClose: 3000,
+            }
+          );
+        }
+      } else {
+        toast.error(errorDetails.message || "Đã xảy ra lỗi!", {
+          autoClose: 3000,
+        });
+      }
+      return Promise.reject(error);
+    }
+
+    // Xử lý lỗi 401 (giữ nguyên phần code cũ)
     if (error.response.status === 401 && !originalRequest._retry) {
       console.log("Token expired or unauthorized - 401 error");
       // toast.error(error.response.data.details.errors.invalidCredentials);
-      toast.error(error.response.data.details.errors.invalidCredentials, {
+      toast.error(error.response.data.details.errors["invalid-credentials"], {
         autoClose: 1500,
       });
 
