@@ -469,7 +469,7 @@ const CheckOut = () => {
         <Step title="Xác nhận" icon={<CheckCircleOutlined />} />
       </Steps>
 
-      <h1 className="text-4xl font-bold mb-8 text-gray-800">
+      <h1 className="text-4xl font-bold mb-3 text-gray-800">
         Chi tiết thanh toán
       </h1>
 
@@ -484,100 +484,108 @@ const CheckOut = () => {
             Thông tin giao hàng
           </h2>
           {/* Địa chỉ giao hàng */}
-          <Radio.Group
-            className="space-y-2 mb-4"
-            onChange={handleAddressTypeChange}
-            value={useNewAddress ? "new" : "saved"}
-          >
-            <Radio value="saved">Sử dụng địa chỉ đã lưu</Radio>
-            <Radio value="new">Nhập địa chỉ giao hàng mới</Radio>
-          </Radio.Group>
+          <div className="space-y-4 ">
+            <Radio.Group
+              className="space-y-2 "
+              onChange={handleAddressTypeChange}
+              value={useNewAddress ? "new" : "saved"}
+            >
+              <Radio value="saved" className="flex items-center ">
+                <span>Sử dụng địa chỉ đã lưu</span>
+                <input
+                  type="text"
+                  className="w-full p-4 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={shippingAddress || ""}
+                  onChange={(e) => setShippingAddress(e.target.value)}
+                  disabled={useNewAddress}
+                  placeholder="Không có địa chỉ đã lưu"
+                />
+              </Radio>
+              <Radio value="new" className="block">
+                Nhập địa chỉ giao hàng mới
+              </Radio>
+            </Radio.Group>
 
-          {!useNewAddress && (
-            <div className="mb-4">
-              <Select
-                className={`w-full ${errors.address && !useNewAddress ? "border-red-500" : ""}`}
-                value={shippingAddress || ""}
-                disabled={!shippingAddress}
-                placeholder="Không có địa chỉ đã lưu"
-                onChange={(value) => setShippingAddress(value)}
-                size="large"
-              >
-                <Option value={shippingAddress}>{shippingAddress}</Option>
-              </Select>
-              {!useNewAddress && errors.address && (
-                <p className="text-red-500 mt-1">{errors.address}</p>
-              )}
-            </div>
-          )}
-
-          {useNewAddress && (
-            <div className="space-y-2">
-              <Select
-                className="w-full mb-2"
-                value={selectedProvince || "Chọn tỉnh/thành phố"}
-                onChange={(value) => handleNewAddressChange("province", value)}
-              >
-                {provinceList.map((province) => (
-                  <Option key={province.code} value={province.code}>
-                    {province.name}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                className="w-full mb-2"
-                value={selectedDistrict || "Chọn quận/huyện"}
-                onChange={(value) => handleNewAddressChange("district", value)}
-                disabled={!selectedProvince}
-              >
-                {districtList.map((district) => (
-                  <Option key={district.code} value={district.code}>
-                    {district.name}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                className="w-full mb-2"
-                value={selectedWard || "Chọn phường/xã"}
-                onChange={(value) => handleNewAddressChange("ward", value)}
-                disabled={!selectedDistrict}
-              >
-                {wardList.map((ward) => (
-                  <Option key={ward.code} value={ward.code}>
-                    {ward.name}
-                  </Option>
-                ))}
-              </Select>
-              <input
-                type="text"
-                placeholder="Số nhà, tên đường"
-                className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  errors.address && useNewAddress ? "border-red-500" : ""
-                }`}
-                value={specificAddress}
-                onChange={(e) =>
-                  handleNewAddressChange("specific", e.target.value)
-                }
-              />
-              <input
-                type="text"
-                placeholder="Địa chỉ đầy đủ"
-                className="w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                value={fullAddress}
-                readOnly
-              />
-              {useNewAddress && errors.address && (
-                <p className="text-red-500">{errors.address}</p>
-              )}
-            </div>
-          )}
+            {
+              <div className="space-y-4 ml-6">
+                <div className="grid grid-cols-3 gap-4">
+                  <Select
+                    className="w-full"
+                    value={selectedProvince || "Chọn tỉnh/thành phố"}
+                    onChange={(value) =>
+                      handleNewAddressChange("province", value)
+                    }
+                    size="large"
+                  >
+                    {provinceList.map((province) => (
+                      <Option key={province.code} value={province.code}>
+                        {province.name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    className="w-full"
+                    value={selectedDistrict || "Chọn quận/huyện"}
+                    onChange={(value) =>
+                      handleNewAddressChange("district", value)
+                    }
+                    size="large"
+                    disabled={!selectedProvince}
+                  >
+                    {districtList.map((district) => (
+                      <Option key={district.code} value={district.code}>
+                        {district.name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    className="w-full"
+                    value={selectedWard || "Chọn phường/xã"}
+                    onChange={(value) => handleNewAddressChange("ward", value)}
+                    size="large"
+                    disabled={!selectedDistrict}
+                  >
+                    {wardList.map((ward) => (
+                      <Option key={ward.code} value={ward.code}>
+                        {ward.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Số nhà, tên đường"
+                  className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.specificAddress ? "border-red-500" : ""
+                  }`}
+                  value={specificAddress}
+                  onChange={(e) =>
+                    handleNewAddressChange("specific", e.target.value)
+                  }
+                />
+                {errors.specificAddress && (
+                  <p className="text-red-500 text-sm">
+                    {errors.specificAddress}
+                  </p>
+                )}
+                {fullAddress && (
+                  <div className="bg-white p-3 border rounded-md">
+                    {/* <h4 className="font-semibold text-gray-700 mb-2">
+                      Địa chỉ đầy đủ:
+                    </h4> */}
+                    <p className="text-gray-600">{fullAddress}</p>
+                  </div>
+                )}
+              </div>
+            }
+          </div>
 
           {/* Số điện thoại */}
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700 mt-4">
             Số điện thoại
           </h2>
           <Radio.Group
-            className="space-y-2"
+            className=""
             onChange={(e) => {
               setUseNewPhoneNumber(e.target.value === "new");
               setErrors({ ...errors, phone: "" }); // Reset lỗi cho phone khi thay đổi lựa chọn
@@ -588,11 +596,10 @@ const CheckOut = () => {
               Số điện thoại đã lưu
               <input
                 type="text"
-                className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
+                className={`w-full p-3 border rounded-md  focus:ring-2 focus:ring-primary focus:border-transparent ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
                 value={selectedPhoneNumber || ""}
-                disabled={!selectedPhoneNumber}
+                disabled
                 placeholder="Không có số điện thoại đã lưu"
-                onChange={(e) => setSelectedPhoneNumber(e.target.value)}
               />
               {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng số điện thoại đã lưu */}
               {!useNewPhoneNumber && errors.phone && (
@@ -600,26 +607,32 @@ const CheckOut = () => {
               )}
             </Radio>
 
-            {/* <Radio value="new" className="block">
+            <Radio value="new" className="block">
               Nhập số điện thoại mới
               <input
-                type="text"
+                type="tel"
                 placeholder="VD: 0912345678"
-                className={`w-full p-3 border rounded-md mb-2 focus:ring-2 focus:ring-primary focus:border-transparent ${
+                className={`w-full p-3 border rounded-md  focus:ring-2 focus:ring-primary focus:border-transparent ${
                   errors.phone && useNewPhoneNumber ? "border-red-500" : ""
                 }`}
                 value={newPhoneNumber}
-                onChange={handlePhoneChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*$/.test(value)) {
+                    handlePhoneChange(e);
+                  }
+                }}
                 disabled={!useNewPhoneNumber}
+                pattern="[0-9]*"
               />
               {useNewPhoneNumber && errors.phone && (
                 <p className="text-red-500">{errors.phone}</p>
               )}
-            </Radio> */}
+            </Radio>
           </Radio.Group>
 
           {/* Ghi chú */}
-          <h2 className="text-2xl font-semibold mb-6 text-gray-700">Ghi chú</h2>
+          <h2 className="text-2xl font-semibold mb-2 text-gray-700">Ghi chú</h2>
           <textarea
             type="text"
             placeholder="VD: Ghi chú đơn hàng"

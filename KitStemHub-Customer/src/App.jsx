@@ -25,6 +25,7 @@ import EmailVerification from "./components/EmailVerification"; // Import EmailV
 import Result from "./components/result/Result";
 import ResetPassword from "./components/ResetPassword";
 import KitCategory from "./components/home/KitCategory";
+import CategoryDetailPage from "./pages/categoryDetailPage/CategoryDetailPage";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -109,7 +110,10 @@ function App() {
           <Route path="/checkout" element={<CheckOutPage />} />
           <Route path="/order/:orderId" element={<OrderDetail />} />
           <Route path="/order/result" element={<Result />} />
-          <Route path="/category/:categoryName" element={<KitCategory />} />
+          <Route
+            path="/category/:categoryName"
+            element={<CategoryDetailPage />}
+          />
         </Routes>
       </Router>
     </AuthProvider>
