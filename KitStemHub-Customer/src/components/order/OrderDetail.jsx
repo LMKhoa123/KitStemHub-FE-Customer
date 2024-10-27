@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import {
   Card,
   Steps,
@@ -28,6 +28,7 @@ const { Title, Text } = Typography;
 
 function OrderDetail() {
   const { orderId } = useParams();
+  const location = useLocation();
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [labs, setLabs] = useState([]);
@@ -319,13 +320,29 @@ function OrderDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-6">
             <Card title="Thông tin thanh toán" className="h-full shadow-md">
               <Space align="center" size="large">
-                <Text strong>Thẻ kết thúc bằng ***123</Text>
-                <Image
-                  src="/vnpayImage.svg"
-                  alt="VNPay"
-                  width={80}
-                  height={80}
-                />
+                {/* //conf sua */}
+                {localStorage.getItem("paymentMethod") === "" ? (
+                  <>
+                    <Text strong>Thanh toán bằng tiền mặt</Text>
+
+                    <Image
+                      src="/cash.svg"
+                      alt="Cash Payment"
+                      width={30}
+                      height={30}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text strong>Thẻ kết thúc bằng</Text>
+                    <Image
+                      src="/vnpayImage.svg"
+                      alt="VNPay"
+                      width={80}
+                      height={80}
+                    />
+                  </>
+                )}
               </Space>
             </Card>
 
