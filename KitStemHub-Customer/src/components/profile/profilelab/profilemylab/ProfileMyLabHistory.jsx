@@ -23,10 +23,14 @@ function ProfileMyLabHistory() {
         },
       });
 
-      if (response.data && response.data.detail && response.data.detail.data) {
-        const labSupportsData = response.data.detail.data["lab-supports"];
-        const totalPages = response.data.detail.data["total-pages"] || 0;
-        const currentPage = response.data.detail.data["current-page"] || 0;
+      if (
+        response.data &&
+        response.data.details &&
+        response.data.details.data
+      ) {
+        const labSupportsData = response.data.details.data["lab-supports"];
+        const totalPages = response.data.details.data["total-pages"] || 0;
+        const currentPage = response.data.details.data["current-page"] || 0;
 
         if (labSupportsData.length > 0) {
           // Cập nhật dữ liệu bảng

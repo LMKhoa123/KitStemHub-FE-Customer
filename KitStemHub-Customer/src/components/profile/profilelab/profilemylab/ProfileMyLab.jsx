@@ -19,13 +19,21 @@ function ProfileMyLab({ orderId }) {
       // Lấy trạng thái giao hàng
       setShippingStatus(orderDetails["shipping-status"]); // Lưu trạng thái giao hàng vào state
 
-      // Kiểm tra trạng thái từ localStorage
-      const storedStatus =
-        JSON.parse(localStorage.getItem("supportStatus")) || {};
+      // Lấy trạng thái hỗ trợ từ API khác
+      const supportResponse = await api.get(`labsupports/customers`);
+      const labSupportStatus =
+        supportResponse.data.details.data["lab-supports"];
 
-      // Lưu trạng thái từ API hoặc localStorage
+      // Tạo đối tượng trạng thái hỗ trợ cho từng lab, lọc theo orderId
       const initialSupportStatus = labSupports.reduce((acc, lab) => {
-        acc[lab.lab.id] = storedStatus[lab.lab.id] || "success"; // Nếu có trạng thái từ localStorage, dùng nó
+        const supportData = labSupportStatus.find(
+          (support) =>
+            support["lab-id"] === lab.lab.id &&
+            support["order-support-id"] === lab["order-support-id"]
+        );
+        // Kiểm tra trạng thái is-finished cho đúng lab trong đơn hàng
+        acc[lab.lab.id] =
+          supportData && !supportData["is-finished"] ? "fail" : "success";
         return acc;
       }, {});
 
@@ -46,11 +54,10 @@ function ProfileMyLab({ orderId }) {
 
   // Hàm hỗ trợ lab
   const handleSupport = async (labId, packageId) => {
-    setSupportStatus((prevStatus) => {
-      const updatedStatus = { ...prevStatus, [labId]: "fail" };
-      localStorage.setItem("supportStatus", JSON.stringify(updatedStatus));
-      return updatedStatus;
-    });
+    setSupportStatus((prevStatus) => ({
+      ...prevStatus,
+      [labId]: "fail", // Cập nhật trạng thái tạm thời là "Đang hỗ trợ"
+    }));
 
     try {
       const response = await api.post(
@@ -61,18 +68,17 @@ function ProfileMyLab({ orderId }) {
         message: response.data.detailss.message,
         duration: 3,
       });
+      fetchLabData();
     } catch (error) {
       notification.error({
         message: error.response?.data?.detailss?.message || "Có lỗi xảy ra!",
         duration: 3,
       });
-
-      // Khôi phục trạng thái nếu lỗi
-      setSupportStatus((prevStatus) => {
-        const updatedStatus = { ...prevStatus, [labId]: "success" };
-        localStorage.setItem("supportStatus", JSON.stringify(updatedStatus));
-        return updatedStatus;
-      });
+      // Nếu có lỗi, phục hồi trạng thái ban đầu
+      setSupportStatus((prevStatus) => ({
+        ...prevStatus,
+        [labId]: "success",
+      }));
     }
   };
 
@@ -107,7 +113,7 @@ function ProfileMyLab({ orderId }) {
 
         // Cấu hình nút Hỗ trợ
         const getButtonProps = () => {
-          if (shippingStatus !== "ĐÃ XÁC NHẬN") {
+          if (shippingStatus !== "GIAO HÀNG THÀNH CÔNG") {
             return null;
           }
 

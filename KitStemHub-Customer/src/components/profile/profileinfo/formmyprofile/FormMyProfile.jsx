@@ -206,7 +206,7 @@ function FormMyProfile() {
   }, [isUpdated]);
 
   return (
-    <div className="bg-white p-10 rounded-lg shadow-md max-w-5xl mx-auto">
+    <div className="bg-white p-10 rounded-lg shadow-md max-w-7xl mx-auto">
       <h1 className="text-3xl font-semibold text-center text-rose-600 mb-8">
         Cập nhật thông tin cá nhân
       </h1>
