@@ -117,39 +117,39 @@ function CartMyProfile() {
       title: "Đơn hàng",
       dataIndex: "id",
       key: "id",
-      width: "20%",
+      width: 400,
     },
     {
       title: "Thời gian đặt hàng",
       dataIndex: "created-at",
       key: "created-at",
       render: (text) => formatDateTime(text),
-      width: "10%",
+      width: 150,
     },
     {
       title: "Địa chỉ giao hàng",
       dataIndex: "shipping-address",
       key: "shipping-address",
-      width: "20%",
+      width: 400,
     },
     {
       title: "Trạng thái giao hàng",
       dataIndex: "shipping-status",
       key: "shipping-status",
       render: (status) => renderShippingStatus(status),
-      width: "15%",
+      width: 100,
     },
     {
       title: "Tổng tiền",
       dataIndex: "total-price",
       key: "total-price",
       render: (price) => price.toLocaleString("vi-VN") + " VND",
-      width: "15%",
+      width: 100,
     },
     {
       title: "Xem Lab & Hỗ trợ",
       key: "lab-support",
-      width: "10%",
+      width: 100,
       render: (record) => (
         <Button type="primary" onClick={() => showLabModal(record.id)}>
           Xem
@@ -160,7 +160,7 @@ function CartMyProfile() {
       title: "Ghi chú",
       dataIndex: "note",
       key: "note",
-      width: "5%",
+      width: 70,
       render: (note) =>
         note ? (
           <Button type="link" onClick={() => handleShowNoteModal(note)}>
@@ -182,7 +182,7 @@ function CartMyProfile() {
   ];
 
   return (
-    <div className="bg-white p-14 max-w-6xl shadow-lg rounded mb-6 ">
+    <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
       <h1 className="text-2xl font-semibold mb-6">Đơn hàng của bạn</h1>
       <Table
         dataSource={orders} // Hiển thị danh sách đơn hàng
