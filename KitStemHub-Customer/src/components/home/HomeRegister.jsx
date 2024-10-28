@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Search from "antd/es/input/Search";
 import HomeProductCarousel from "./homeProductCarousel/HomeProductCarousel";
+import HomeCarousel from "./homeCarousel/HomeCarousel";
 
 function HomeRegister() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,19 +11,18 @@ function HomeRegister() {
   };
   return (
     <>
-      {/* nav home page */}
-      {/* <div className="flex mt-16"> */}
-      {/* side bar */}
+      <HomeCarousel />
 
       {/* our product */}
       <div className="flex flex-col ml-4 mr-4 mt-16">
-        <div className="flex mb-5 items-center">
-          <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
-          <h3 className="text-rose-600 font-medium flex items-center">
-            Sản phẩm của chúng tôi
-          </h3>
-        </div>
-        {/* <div className="flex mb-5 items-center flex justify-end">
+        <div className="ml-44">
+          <div className="flex mb-5 items-center">
+            <div className="w-3 bg-rose-600 mr-3 rounded-lg h-8"></div>
+            <h3 className="text-rose-600 font-medium flex items-center">
+              Sản phẩm của chúng tôi
+            </h3>
+          </div>
+          {/* <div className="flex mb-5 items-center flex justify-end">
           <Search
             placeholder="Bạn đang tìm kiếm gì?"
             onChange={handleSearchChange} // Bắt sự kiện khi có thay đổi trong ô tìm kiếm
@@ -30,10 +30,10 @@ function HomeRegister() {
             className="search-product w-1/5 "
           />
         </div> */}
-        <h1 className="font-semibold text-3xl mb-10">
-          Khám phá sản phẩm của chúng tôi
-        </h1>
-
+          <h1 className="font-semibold text-3xl mb-10">
+            Khám phá sản phẩm của chúng tôi
+          </h1>
+        </div>
         {/* carousel product */}
         <div className="flex-grow mb-16">
           <HomeProductCarousel searchTerm={searchTerm} />{" "}

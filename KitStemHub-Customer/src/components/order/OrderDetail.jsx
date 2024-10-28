@@ -335,7 +335,7 @@ function OrderDetail() {
                   </>
                 ) : (
                   <>
-                    <Text strong>Thẻ kết thúc bằng</Text>
+                    <Text strong>Thanh toán bằng</Text>
                     <Image
                       src="/vnpayImage.svg"
                       alt="VNPay"

@@ -63,6 +63,7 @@ function ProfileMyLab({ orderId }) {
       const response = await api.post(
         `labsupports/orders/${orderId}/packages/${packageId}/labs/${labId}`
       );
+      console.log("ho troj: ", response.data);
 
       notification.success({
         message: response.data.detailss.message,
@@ -71,9 +72,14 @@ function ProfileMyLab({ orderId }) {
       fetchLabData();
     } catch (error) {
       notification.error({
-        message: error.response?.data?.detailss?.message || "Có lỗi xảy ra!",
+        message:
+          error?.response?.data?.detailss?.errors["invalid-credentials"] ||
+          "Bạn đã gửi yêu cầu hổ trợ cho bài lab này!",
         duration: 3,
       });
+      console.log(
+        error?.response.data?.detailss?.errors["invalid-credentials"]
+      );
       // Nếu có lỗi, phục hồi trạng thái ban đầu
       setSupportStatus((prevStatus) => ({
         ...prevStatus,
@@ -122,14 +128,6 @@ function ProfileMyLab({ orderId }) {
               disabled: true,
               children: "Đã hết số lần hỗ trợ",
               style: { backgroundColor: "#f5f5f5", color: "#d9d9d9" },
-            };
-          }
-
-          if (status === "fail") {
-            return {
-              disabled: true,
-              children: "Đang hỗ trợ",
-              style: { backgroundColor: "orange", color: "white" },
             };
           }
 
