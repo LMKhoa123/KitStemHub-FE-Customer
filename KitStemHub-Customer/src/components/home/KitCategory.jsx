@@ -6,22 +6,18 @@ import {
   Pagination,
   Button,
   Input,
-  Checkbox,
   Tag,
   Tooltip,
-  Menu,
-  Dropdown,
-  Slider,
   Radio,
-  Space,
 } from "antd";
+
 import api from "./../../config/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+  AppstoreOutlined,
+  DollarOutlined,
   EyeOutlined,
   HeartOutlined,
-  CloseOutlined,
-  DownOutlined,
   ArrowUpOutlined,
 } from "@ant-design/icons";
 import AOS from "aos";
@@ -38,9 +34,8 @@ function KitCategory({ initialSearchTerm }) {
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const { categoryName } = useParams();
-  const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [customPriceRange, setCustomPriceRange] = useState([0, 5000000]);
+
+  // const [priceFilter, setPriceFilter] = useState("all");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -54,27 +49,41 @@ function KitCategory({ initialSearchTerm }) {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get("kits", {
-        params: {
-          page: currentPage,
-          "kit-name": searchTerm,
-          "category-name": categoryName,
-          "from-price": priceRange[0],
-          "to-price": priceRange[1],
-        },
-      });
+      // Ensure currentPage is never negative
+      const pageToFetch = Math.max(0, currentPage);
+
+      const params = {
+        page: pageToFetch,
+        "kit-name": searchTerm,
+      };
+
+      // Chỉ thêm category-name nếu categoryName không phải "all"
+      if (categoryName && categoryName !== "Tất Cả") {
+        params["category-name"] = categoryName;
+      }
+
+      // Chỉ thêm price range params khi có giá trị
+      if (priceRange.length === 2) {
+        params["from-price"] = priceRange[0];
+        params["to-price"] = priceRange[1];
+      }
+
+      const response = await api.get("kits", { params });
+
       const {
         kits,
         "total-pages": totalPages,
         "current-page": currentPageFromApi,
       } = response.data.details.data;
-      setDataSource(kits);
-      setTotalPages(totalPages);
-      setCurrentPage(currentPageFromApi - 1);
+
+      setDataSource(kits || []);
+      setTotalPages(totalPages || 0);
+      setCurrentPage(Math.max(0, (currentPageFromApi || 1) - 1));
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu kit:", error);
       setDataSource([]);
       setTotalPages(0);
+      setCurrentPage(0);
     } finally {
       setLoading(false);
     }
@@ -124,48 +133,17 @@ function KitCategory({ initialSearchTerm }) {
     fetchProducts();
   };
 
-  const handleApplyFilter = () => {
-    setCurrentPage(0);
-    fetchProducts();
-  };
-
   const handlePriceFilterChange = (e) => {
     const value = e.target.value;
-    setPriceFilter(value);
-    if (value === "custom") {
-      setPriceRange(customPriceRange);
-    } else if (value === "all") {
-      setPriceRange([0, 5000000]);
+
+    if (value === "all") {
+      setPriceRange([]);
     } else {
       const [min, max] = value.split("-").map(Number);
       setPriceRange([min, max]);
     }
-    setCurrentPage(0);
-    fetchProducts();
-  };
 
-  const handleCustomPriceChange = (value) => {
-    setCustomPriceRange(value);
-    if (priceFilter === "custom") {
-      setPriceRange(value);
-      setCurrentPage(0);
-      fetchProducts();
-    }
-  };
-  // const priceFilterMenu = (
-  //   <Menu onClick={({ key }) => handlePriceFilterChange(key)}>
-  //     <Menu.Item key="all">Tất cả giá</Menu.Item>
-  //     <Menu.Item key="0-100000">0 - 100,000 VND</Menu.Item>
-  //     <Menu.Item key="100000-500000">100,000 - 500,000 VND</Menu.Item>
-  //     <Menu.Item key="500000-1000000">500,000 - 1,000,000 VND</Menu.Item>
-  //     <Menu.Item key="1000000-2000000">1,000,000 - 2,000,000 VND</Menu.Item>
-  //     <Menu.Item key="2000000-5000000">2,000,000 - 5,000,000 VND</Menu.Item>
-  //     <Menu.Item key="custom">Tùy chỉnh</Menu.Item>
-  //   </Menu>
-  // );
-
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
+    setCurrentPage(0); // Reset to first page when filter changes
   };
 
   const handleSearchInputChange = (e) => {
@@ -174,25 +152,89 @@ function KitCategory({ initialSearchTerm }) {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Tiêu đề và nút lọc */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">
-          {categoryName || "Tất cả sản phẩm"} (
-          {loading ? "Đang tải..." : dataSource.length} sản phẩm)
-        </h2>
-        <div className="flex items-center space-x-4">
-          <Button onClick={toggleSidebar}>
-            {sidebarVisible ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
-          </Button>
-        </div>
-      </div>
+      {/* Tiêu đề */}
+      <h2 className="text-2xl font-bold mb-6">
+        {categoryName || "Tất cả sản phẩm"} (
+        {loading ? "Đang tải..." : dataSource.length} sản phẩm)
+      </h2>
 
-      {/* Khu vực nội dung chính */}
-      <div className="flex">
-        {/* Lưới sản phẩm */}
-        <div
-          className={`w-full ${sidebarVisible ? "pr-[300px]" : ""} transition-all duration-300`}
-        >
+      {/* Container cho sidebar và content */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Sidebar - Fixed on the left */}
+        <div className="w-full md:w-64 shrink-0">
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-4">Tìm kiếm</h3>
+              <Input.Search
+                placeholder="Nhập tên kit"
+                onSearch={handleSearch}
+                value={tempSearchTerm}
+                onChange={handleSearchInputChange}
+                className="mb-4"
+              />
+            </div>
+
+            <div className="space-y-4">
+              {/* Price Filter Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">
+                  <DollarOutlined className="mr-2" />
+                  Lọc theo giá
+                </h3>
+                <Radio.Group
+                  onChange={handlePriceFilterChange}
+                  className="flex flex-col gap-2"
+                >
+                  <Radio value="all">Tất cả giá</Radio>
+                  <Radio value="0-100000">0 - 100,000 VND</Radio>
+                  <Radio value="100000-500000">100,000 - 500,000 VND</Radio>
+                  <Radio value="500000-1000000">500,000 - 1,000,000 VND</Radio>
+                  <Radio value="1000000-2000000">
+                    1,000,000 - 2,000,000 VND
+                  </Radio>
+                  <Radio value="2000000-5000000">
+                    2,000,000 - 5,000,000 VND
+                  </Radio>
+                </Radio.Group>
+              </div>
+
+              {/* Categories Section */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3">
+                  <AppstoreOutlined className="mr-2" />
+                  Danh mục
+                </h3>
+                <div className="flex flex-col gap-2">
+                  {/* Thêm nút Tất Cả */}
+                  <Button
+                    type={
+                      !categoryName || categoryName === "Tất Cả"
+                        ? "primary"
+                        : "text"
+                    }
+                    onClick={() => navigate(`/category/Tất Cả`)}
+                    className="text-left"
+                  >
+                    Tất Cả
+                  </Button>
+                  {categories.map((category) => (
+                    <Button
+                      key={category.id}
+                      type={categoryName === category.name ? "primary" : "text"}
+                      onClick={() => navigate(`/category/${category.name}`)}
+                      className="text-left"
+                    >
+                      {category.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1">
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <Spin size="large" />
@@ -274,6 +316,8 @@ function KitCategory({ initialSearchTerm }) {
               )}
             </div>
           )}
+
+          {/* Pagination */}
           {totalPages > 0 && (
             <Pagination
               total={totalPages * 20}
@@ -285,70 +329,9 @@ function KitCategory({ initialSearchTerm }) {
             />
           )}
         </div>
-
-        {/* Thanh bên */}
-        <div
-          className={`fixed top-0 right-0 h-screen w-[300px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-            sidebarVisible ? "translate-x-0" : "translate-x-full"
-          } overflow-hidden`}
-        >
-          <div className="h-full flex flex-col">
-            <div className="p-6 flex-grow overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold">Bộ lọc</h3>
-                <Button
-                  icon={<CloseOutlined />}
-                  onClick={toggleSidebar}
-                  type="text"
-                />
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-medium mb-2">Tìm kiếm theo tên Kit</h4>
-                  <Input.Search
-                    placeholder="Nhập tên kit"
-                    onSearch={handleSearch}
-                    value={tempSearchTerm}
-                    onChange={handleSearchInputChange} // cập nhật giá trị tạm thời khi người dùng nhập
-                  />
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2">Lọc theo giá</h4>
-                  <Radio.Group
-                    onChange={handlePriceFilterChange}
-                    value={priceFilter}
-                  >
-                    <Space direction="vertical">
-                      <Radio value="all">Tất cả giá</Radio>
-                      <Radio value="0-100000">0 - 100,000 VND</Radio>
-                      <Radio value="100000-500000">100,000 - 500,000 VND</Radio>
-                      <Radio value="500000-1000000">
-                        500,000 - 1,000,000 VND
-                      </Radio>
-                      <Radio value="1000000-2000000">
-                        1,000,000 - 2,000,000 VND
-                      </Radio>
-                      <Radio value="2000000-5000000">
-                        2,000,000 - 5,000,000 VND
-                      </Radio>
-                    </Space>
-                  </Radio.Group>
-                  <h4 className="mt-6 font-medium">Danh mục</h4>
-                  {categories.map((category) => (
-                    <Button
-                      key={category.id}
-                      type="link"
-                      onClick={() => navigate(`/category/${category.name}`)}
-                    >
-                      {category.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+
+      {/* Scroll to top button */}
       {showScrollTop && (
         <Button
           type="primary"

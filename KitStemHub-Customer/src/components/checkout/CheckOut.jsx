@@ -534,14 +534,12 @@ const CheckOut = () => {
                     {errors.specificAddress}
                   </p>
                 )}
-                {fullAddress && (
+                {/* {fullAddress && (
                   <div className="bg-white p-3 border rounded-md">
-                    {/* <h4 className="font-semibold text-gray-700 mb-2">
-                      Địa chỉ đầy đủ:
-                    </h4> */}
+                    
                     <p className="text-gray-600">{fullAddress}</p>
                   </div>
-                )}
+                )} */}
               </div>
             }
           </div>

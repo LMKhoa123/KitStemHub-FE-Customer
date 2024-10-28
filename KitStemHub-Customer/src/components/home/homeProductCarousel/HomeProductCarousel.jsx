@@ -16,6 +16,7 @@ import CategoryCarousel from "../CategoryCarousel";
 function HomeProductCarousel() {
   const navigate = useNavigate();
   const [categoriesWithProducts, setCategoriesWithProducts] = useState([]);
+  const [allKits, setAllKits] = useState([]); // Thêm state mới
   const [loading, setLoading] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const categoryRefs = useRef({});
@@ -29,8 +30,9 @@ function HomeProductCarousel() {
   }, []);
 
   useEffect(() => {
-    const fetchCategoriesAndProducts = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch categories và products theo categories như cũ
         const categoriesResponse = await api.get("categories");
         const categories = categoriesResponse.data.details.data.categories;
 
@@ -50,15 +52,24 @@ function HomeProductCarousel() {
           })
         );
 
+        // Thêm fetch all kits
+        const allKitsResponse = await api.get("kits", {
+          params: {
+            page: 0,
+            "per-page": 5,
+          },
+        });
+
         setCategoriesWithProducts(categoriesWithProductsData);
+        setAllKits(allKitsResponse.data.details.data.kits);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching categories and products:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
 
-    fetchCategoriesAndProducts();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -101,6 +112,95 @@ function HomeProductCarousel() {
     <div className="bg-white">
       <CategoryCarousel onCategoryClick={handleCategoryClick} />
       <div className="container mx-auto py-8 px-4">
+        {/* Thêm phần hiển thị All Kits ở đầu */}
+        <div className="mb-16" data-aos="fade-up">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 relative">
+              Tất Cả Sản Phẩm
+            </h2>
+            <Button
+              type="link"
+              className="text-blue-600 hover:text-blue-800 transition-colors duration-300 text-lg font-semibold"
+              onClick={() => navigate("/category/Tất Cả")}
+            >
+              Xem Thêm <RightOutlined />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {allKits.map((product, productIndex) => (
+              <Card
+                key={product.id}
+                hoverable
+                className={`group hover:shadow-xl duration-300 bg-white overflow-hidden
+                  ${productIndex >= 1 ? "hidden " : "block"}
+                  ${productIndex >= 2 ? "hidden " : "sm:block"}
+                  ${productIndex >= 3 ? "hidden" : " md:block"}
+                  ${productIndex >= 4 ? "hidden " : "lg:block"}
+                  ${productIndex >= 5 ? "hidden " : "xl:block"}
+                `}
+                cover={
+                  <img
+                    alt={product.name}
+                    src={product["kit-images"]?.[0]?.url || "default-image-url"}
+                    className="h-48 w-full object-cover"
+                  />
+                }
+                onClick={() => handleProductClick(product.id)}
+                bodyStyle={{
+                  padding: "0",
+                  paddingTop: "24px",
+                  paddingBottom: "24px",
+                }}
+                bordered={false}
+              >
+                <Card.Meta
+                  title={
+                    <Tooltip title={product.name}>
+                      <div className="text-lg font-semibold truncate">
+                        {product.name}
+                      </div>
+                    </Tooltip>
+                  }
+                  description={
+                    <>
+                      <p className="text-sm text-gray-500 mb-2 truncate">
+                        {product.brief}
+                      </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-800 font-semibold">
+                          {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
+                        </span>
+                      </div>
+                    </>
+                  }
+                />
+                <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
+                  <Button
+                    shape="circle"
+                    icon={<HeartOutlined />}
+                    className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Đã nhấn vào biểu tượng tim");
+                    }}
+                  />
+                  <Button
+                    shape="circle"
+                    icon={<EyeOutlined />}
+                    className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Đã nhấn vào biểu tượng mắt");
+                    }}
+                  />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Phần hiển thị theo categories giữ nguyên */}
         {categoriesWithProducts.map((category, index) => (
           <div
             key={category.id}
@@ -118,7 +218,7 @@ function HomeProductCarousel() {
                 className="text-blue-600 hover:text-blue-800 transition-colors duration-300 text-lg font-semibold"
                 onClick={() => navigate(`/category/${category.name}`)}
               >
-                Xem tất cả <RightOutlined />
+                Xem Thêm <RightOutlined />
               </Button>
             </div>
 
