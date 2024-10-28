@@ -15,7 +15,10 @@ const Result = () => {
   const [loading, setLoading] = useState(true); // Trạng thái loading
   // Lấy orderId và paymentMethod từ localStorage
   const orderId = localStorage.getItem("orderId");
-  const paymentMethod = localStorage.getItem("paymentMethod");
+  const orderKey = `order_${orderId}`;
+  const orderData = localStorage.getItem(orderKey);
+  const { paymentMethod } = JSON.parse(orderData);
+
   console.log("Order ID:", orderId); // Log ra orderId để kiểm tra giá trị
   console.log(paymentMethod);
 
