@@ -23,7 +23,7 @@ function HomeCarousel() {
         <div className="relative h-full w-full">
           <img
             loading="lazy"
-            src="public/page1.jpeg"
+            src="/page1.jpeg"
             alt=""
             className="h-full w-full object-cover"
           />
@@ -38,7 +38,7 @@ function HomeCarousel() {
         <div className="relative h-full w-full">
           <img
             loading="lazy"
-            src="public/page2.jpeg"
+            src="/page2.jpeg"
             alt=""
             className="h-full w-full object-cover"
           />
@@ -52,7 +52,7 @@ function HomeCarousel() {
         <div className="relative h-full w-full">
           <img
             loading="lazy"
-            src="public/page5.jpg"
+            src="/page5.jpg"
             alt=""
             className="h-full w-full object-cover"
           />
