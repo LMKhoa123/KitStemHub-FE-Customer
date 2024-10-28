@@ -88,7 +88,9 @@ function CartContent() {
       setCartItems(updatedCartItems);
 
       // Gửi sự kiện cartUpdate để cập nhật badge
-      const cartEvent = new Event("cartUpdate");
+      const cartEvent = new CustomEvent("cartUpdate", {
+        detail: updatedCartItems.length,
+      });
       window.dispatchEvent(cartEvent);
 
       // Cập nhật lại tổng sau khi xóa sản phẩm
