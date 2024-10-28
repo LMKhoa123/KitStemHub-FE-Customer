@@ -1,7 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useRef } from "react";
-import { Card, Button, Spin, Tooltip, Tag } from "antd";
-import { RightOutlined, HeartOutlined, EyeOutlined } from "@ant-design/icons";
+import { Card, Button, Spin, Tooltip } from "antd";
+import {
+  RightOutlined,
+  HeartOutlined,
+  EyeOutlined,
+  ArrowUpOutlined,
+} from "@ant-design/icons";
 import api from "../../../config/axios";
 import { useNavigate } from "react-router-dom";
 import AOS from "aos";
@@ -12,6 +17,7 @@ function HomeProductCarousel() {
   const navigate = useNavigate();
   const [categoriesWithProducts, setCategoriesWithProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const categoryRefs = useRef({});
 
   useEffect(() => {
@@ -55,6 +61,16 @@ function HomeProductCarousel() {
     fetchCategoriesAndProducts();
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // Hiện nút khi scroll xuống 300px
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleProductClick = (kitId) => {
     navigate(`/productdetail/${kitId}`);
   };
@@ -64,6 +80,13 @@ function HomeProductCarousel() {
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   if (loading) {
@@ -178,6 +201,21 @@ function HomeProductCarousel() {
           </div>
         ))}
       </div>
+      {showScrollTop && (
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<ArrowUpOutlined />}
+          size="large"
+          onClick={scrollToTop}
+          className=" fixed bottom-8 right-8 z-50 shadow-lg hover:scale-110 transition-transform duration-300"
+          style={{
+            backgroundColor: "red",
+            height: "50px",
+            width: "50px",
+          }}
+        />
+      )}
     </div>
   );
 }

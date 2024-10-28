@@ -32,7 +32,9 @@ function OrderDetail() {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [labs, setLabs] = useState([]);
-
+  const orderKey = `order_${orderId}`;
+  const orderDetails = JSON.parse(localStorage.getItem(orderKey));
+  console.log(orderDetails.paymentMethod);
   useEffect(() => {
     const fetchOrderData = async () => {
       setLoading(true);
@@ -320,8 +322,7 @@ function OrderDetail() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-6">
             <Card title="Thông tin thanh toán" className="h-full shadow-md">
               <Space align="center" size="large">
-                {/* //conf sua */}
-                {localStorage.getItem("paymentMethod") === "" ? (
+                {orderDetails.paymentMethod === "cash" ? (
                   <>
                     <Text strong>Thanh toán bằng tiền mặt</Text>
 

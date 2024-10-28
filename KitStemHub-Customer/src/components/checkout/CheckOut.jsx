@@ -190,7 +190,18 @@ const CheckOut = () => {
 
         // Lưu `orderId` vào `localStorage` để dùng khi người dùng quay lại từ VNPay
         localStorage.setItem("orderId", orderId);
-        localStorage.setItem("paymentMethod", paymentMethod);
+
+        const orderKey = `order_${orderId}`;
+        // Store order data
+        localStorage.setItem(
+          orderKey,
+          JSON.stringify({ paymentMethod, orderId })
+        );
+
+        // If you need to log the payment method, get it from the stored data
+        // const storedOrder = JSON.parse(localStorage.getItem(orderKey));
+        // console.log("Payment Method:", storedOrder.paymentMethod);
+
         if (paymentMethod === "bank") {
           // khúc này gọi api  tạo ra đường link rồi mở qua trang đó với url đucojw trả ra
           const paymentResponse = await api.post("payments/vnpay", {

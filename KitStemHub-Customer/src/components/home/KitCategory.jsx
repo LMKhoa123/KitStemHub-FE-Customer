@@ -22,6 +22,7 @@ import {
   HeartOutlined,
   CloseOutlined,
   DownOutlined,
+  ArrowUpOutlined,
 } from "@ant-design/icons";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -40,6 +41,7 @@ function KitCategory({ initialSearchTerm }) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [priceFilter, setPriceFilter] = useState("all");
   const [customPriceRange, setCustomPriceRange] = useState([0, 5000000]);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     AOS.init({
@@ -94,10 +96,24 @@ function KitCategory({ initialSearchTerm }) {
     };
     fetchCategories();
   }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      // Hiện nút khi scroll xuống 300px
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const handleProductClick = (kitId) => {
     navigate(`/productdetail/${kitId}`);
   };
-
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
   const handlePageChange = (page) => {
     setCurrentPage(page - 1);
   };
@@ -333,6 +349,21 @@ function KitCategory({ initialSearchTerm }) {
           </div>
         </div>
       </div>
+      {showScrollTop && (
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<ArrowUpOutlined />}
+          size="large"
+          onClick={scrollToTop}
+          className=" fixed bottom-8 right-8 z-50 shadow-lg hover:scale-110 transition-transform duration-300"
+          style={{
+            backgroundColor: "red",
+            height: "50px",
+            width: "50px",
+          }}
+        />
+      )}
     </div>
   );
 }
