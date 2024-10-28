@@ -87,9 +87,6 @@ function CartContent() {
       // Cập nhật lại giỏ hàng trong state
       setCartItems(updatedCartItems);
 
-      // Lưu lại giỏ hàng cập nhật vào localStorage
-      localStorage.setItem("cart", JSON.stringify(updatedCartItems));
-
       // Gửi sự kiện cartUpdate để cập nhật badge
       const cartEvent = new Event("cartUpdate");
       window.dispatchEvent(cartEvent);
@@ -156,6 +153,10 @@ function CartContent() {
         description: "Số lượng sản phẩm đã được cập nhật.",
         placement: "topRight",
       });
+
+      // Phát sự kiện để cập nhật badge
+      const cartEvent = new Event("cartUpdate");
+      window.dispatchEvent(cartEvent);
     } catch (error) {
       // Hiển thị thông báo lỗi
       notification.error({

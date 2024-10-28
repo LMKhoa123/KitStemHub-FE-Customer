@@ -12,10 +12,12 @@ const Result = () => {
   const navigate = useNavigate();
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false); // Hiệu ứng pháo hoa
-  const orderId = location.state?.orderId || localStorage.getItem("orderId");
   const [loading, setLoading] = useState(true); // Trạng thái loading
+  // Lấy orderId và paymentMethod từ localStorage
+  const orderId = localStorage.getItem("orderId");
+  const paymentMethod = localStorage.getItem("paymentMethod");
   console.log("Order ID:", orderId); // Log ra orderId để kiểm tra giá trị
-  console.log("Location state:", location.state);
+  console.log(paymentMethod);
 
   // Hàm để lấy query parameters từ URL
   const getQueryParams = (search) => {
@@ -37,69 +39,58 @@ const Result = () => {
   };
 
   useEffect(() => {
-    // Nếu có orderId thì lưu vào localStorage
-    if (orderId) {
-      localStorage.setItem("orderId", orderId);
+    if (!orderId) {
+      console.error("Order ID is missing!");
+      navigate("/checkout"); // Quay lại trang checkout nếu không có orderId
+      return;
     }
-    // Lấy các thông tin từ query parameters
-    const queryParams = getQueryParams(location.search);
 
-    // Nếu có thông tin thanh toán VNPay, gọi API để xác nhận thanh toán
     const confirmPayment = async () => {
       setLoading(true);
-      if (queryParams.vnp_TransactionStatus) {
-        try {
+      try {
+        const queryParams = getQueryParams(location.search);
+
+        if (paymentMethod === "cash") {
+          // Nếu phương thức thanh toán là COD
+          console.log("COD Payment confirmed");
+          setPaymentStatus("success");
+          setShowConfetti(true);
+          notification.destroy();
+          notification.success({
+            message: "Đơn hàng COD đã được đặt thành công!",
+          });
+        } else if (queryParams.vnp_TransactionStatus) {
+          // Nếu phương thức thanh toán là VNPay
           const response = await api.get("payments/vnpay/callback", {
             params: queryParams,
           });
 
           if (response.data.status === "success") {
             setPaymentStatus("success");
-            setShowConfetti(true); // Hiển thị hiệu ứng pháo hoa
+            setShowConfetti(true);
             notification.destroy();
             notification.success({
-              message: "Thực hiện giao dịch thanh toán thành công!",
-              duration: 3,
+              message: "Thanh toán thành công!",
             });
           } else {
+            console.error("VNPay callback failed:", response.data);
             setPaymentStatus("fail");
-            notification.destroy();
-            notification.error({
-              message: "Thực hiện giao dịch thanh toán thất bại!",
-              duration: 3,
-            });
-            navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
+            notification.error({ message: "Thanh toán thất bại!" });
           }
-        } catch (error) {
-          console.log(error);
-          setPaymentStatus("fail");
-          notification.destroy();
-          notification.error({
-            message: "Đã có lỗi xảy ra khi thực hiện giao dịch thanh toán!",
-            duration: 3,
-          });
-          navigate("/checkout"); // Điều hướng về trang checkout nếu thất bại
-        } finally {
-          setLoading(false);
-          window.history.replaceState(null, "", "/order/result");
         }
-      } else if (orderId) {
-        // Nếu không phải VNPay mà là thanh toán COD (orderId có trong state)
-        setPaymentStatus("success");
-        setShowConfetti(true);
-        notification.destroy();
-        notification.success({
-          message: "Đơn hàng COD đã được đặt thành công!",
-          duration: 3,
+      } catch (error) {
+        console.error("Error in payment confirmation:", error);
+        setPaymentStatus("fail");
+        notification.error({
+          message: "Thanh toán thất bại, vui lòng thử lại!",
         });
+      } finally {
         setLoading(false);
-        // Xóa `orderId` khỏi `localStorage` sau khi hoàn tất
-        localStorage.removeItem("orderId");
       }
     };
 
     confirmPayment();
-  }, [location.search, navigate, orderId]);
+  }, [orderId, paymentMethod, navigate]);
 
   // Hàm xử lý khi bấm "Quay về trang chủ"
   const handleGoHome = () => {
@@ -107,10 +98,6 @@ const Result = () => {
     localStorage.removeItem("cart");
     navigate("/home");
   };
-
-  const paymentMethod =
-    location.state?.paymentMethod || localStorage.getItem("paymentMethod");
-  console.log("Received paymentMethod in Result:", paymentMethod);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white">
@@ -188,9 +175,8 @@ const Result = () => {
               <Button
                 type="primary"
                 onClick={() => {
-                  const storedOrderId = localStorage.getItem("orderId");
-                  navigate(`/order/${storedOrderId || orderId}`, {
-                    state: { orderId: storedOrderId || orderId, paymentMethod },
+                  navigate(`/order/${orderId}`, {
+                    state: { orderId, paymentMethod },
                   });
                 }}
                 className="bg-rose-500 hover:bg-rose-600 font-semibold"
