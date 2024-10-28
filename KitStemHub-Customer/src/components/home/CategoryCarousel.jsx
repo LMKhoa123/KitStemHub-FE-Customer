@@ -61,7 +61,7 @@ function CategoryCarousel({ onCategoryClick }) {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-300 to-indigo-300 py-10 px-4 sm:px-6 lg:px-8 shadow-lg rounded-lg">
+    <div className="bg-gradient-to-r from-blue-300 to-indigo-300 py-10 px-4 sm:px-6 lg:px-8 shadow-lg rounded-lg ">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-2xl font-bold text-center text-indigo-700 mb-6">
           Explore Categories
