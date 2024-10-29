@@ -319,10 +319,10 @@ const ProductDetail = () => {
                             <Tag color="blue" className="px-3 py-1 text-sm">
                               {lab.level.name}
                             </Tag>
-                            <span className="text-sm text-gray-600">
+                            {/* <span className="text-sm text-gray-600">
                               <span className="font-medium">Giá:</span>{" "}
                               {lab.price.toLocaleString("vi-VN")} ₫
-                            </span>
+                            </span> */}
                             <span className="text-sm text-gray-600">
                               <span className="font-medium">
                                 Số lần hỗ trợ tối đa:

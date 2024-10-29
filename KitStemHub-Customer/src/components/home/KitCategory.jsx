@@ -151,9 +151,9 @@ function KitCategory({ initialSearchTerm }) {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-20 px-4">
       {/* Tiêu đề */}
-      <h2 className="text-2xl font-bold mb-6">
+      <h2 className="text-2xl mb-14 font-bold font-sans">
         {categoryName || "Tất cả sản phẩm"} (
         {loading ? "Đang tải..." : dataSource.length} sản phẩm)
       </h2>
@@ -275,13 +275,18 @@ function KitCategory({ initialSearchTerm }) {
                             <p className="text-sm text-gray-500 mb-2 truncate">
                               {item.brief}
                             </p>
-                            <div className="flex justify-between items-center">
+                            <div className="flex flex-col gap-3">
                               <span className="text-green-800 font-semibold">
                                 {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()} VND`}
                               </span>
-                              <Tag color="blue">
-                                {item["kits-category"].name}
-                              </Tag>
+                              <div className="flex justify-end">
+                                <Tag
+                                  color="blue"
+                                  className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                                >
+                                  {item["kits-category"].name}
+                                </Tag>
+                              </div>
                             </div>
                           </>
                         }
