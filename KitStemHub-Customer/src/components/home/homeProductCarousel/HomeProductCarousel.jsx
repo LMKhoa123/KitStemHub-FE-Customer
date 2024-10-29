@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState, useRef } from "react";
-import { Card, Button, Spin, Tooltip } from "antd";
+import { Card, Button, Spin, Tooltip, Tag } from "antd";
 import {
   RightOutlined,
   HeartOutlined,
@@ -111,11 +111,11 @@ function HomeProductCarousel() {
   return (
     <div className="bg-white">
       <CategoryCarousel onCategoryClick={handleCategoryClick} />
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto py-12 px-4">
         {/* Thêm phần hiển thị All Kits ở đầu */}
         <div className="mb-16" data-aos="fade-up">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 relative">
+            <h2 className="text-4xl font-bold text-gray-800 relative font-sans">
               Tất Cả Sản Phẩm
             </h2>
             <Button
@@ -148,7 +148,7 @@ function HomeProductCarousel() {
                 }
                 onClick={() => handleProductClick(product.id)}
                 bodyStyle={{
-                  padding: "0",
+                  padding: "22px",
                   paddingTop: "24px",
                   paddingBottom: "24px",
                 }}
@@ -164,13 +164,21 @@ function HomeProductCarousel() {
                   }
                   description={
                     <>
-                      <p className="text-sm text-gray-500 mb-2 truncate">
+                      <p className="text-sm text-gray-500 mb-3 truncate">
                         {product.brief}
                       </p>
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-3">
                         <span className="text-green-800 font-semibold">
                           {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
                         </span>
+                        <div className="flex justify-end">
+                          <Tag
+                            color="blue"
+                            className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                          >
+                            {product["kits-category"].name}
+                          </Tag>
+                        </div>
                       </div>
                     </>
                   }
@@ -245,7 +253,7 @@ function HomeProductCarousel() {
                   }
                   onClick={() => handleProductClick(product.id)}
                   bodyStyle={{
-                    padding: "0",
+                    padding: "22px",
                     paddingTop: "24px",
                     paddingBottom: "24px",
                   }}
@@ -264,13 +272,18 @@ function HomeProductCarousel() {
                         <p className="text-sm text-gray-500 mb-2 truncate">
                           {product.brief}
                         </p>
-                        <div className="flex justify-between items-center">
+                        <div className="flex flex-col gap-3">
                           <span className="text-green-800 font-semibold">
                             {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
                           </span>
-                          {/* <Tag color="blue">
-                            {product["kits-category"].name}
-                          </Tag> */}
+                          <div className="flex justify-end">
+                            <Tag
+                              color="blue"
+                              className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                            >
+                              {product["kits-category"].name}
+                            </Tag>
+                          </div>
                         </div>
                       </>
                     }
