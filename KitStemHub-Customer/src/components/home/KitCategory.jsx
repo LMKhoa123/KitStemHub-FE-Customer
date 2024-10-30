@@ -28,7 +28,7 @@ function KitCategory({ initialSearchTerm }) {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [priceRange, setPriceRange] = useState([0, 5000000]);
+  const [priceRange, setPriceRange] = useState([]);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm || "");
   const [tempSearchTerm, setTempSearchTerm] = useState(initialSearchTerm || "");
   const [categories, setCategories] = useState([]);
@@ -62,8 +62,12 @@ function KitCategory({ initialSearchTerm }) {
         params["category-name"] = categoryName;
       }
 
-      // Chỉ thêm price range params khi có giá trị
-      if (priceRange.length === 2) {
+      // Cập nhật logic xử lý price range
+      if (priceRange.length === 1) {
+        // Trường hợp chỉ có from-price (> 5,000,000)
+        params["from-price"] = priceRange[0];
+      } else if (priceRange.length === 2) {
+        // Trường hợp có cả from-price và to-price
         params["from-price"] = priceRange[0];
         params["to-price"] = priceRange[1];
       }
@@ -138,12 +142,15 @@ function KitCategory({ initialSearchTerm }) {
 
     if (value === "all") {
       setPriceRange([]);
+    } else if (value === "5000000-") {
+      // Trường hợp đặc biệt cho "Trên 5,000,000 VND"
+      setPriceRange([5000000]); // Chỉ set giá trị min, không set max
     } else {
       const [min, max] = value.split("-").map(Number);
       setPriceRange([min, max]);
     }
 
-    setCurrentPage(0); // Reset to first page when filter changes
+    setCurrentPage(0);
   };
 
   const handleSearchInputChange = (e) => {
@@ -195,6 +202,7 @@ function KitCategory({ initialSearchTerm }) {
                   <Radio value="2000000-5000000">
                     2,000,000 - 5,000,000 VND
                   </Radio>
+                  <Radio value="5000000-">Trên 5,000,000 VND</Radio>
                 </Radio.Group>
               </div>
 
@@ -255,9 +263,14 @@ function KitCategory({ initialSearchTerm }) {
                         <img
                           alt={item.name || "Hình ảnh sản phẩm"}
                           src={
-                            item["kit-images"]?.[0]?.url || "default-image-url"
+                            item["kit-images"]?.length > 0
+                              ? item["kit-images"][0].url
+                              : ""
                           }
                           className="h-60 object-cover"
+                          onError={(e) => {
+                            e.target.src = "";
+                          }}
                         />
                       }
                       onClick={() => handleProductClick(item.id)}
@@ -277,7 +290,10 @@ function KitCategory({ initialSearchTerm }) {
                             </p>
                             <div className="flex flex-col gap-3">
                               <span className="text-green-800 font-semibold">
-                                {`${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()} VND`}
+                                {item["min-package-price"] ===
+                                item["max-package-price"]
+                                  ? `${item["min-package-price"].toLocaleString()} VND`
+                                  : `${item["min-package-price"].toLocaleString()} - ${item["max-package-price"].toLocaleString()} VND`}
                               </span>
                               <div className="flex justify-end">
                                 <Tag

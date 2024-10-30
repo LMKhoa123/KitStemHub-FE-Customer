@@ -15,6 +15,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { HeartOutlined, ExperimentOutlined } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
+import { toast } from "react-toastify";
 
 const ProductDetail = () => {
   const { kitId } = useParams();
@@ -36,25 +37,36 @@ const ProductDetail = () => {
     setLoading(true);
     try {
       const kitResponse = await api.get(`kits/${kitId}`);
-      // console.log(kitResponse);
       const kitData = kitResponse.data.details.data.kit;
-      // console.log(kitData);
+
+      if (!kitData) {
+        throw new Error("Không tìm thấy thông tin kit");
+      }
+
       setKitDetail(kitData);
-      setKitImage(kitData["kit-images"][0].url);
-      // console.log("check:" + kitData["kit-images"][0].url);
+      setKitImage(kitData["kit-images"]?.[0]?.url || "Ảnh Kit");
+
       const packageResponse = await api.get(`kits/${kitId}/packages`);
       const packageData = packageResponse.data.details.data.packages;
+
+      if (!packageData || packageData.length === 0) {
+        throw new Error("Không tìm thấy gói sản phẩm nào");
+      }
+
       setPackages(packageData);
       setPackageDetail(packageData[0]);
-
       setLoading(false);
     } catch (error) {
       console.error("Lỗi khi tải thông tin kit:", error);
-      message.error("Không thể tải thông tin kit: " + error.message);
+      // toast.error(error.message || "Không thể tải thông tin kit");
       setKitDetail(null);
       setPackages([]);
       setPackageDetail(null);
       setLoading(false);
+
+      setTimeout(() => {
+        navigate("/home");
+      }, 3500);
     }
   };
 
@@ -68,12 +80,11 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
 
-    // Kiểm tra nếu không có token -> điều hướng về trang login
     if (!token) {
       message.error("Bạn cần đăng nhập để thực hiện thao tác này.");
       localStorage.setItem("redirectAfterLogin", window.location.pathname);
       navigate("/login");
-      return; // Dừng tiếp tục xử lý khi không có token
+      return;
     }
 
     if (!packageDetail) {
@@ -148,8 +159,21 @@ const ProductDetail = () => {
     );
   }
 
-  if (!kitDetail) {
-    return <div>Không có thông tin chi tiết về kit</div>;
+  if (!kitDetail || !packageDetail) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <div className="text-xl text-gray-600 mb-4">
+          Không tìm thấy thông tin sản phẩm
+        </div>
+        <Button
+          type="primary"
+          onClick={() => navigate("/")}
+          className="bg-blue-500"
+        >
+          Quay về trang chủ
+        </Button>
+      </div>
+    );
   }
 
   // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
@@ -188,7 +212,7 @@ const ProductDetail = () => {
             <TransformComponent>
               <Image
                 src={kitImage}
-                alt="Sản phẩm đã chọn"
+                alt={kitDetail.name}
                 className="w-full rounded-lg"
               />
             </TransformComponent>

@@ -169,7 +169,10 @@ function HomeProductCarousel() {
                       </p>
                       <div className="flex flex-col gap-3">
                         <span className="text-green-800 font-semibold">
-                          {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
+                          {product["min-package-price"] ===
+                          product["max-package-price"]
+                            ? `${product["min-package-price"].toLocaleString()} VND`
+                            : `${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
                         </span>
                         <div className="flex justify-end">
                           <Tag
@@ -274,7 +277,10 @@ function HomeProductCarousel() {
                         </p>
                         <div className="flex flex-col gap-3">
                           <span className="text-green-800 font-semibold">
-                            {`${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
+                            {product["min-package-price"] ===
+                            product["max-package-price"]
+                              ? `${product["min-package-price"].toLocaleString()} VND`
+                              : `${product["min-package-price"].toLocaleString()} - ${product["max-package-price"].toLocaleString()} VND`}
                           </span>
                           <div className="flex justify-end">
                             <Tag

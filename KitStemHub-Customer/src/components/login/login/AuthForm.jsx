@@ -220,8 +220,8 @@ function LoginInput() {
 
         if (errorDetails?.errors?.["invalid-credentials"]) {
           toast.error(errorDetails.errors["invalid-credentials"]);
-        } else if (errorDetails?.message) {
-          toast.error(errorDetails.message);
+        } else if (errorDetails.errors["unavailable-username"]) {
+          toast.error(errorDetails.errors["unavailable-username"]);
         } else {
           toast.error("Đăng nhập thất bại. Vui lòng thử lại.");
         }
