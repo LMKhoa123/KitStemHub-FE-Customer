@@ -24,6 +24,10 @@ function LoginInput() {
     useState(false);
   const [resetPasswordEmail, setResetPasswordEmail] = useState("");
   const [isResetPasswordMode, setIsResetPasswordMode] = useState(false);
+  const [formValues, setFormValues] = useState({
+    email: "",
+    password: "",
+  });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -58,7 +62,6 @@ function LoginInput() {
 
   const verifyEmail = async (email, token) => {
     if (!email || !token) {
-      // console.log("Thiếu email hoặc token, không thể xác thực");
       toast.error("Không thể xác thực email. Thiếu thông tin cần thiết.");
       return;
     }
@@ -67,15 +70,27 @@ function LoginInput() {
       const response = await api.get(
         `users/email/verify?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`
       );
-      // console.log("Phản hồi xác thực:", response.data);
       if (response.data.status === "success") {
         toast.success("Xác thực email thành công!");
       } else {
-        toast.error("Xác thực email thất bại. Vui lòng thử lại.");
+        toast.error(
+          response.data.details?.message ||
+            "Xác thực email thất bại. Vui lòng thử lại."
+        );
       }
     } catch (error) {
-      console.error("Lỗi khi xác thực email:", error);
-      toast.error("Đã xảy ra lỗi trong quá trình xác thực email.");
+      if (error.response) {
+        const errorDetails = error.response.data.details;
+        toast.error(
+          errorDetails?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+        );
+      } else if (error.request) {
+        toast.error(
+          "Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
     }
   };
 
@@ -128,15 +143,27 @@ function LoginInput() {
               autoClose: 1500,
             });
           } else {
-            toast.error("Đăng nhập không thành công. Vui lòng thử lại.");
+            toast.error(
+              response.data.details?.message ||
+                "Đăng nhập không thành công. Vui lòng thử lại."
+            );
           }
         } catch (error) {
-          // console.error("Error during server communication:", error);
-          toast.error("Lỗi kết nối với server. Vui lòng thử lại sau.");
+          if (error.response) {
+            const errorDetails = error.response.data.details;
+            toast.error(
+              errorDetails?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+            );
+          } else if (error.request) {
+            toast.error(
+              "Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối mạng."
+            );
+          } else {
+            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+          }
         }
       }
     } catch (error) {
-      // console.error("Error during Google login:", error);
       toast.error("Đăng nhập Google thất bại!");
     } finally {
       setLoading(false);
@@ -150,83 +177,62 @@ function LoginInput() {
         isSignUpMode ? "users/register" : "users/login",
         values
       );
+      console.log("Response:", response);
+      console.log("Response data:", response?.data);
 
-      if (isSignUpMode) {
-        if (response.data.status === "success") {
+      if (response.data.status === "success") {
+        if (isSignUpMode) {
           setVerificationEmail(values.email);
           setIsModalVisible(true);
-        } else if (response.data.status === "fail") {
-          const error = response.data.details?.errors || {};
-          console.log(error);
-          if (error.password) {
-            toast.error(error.password, {
-              autoClose: 1500,
-            });
-          } else {
-            toast.error(response.data.details.message, {
-              autoClose: 1500,
-            });
-          }
         } else {
-          toast.error("Đăng ký không thành công. Vui lòng thử lại.");
-        }
-      } else {
-        // Xử lý khi đăng nhập
-        console.log(response.data);
-        const accessToken = response.data.details["access-token"];
-        const refreshToken = response.data.details["refresh-token"];
+          const accessToken = response.data.details["access-token"];
+          const refreshToken = response.data.details["refresh-token"];
 
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("token", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          setIsLoggedIn(true);
 
-        setIsLoggedIn(true);
-
-        await new Promise((resolve) => {
           toast.success("Đăng nhập thành công!", {
-            onClose: resolve,
-            autoClose: 1500,
-          });
-        });
-
-        // Kiểm tra nếu có URL trước đó để điều hướng sau khi login
-        const redirectUrl = localStorage.getItem("redirectAfterLogin");
-        if (redirectUrl) {
-          navigate(redirectUrl);
-          localStorage.removeItem("redirectAfterLogin"); // Xóa URL sau khi điều hướng
-        } else {
-          navigate("/home"); // Điều hướng mặc định nếu không có URL nào trước đó
-        }
-      }
-    } catch (err) {
-      console.log(err);
-      if (err.response) {
-        const error = err.response.data.details?.errors || {};
-        // console.log("Lỗi từ phía server:", err.response.status);
-        // console.log("Thông điệp lỗi:", err.response.data);
-        // console.log("Chi tiết lỗi:", err.response.data.details);
-
-        if (error.email) {
-          toast.error(error.email, {
+            onClose: () => {
+              const redirectUrl = localStorage.getItem("redirectAfterLogin");
+              if (redirectUrl) {
+                navigate(redirectUrl);
+                localStorage.removeItem("redirectAfterLogin");
+              } else {
+                navigate("/home");
+              }
+            },
             autoClose: 1500,
           });
         }
-      } else if (err.request) {
-        console.log("Không có phản hồi từ server:", err.request);
-        await new Promise((resolve) => {
-          toast.error(
-            "Không thể kết nối đến server, vui lòng kiểm tra lại kết nối mạng.",
-            {
-              onClose: resolve,
-            }
-          );
-        });
       } else {
-        console.log("Lỗi khi tạo yêu cầu:", err.message);
-        await new Promise((resolve) => {
-          toast.error(`Lỗi khi tạo yêu cầu: ${err.message}`, {
-            onClose: resolve,
-          });
-        });
+        // Xử lý khi status không phải success
+        toast.error(
+          response.data.details?.message || "Thao tác không thành công"
+        );
+      }
+    } catch (error) {
+      console.log("Error object:", error);
+
+      // Xử lý lỗi từ response
+      if (error.response?.data) {
+        const errorDetails = error.response.data.details;
+
+        if (errorDetails?.errors?.["invalid-credentials"]) {
+          toast.error(errorDetails.errors["invalid-credentials"]);
+        } else if (errorDetails?.message) {
+          toast.error(errorDetails.message);
+        } else {
+          toast.error("Đăng nhập thất bại. Vui lòng thử lại.");
+        }
+      } else if (error.request) {
+        // Xử lý lỗi network
+        toast.error(
+          "Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        // Xử lý các lỗi khác
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
       }
     } finally {
       setLoading(false);
@@ -249,12 +255,29 @@ function LoginInput() {
         );
         setIsResetPasswordModalVisible(false);
       } else {
-        toast.error("Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại.");
+        toast.error(
+          response.data.details?.message ||
+            "Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại."
+        );
       }
     } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu đặt lại mật khẩu:", error);
-      toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      if (error.response) {
+        const errorDetails = error.response.data.details;
+        toast.error(
+          errorDetails?.message || "Có lỗi xảy ra. Vui lòng thử lại."
+        );
+      } else if (error.request) {
+        toast.error(
+          "Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối mạng."
+        );
+      } else {
+        toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
     }
+  };
+
+  const handleFormValuesChange = (changedValues, allValues) => {
+    setFormValues(allValues);
   };
 
   if (isVerifying) {
@@ -282,11 +305,13 @@ function LoginInput() {
               maxWidth: 600,
             }}
             className={`${styles.signInForm} ${isSignUpMode ? styles.hidden : ""} ml-10`}
-            initialValues={{
-              remember: true,
-            }}
+            // initialValues={{
+            //   remember: true,
+            // }}
             onFinish={handleOnFinish}
-            autoComplete="true"
+            onValuesChange={handleFormValuesChange}
+            initialValues={formValues}
+            preserve={true}
           >
             <h2 className={styles.title}>Đăng nhập</h2>
             <Form.Item
@@ -384,10 +409,9 @@ function LoginInput() {
             }}
             className={`${styles.signUpForm} ${isSignUpMode ? "" : styles.hidden} ml-10`}
             onFinish={handleOnFinish}
-            initialValues={{
-              remember: true,
-            }}
-            autoComplete="true"
+            onValuesChange={handleFormValuesChange}
+            initialValues={formValues}
+            preserve={true}
           >
             <h2 className={styles.title}>Đăng ký</h2>
 
