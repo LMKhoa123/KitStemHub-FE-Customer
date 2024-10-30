@@ -156,8 +156,10 @@ function CartContent() {
         placement: "topRight",
       });
 
-      // Phát sự kiện để cập nhật badge
-      const cartEvent = new Event("cartUpdate");
+      // Sau khi thay đổi số lượng, phát lại sự kiện cartUpdate với số loại sản phẩm
+      const cartEvent = new CustomEvent("cartUpdate", {
+        detail: cartItems.length, // Đếm số loại sản phẩm
+      });
       window.dispatchEvent(cartEvent);
     } catch (error) {
       // Hiển thị thông báo lỗi
