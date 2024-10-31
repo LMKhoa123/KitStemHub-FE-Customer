@@ -15,7 +15,7 @@ function EmailVerification() {
       if (key === "email") email = decodeURIComponent(value);
       if (key === "token") token = decodeURIComponent(value);
     });
-
+    // console.log(email + " + " + token);
     // console.log("Email from URL:", email);
     // console.log("Token from URL:", token);
 
