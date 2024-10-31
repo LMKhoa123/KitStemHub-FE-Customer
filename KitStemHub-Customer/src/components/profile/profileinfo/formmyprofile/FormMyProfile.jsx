@@ -130,7 +130,7 @@ function FormMyProfile() {
   // Hàm kiểm tra tính hợp lệ của họ, tên và số điện thoại
   const validateProfileData = () => {
     const nameRegex = /^[A-Za-zÀ-ỹ\s]+$/; // Chỉ cho phép chữ cái và khoảng trắng
-    const phoneRegex = /^\d{10}$/; // Chỉ cho phép 10 chữ số
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})\b/; // phải là số theo đầu số việt nam
     const newErrors = {};
 
     if (!nameRegex.test(profileData.firstName)) {
@@ -144,7 +144,8 @@ function FormMyProfile() {
     }
 
     if (!phoneRegex.test(profileData.phoneNumber)) {
-      newErrors.phoneNumber = "Số điện thoại phải có đúng 10 chữ số.";
+      newErrors.phoneNumber =
+        "Số điện thoại phải có 10 số và bắt đầu bằng đầu số Việt Nam (03, 05, 07, 08, 09)";
     }
 
     setErrors(newErrors);
@@ -247,14 +248,23 @@ function FormMyProfile() {
         <div className="mb-10">
           <label className="text-gray-700 font-semibold">Số điện thoại</label>
           <input
-            type="number"
+            type="text"
+            maxLength="10"
             className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
               errors.phoneNumber ? "border-red-500" : "border-gray-300"
             }`}
             value={profileData.phoneNumber}
-            onChange={(e) =>
-              setProfileData({ ...profileData, phoneNumber: e.target.value })
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) {
+                setProfileData({ ...profileData, phoneNumber: value });
+              }
+            }}
+            onKeyPress={(e) => {
+              if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+              }
+            }}
           />
           {errors.phoneNumber && (
             <p className="text-red-500 text-sm mt-1">{errors.phoneNumber}</p>

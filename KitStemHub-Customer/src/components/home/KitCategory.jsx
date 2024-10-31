@@ -158,7 +158,7 @@ function KitCategory({ initialSearchTerm }) {
   };
 
   return (
-    <div className="container mx-auto py-20 px-4">
+    <div className=" mx-auto py-20 px-8">
       {/* Tiêu đề */}
       <h2 className="text-2xl mb-14 font-bold font-sans">
         {categoryName || "Tất cả sản phẩm"} (
@@ -169,7 +169,7 @@ function KitCategory({ initialSearchTerm }) {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar - Fixed on the left */}
         <div className="w-full md:w-64 shrink-0">
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white p-4 rounded-lg shadow-md ">
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-4">Tìm kiếm</h3>
               <Input.Search
@@ -255,10 +255,11 @@ function KitCategory({ initialSearchTerm }) {
                     key={item.id}
                     data-aos="fade-up"
                     data-aos-anchor-placement="top-bottom"
+                    className="h-full"
                   >
                     <Card
                       hoverable
-                      className="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300"
+                      className="group hover:shadow-xl duration-300 bg-white h-full flex flex-col"
                       cover={
                         <img
                           alt={item.name || "Hình ảnh sản phẩm"}
@@ -267,29 +268,38 @@ function KitCategory({ initialSearchTerm }) {
                               ? item["kit-images"][0].url
                               : ""
                           }
-                          className="h-60 object-cover"
+                          className="h-60 w-full object-cover"
                           onError={(e) => {
                             e.target.src = "";
                           }}
                         />
                       }
                       onClick={() => handleProductClick(item.id)}
+                      bodyStyle={{
+                        padding: "22px",
+                        paddingTop: "24px",
+                        paddingBottom: "24px",
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                      bordered={false}
                     >
                       <Card.Meta
                         title={
                           <Tooltip title={item.name}>
-                            <div className="text-lg font-semibold truncate">
+                            <div className="text-lg font-semibold text-pretty">
                               {item.name}
                             </div>
                           </Tooltip>
                         }
                         description={
                           <>
-                            <p className="text-sm text-gray-500 mb-2 truncate">
+                            <p className="text-sm text-gray-500 mb-2 text-pretty">
                               {item.brief}
                             </p>
                             <div className="flex flex-col gap-3">
-                              <span className="text-green-800 font-semibold">
+                              <span className="text-green-800 font-semibold pb-4 text-pretty">
                                 {item["min-package-price"] ===
                                 item["max-package-price"]
                                   ? `${item["min-package-price"].toLocaleString()} VND`
@@ -298,7 +308,7 @@ function KitCategory({ initialSearchTerm }) {
                               <div className="flex justify-end">
                                 <Tag
                                   color="blue"
-                                  className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                                  className="absolute bottom-2 right-2 truncate px-2 py-1  font-medium"
                                 >
                                   {item["kits-category"].name}
                                 </Tag>
@@ -307,11 +317,11 @@ function KitCategory({ initialSearchTerm }) {
                           </>
                         }
                       />
-                      <div className="absolute top-2 right-2 flex flex-col space-y-2">
+                      <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
                         <Button
                           shape="circle"
                           icon={<HeartOutlined />}
-                          className="bg-white/80 hover:bg-red-500 hover:text-white transition-colors duration-300"
+                          className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             console.log("Đã nhấn vào biểu tượng tim");
@@ -320,7 +330,7 @@ function KitCategory({ initialSearchTerm }) {
                         <Button
                           shape="circle"
                           icon={<EyeOutlined />}
-                          className="bg-white/80 hover:bg-blue-500 hover:text-white transition-colors duration-300"
+                          className="bg-white hover:!bg-red-500 hover:!text-white transition-colors duration-300 border-none"
                           onClick={(e) => {
                             e.stopPropagation();
                             console.log("Đã nhấn vào biểu tượng mắt");

@@ -115,11 +115,10 @@ const CheckOut = () => {
     if (useNewPhoneNumber) {
       if (
         !newPhoneNumber ||
-        newPhoneNumber.length !== 10 ||
-        !/^[0-9]+$/.test(newPhoneNumber)
+        !/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(newPhoneNumber)
       ) {
         tempErrors.phone =
-          "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số.";
+          "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam bắt đầu bằng 03, 05, 07, 08, 09";
       }
     } else {
       if (!selectedPhoneNumber) {
@@ -136,13 +135,14 @@ const CheckOut = () => {
   const handlePhoneChange = (e) => {
     const phoneValue = e.target.value;
 
-    // Kiểm tra độ dài của số điện thoại
-    if (phoneValue.length === 10 && /^[0-9]+$/.test(phoneValue)) {
+    // Kiểm tra định dạng số điện thoại Việt Nam
+    if (/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(phoneValue)) {
       setErrors((prevErrors) => ({ ...prevErrors, phone: "" })); // Xoá lỗi nếu hợp lệ
     } else {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        phone: "Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số.",
+        phone:
+          "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại Việt Nam bắt đầu bằng 03, 05, 07, 08, 09",
       }));
     }
 
