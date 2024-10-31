@@ -245,7 +245,7 @@ function FormMyProfile() {
           )}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-10">
           <label className="text-gray-700 font-semibold">Số điện thoại</label>
           <input
             type="text"
@@ -282,10 +282,23 @@ function FormMyProfile() {
       </div>
 
       {/* Nút để mở modal chỉnh sửa địa chỉ */}
-      <div className="mt-6">
-        <Button type="primary" onClick={showAddressModal}>
-          Chỉnh sửa địa chỉ
-        </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div className="flex items-end">
+          <Button type="primary" onClick={showAddressModal}>
+            Chỉnh sửa địa chỉ
+          </Button>
+        </div>
+        <div>
+          <label className="text-gray-700 font-semibold">Điểm</label>
+          <input
+            disabled
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring"
+            value={profileData.points}
+            onChange={(e) =>
+              setProfileData({ ...profileData, points: e.target.value })
+            }
+          />
+        </div>
       </div>
 
       {/* Modal chứa form chỉnh sửa địa chỉ */}
