@@ -127,23 +127,23 @@ function HomeProductCarousel() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-6">
             {allKits.map((product, productIndex) => (
               <Card
                 key={product.id}
                 hoverable
-                className={`group hover:shadow-xl duration-300 bg-white overflow-hidden
+                className={` relative group hover:shadow-xl duration-300 bg-white overflow-hidden
                   ${productIndex >= 1 ? "hidden " : "block"}
-                  ${productIndex >= 2 ? "hidden " : "sm:block"}
-                  ${productIndex >= 3 ? "hidden" : " md:block"}
-                  ${productIndex >= 4 ? "hidden " : "lg:block"}
-                  ${productIndex >= 5 ? "hidden " : "xl:block"}
+                  ${productIndex >= 2 ? "hidden " : "md:block"}
+                  ${productIndex >= 3 ? "hidden" : " lg:block"}
+                  ${productIndex >= 4 ? "hidden " : "xl:block"}
+                 
                 `}
                 cover={
                   <img
                     alt={product.name}
                     src={product["kit-images"]?.[0]?.url || "default-image-url"}
-                    className="h-48 w-full object-cover"
+                    className="h-60 w-full object-cover"
                   />
                 }
                 onClick={() => handleProductClick(product.id)}
@@ -157,18 +157,18 @@ function HomeProductCarousel() {
                 <Card.Meta
                   title={
                     <Tooltip title={product.name}>
-                      <div className="text-lg font-semibold truncate">
+                      <div className="text-lg font-semibold ">
                         {product.name}
                       </div>
                     </Tooltip>
                   }
                   description={
                     <>
-                      <p className="text-sm text-gray-500 mb-3 truncate">
+                      <p className="text-sm text-gray-500 mb-3 ">
                         {product.brief}
                       </p>
                       <div className="flex flex-col gap-3">
-                        <span className="text-green-800 font-semibold">
+                        <span className="text-green-800 font-semibold pb-4">
                           {product["min-package-price"] ===
                           product["max-package-price"]
                             ? `${product["min-package-price"].toLocaleString()} VND`
@@ -177,7 +177,7 @@ function HomeProductCarousel() {
                         <div className="flex justify-end">
                           <Tag
                             color="blue"
-                            className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                            className="absolute bottom-2 right-2 truncate px-2 py-1  font-medium"
                           >
                             {product["kits-category"].name}
                           </Tag>
@@ -233,17 +233,17 @@ function HomeProductCarousel() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {category.products.slice(0, 5).map((product, productIndex) => (
                 <Card
                   key={product.id}
                   hoverable
                   className={`group hover:shadow-xl duration-300 bg-white overflow-hidden
                     ${productIndex >= 1 ? "hidden " : "block"}
-                    ${productIndex >= 2 ? "hidden " : "sm:block"}
-                    ${productIndex >= 3 ? "hidden" : " md:block"}
-                    ${productIndex >= 4 ? "hidden " : "lg:block"}
-                     ${productIndex >= 5 ? "hidden " : "xl:block"}
+                    ${productIndex >= 2 ? "hidden " : "md:block"}
+                    ${productIndex >= 3 ? "hidden" : " lg:block"}
+                    ${productIndex >= 4 ? "hidden " : "xl:block"}
+
                   `}
                   cover={
                     <img
@@ -251,7 +251,7 @@ function HomeProductCarousel() {
                       src={
                         product["kit-images"]?.[0]?.url || "default-image-url"
                       }
-                      className="h-48 w-full object-cover"
+                      className="h-60 w-full object-cover"
                     />
                   }
                   onClick={() => handleProductClick(product.id)}
@@ -265,18 +265,18 @@ function HomeProductCarousel() {
                   <Card.Meta
                     title={
                       <Tooltip title={product.name}>
-                        <div className="text-lg font-semibold truncate">
+                        <div className="text-lg font-semibold text-pretty ">
                           {product.name}
                         </div>
                       </Tooltip>
                     }
                     description={
                       <>
-                        <p className="text-sm text-gray-500 mb-2 truncate">
+                        <p className="text-sm text-gray-500 mb-2 text-pretty">
                           {product.brief}
                         </p>
                         <div className="flex flex-col gap-3">
-                          <span className="text-green-800 font-semibold">
+                          <span className="text-green-800 font-semibold pb-4 text-pretty">
                             {product["min-package-price"] ===
                             product["max-package-price"]
                               ? `${product["min-package-price"].toLocaleString()} VND`
@@ -285,7 +285,7 @@ function HomeProductCarousel() {
                           <div className="flex justify-end">
                             <Tag
                               color="blue"
-                              className="inline-block max-w-[200px] truncate px-2 py-1 text-center font-medium"
+                              className="absolute bottom-2 right-2 truncate px-2 py-1  font-medium"
                             >
                               {product["kits-category"].name}
                             </Tag>
