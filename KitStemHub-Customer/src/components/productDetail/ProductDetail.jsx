@@ -69,23 +69,20 @@ const ProductDetail = () => {
       const packageData = packageResponse.data.details.data.packages;
 
       if (!packageData || packageData.length === 0) {
-        throw new Error("Không tìm thấy gói sản phẩm nào");
+        setPackages([]);
+        setPackageDetail(null);
+      } else {
+        setPackages(packageData);
+        setPackageDetail(packageData[0]);
       }
 
-      setPackages(packageData);
-      setPackageDetail(packageData[0]);
       setLoading(false);
     } catch (error) {
       console.error("Lỗi khi tải thông tin kit:", error);
-      // toast.error(error.message || "Không thể tải thông tin kit");
       setKitDetail(null);
       setPackages([]);
       setPackageDetail(null);
       setLoading(false);
-
-      setTimeout(() => {
-        navigate("/home");
-      }, 3500);
     }
   };
 
@@ -226,22 +223,22 @@ const ProductDetail = () => {
     );
   }
 
-  if (!kitDetail || !packageDetail) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <div className="text-xl text-gray-600 mb-4">
-          Không tìm thấy thông tin sản phẩm
-        </div>
-        <Button
-          type="primary"
-          onClick={() => navigate("/")}
-          className="bg-blue-500"
-        >
-          Quay về trang chủ
-        </Button>
-      </div>
-    );
-  }
+  // if (!kitDetail || !packageDetail) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center h-screen">
+  //       <div className="text-xl text-gray-600 mb-4">
+  //         Không tìm thấy thông tin sản phẩm
+  //       </div>
+  //       <Button
+  //         type="primary"
+  //         onClick={() => navigate("/")}
+  //         className="bg-blue-500"
+  //       >
+  //         Quay về trang chủ
+  //       </Button>
+  //     </div>
+  //   );
+  // }
 
   // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
   // const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
@@ -280,7 +277,7 @@ const ProductDetail = () => {
               <Image
                 src={kitImage}
                 alt={kitDetail.name}
-                className="w-full rounded-lg"
+                className="!w-[32rem]  rounded-lg"
               />
             </TransformComponent>
           </TransformWrapper>
@@ -288,50 +285,44 @@ const ProductDetail = () => {
 
         <div className="md:w-1/2">
           <h1 className="text-2xl font-semibold mb-2">{kitDetail.name}</h1>
-          <div className="flex items-center mb-4">
-            <Rate
-              disabled
-              defaultValue={4.5}
-              className="text-yellow-400 text-sm"
-            />
-            <span className="ml-2 text-gray-600 text-sm">(100 Reviews)</span>
-            <span
-              className={`ml-2 text-sm ${
-                kitDetail.status ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {kitDetail.status ? "Còn hàng" : "Hết hàng"}
-            </span>
-          </div>
 
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2">Chọn gói:</h3>
-            <Radio.Group
-              onChange={(e) => handlePackageSelect(e.target.value)}
-              value={packageDetail?.id}
-              className="w-full space-y-2"
-            >
-              {packages.map((pkg) => (
-                <div
-                  key={pkg.id}
-                  className="flex justify-between items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
-                >
-                  <Radio value={pkg.id} className="flex-grow">
-                    <span className="text-base font-medium">{pkg.name}</span>
-                  </Radio>
-                  <Button
-                    type="link"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Ngăn chặn sự kiện chọn radio
-                      showPackageDetails(pkg);
-                    }}
+          {packages.length > 0 ? (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2">Chọn gói:</h3>
+              <Radio.Group
+                onChange={(e) => handlePackageSelect(e.target.value)}
+                value={packageDetail?.id}
+                className="w-full space-y-2"
+              >
+                {packages.map((pkg) => (
+                  <div
+                    key={pkg.id}
+                    className="flex justify-between items-center p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
                   >
-                    Xem chi tiết
-                  </Button>
-                </div>
-              ))}
-            </Radio.Group>
-          </div>
+                    <Radio value={pkg.id} className="flex-grow">
+                      <span className="text-base font-medium">{pkg.name}</span>
+                    </Radio>
+                    <Button
+                      type="link"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Ngăn chặn sự kiện chọn radio
+                        showPackageDetails(pkg);
+                      }}
+                    >
+                      Xem chi tiết
+                    </Button>
+                  </div>
+                ))}
+              </Radio.Group>
+            </div>
+          ) : (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-700">
+                Kit này hiện chưa có gói sản phẩm nào. Vui lòng quay lại sau.
+              </p>
+            </div>
+          )}
+
           <Modal
             title={
               <span className="text-2xl font-semibold text-red-600 flex items-center">
@@ -422,58 +413,69 @@ const ProductDetail = () => {
             )}
           </Modal>
 
-          <p className="text-2xl font-bold text-red-600 mb-4">
-            {packageDetail.price.toLocaleString("vi-VN")} ₫
-          </p>
-          <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
-          {packageDetail && (
-            <div className="border-t border-gray-200 pt-4">
-              <h3 className="font-semibold mb-2">Chi tiết gói đã chọn:</h3>
-              <p className="text-sm mb-2">Tên: {packageDetail.name}</p>
-              <p className="text-sm mb-2">Cấp độ: {packageDetail.level.name}</p>
-              <p className="text-sm">
-                Trạng thái: {packageDetail.status ? "Có sẵn" : "Không có sẵn"}
+          {packageDetail ? (
+            <>
+              <p className="text-2xl font-bold text-red-600 mb-4">
+                {packageDetail.price.toLocaleString("vi-VN")} ₫
               </p>
-            </div>
-          )}
+              <p className="mb-6 text-sm text-gray-600">{kitDetail.brief}</p>
+              {packageDetail && (
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="font-semibold mb-2">Chi tiết gói đã chọn:</h3>
+                  <p className="text-sm mb-2">Tên: {packageDetail.name}</p>
+                  <p className="text-sm mb-2">
+                    Cấp độ: {packageDetail.level.name}
+                  </p>
+                  <p className="text-sm">
+                    Trạng thái:{" "}
+                    {packageDetail.status ? "Có sẵn" : "Không có sẵn"}
+                  </p>
+                </div>
+              )}
 
-          <div className="flex items-center gap-4 mb-6 mt-6">
-            <div className="flex border rounded">
-              <button
-                className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
-                onClick={() => handleQuantityChange(-1)}
-              >
-                -
-              </button>
-              <input
-                type="text"
-                value={quantity}
-                className="w-12 text-center"
-                readOnly
-              />
-              <button
-                className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
-                onClick={() => handleQuantityChange(1)}
-              >
-                +
-              </button>
-            </div>
-            <Button
-              type="primary"
-              size="large"
-              className="bg-red-500 hover:bg-red-600 border-none"
-              onClick={handleAddToCart}
-            >
-              Thêm vào giỏ hàng
-            </Button>
-            {/* <Tooltip title="Thêm vào danh sách yêu thích">
-              <Button
-                icon={<HeartOutlined />}
-                size="large"
-                className="border-gray-300"
-              />
-            </Tooltip> */}
-          </div>
+              <div className="flex items-center gap-4 mb-6 mt-6">
+                <div className="flex border rounded">
+                  <button
+                    className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
+                    onClick={() => handleQuantityChange(-1)}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={quantity}
+                    className="w-12 text-center"
+                    readOnly
+                  />
+                  <button
+                    className="px-3 py-1 bg-gray-100 hover:bg-red-500 hover:text-white"
+                    onClick={() => handleQuantityChange(1)}
+                  >
+                    +
+                  </button>
+                </div>
+                <Button
+                  type="primary"
+                  size="large"
+                  className="bg-red-500 hover:bg-red-600 border-none"
+                  onClick={handleAddToCart}
+                >
+                  Thêm vào giỏ hàng
+                </Button>
+                {/* <Tooltip title="Thêm vào danh sách yêu thích">
+                  <Button
+                    icon={<HeartOutlined />}
+                    size="large"
+                    className="border-gray-300"
+                  />
+                </Tooltip> */}
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500 italic">
+              Không có thông tin giá cho sản phẩm này
+            </p>
+          )}
         </div>
       </div>
       <Tabs defaultActiveKey="1">
