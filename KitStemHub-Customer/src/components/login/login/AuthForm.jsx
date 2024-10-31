@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { Button, Form, Image, Input, Modal } from "antd";
+import { Button, Form, Input, Modal, Select } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../../../config/firebase";
 import api from "../../../config/axios";
@@ -9,14 +9,15 @@ import Loading from "../../Loading";
 import { useAuth } from "../../../context/AuthContext";
 import { toast } from "react-toastify";
 import EmailVerification from "../../EmailVerification";
-import { LockOutlined } from "@ant-design/icons";
+const { Option } = Select;
 
 function LoginInput() {
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setIsLoggedIn } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isVerificationModalVisible, setIsVerificationModalVisible] =
+    useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
   const location = useLocation();
   const [isVerifying, setIsVerifying] = useState(false);
@@ -28,6 +29,14 @@ function LoginInput() {
     email: "",
     password: "",
   });
+  const [form] = Form.useForm();
+  const [provinceList, setProvinceList] = useState([]);
+  const [districtList, setDistrictList] = useState([]);
+  const [wardList, setWardList] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [specificAddress, setSpecificAddress] = useState("");
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -149,21 +158,14 @@ function LoginInput() {
             );
           }
         } catch (error) {
-          if (error.response) {
-            const errorDetails = error.response.data.details;
-            toast.error(
-              errorDetails?.message || "Có lỗi xảy ra. Vui lòng thử lại."
-            );
-          } else if (error.request) {
-            toast.error(
-              "Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối mạng."
-            );
-          } else {
-            toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
-          }
+          console.error("Google login error:", error);
+          toast.error("Đăng nhập Google thất bại!");
+        } finally {
+          setLoading(false);
         }
       }
     } catch (error) {
+      console.error("Google login error:", error);
       toast.error("Đăng nhập Google thất bại!");
     } finally {
       setLoading(false);
@@ -173,9 +175,20 @@ function LoginInput() {
   const handleOnFinish = async (values) => {
     setLoading(true);
     try {
+      const fullAddress = buildFullAddress();
+
       const response = await api.post(
         isSignUpMode ? "users/register" : "users/login",
-        values
+        isSignUpMode
+          ? {
+              email: values.email,
+              password: values.password,
+              "first-name": values["first-name"],
+              "last-name": values["last-name"],
+              "phone-number": values["phone-number"] || "",
+              address: fullAddress || "",
+            }
+          : values
       );
       console.log("Response:", response);
       console.log("Response data:", response?.data);
@@ -183,7 +196,16 @@ function LoginInput() {
       if (response.data.status === "success") {
         if (isSignUpMode) {
           setVerificationEmail(values.email);
-          setIsModalVisible(true);
+          setIsVerificationModalVisible(true);
+          form.resetFields();
+          setFormValues({
+            email: "",
+            password: "",
+            "first-name": "",
+            "last-name": "",
+            "phone-number": "",
+            address: "",
+          });
         } else {
           const accessToken = response.data.details["access-token"];
           const refreshToken = response.data.details["refresh-token"];
@@ -239,8 +261,8 @@ function LoginInput() {
     }
   };
 
-  const handleModalOk = () => {
-    setIsModalVisible(false);
+  const handleVerificationModalOk = () => {
+    setIsVerificationModalVisible(false);
     setIsSignUpMode(false);
   };
 
@@ -250,10 +272,11 @@ function LoginInput() {
         email: resetPasswordEmail,
       });
       if (response.data.status === "success") {
+        setIsResetPasswordMode(false);
+        setIsResetPasswordModalVisible(true);
         toast.success(
           "Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn."
         );
-        setIsResetPasswordModalVisible(false);
       } else {
         toast.error(
           response.data.details?.message ||
@@ -279,6 +302,96 @@ function LoginInput() {
   const handleFormValuesChange = (changedValues, allValues) => {
     setFormValues(allValues);
   };
+
+  const baseURL = "https://vn-public-apis.fpo.vn";
+
+  const fetchProvinces = async () => {
+    try {
+      const response = await fetch(`${baseURL}/provinces/getAll?limit=-1`);
+      const data = await response.json();
+      const provincesArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setProvinceList(provincesArray);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách tỉnh:", error);
+    }
+  };
+
+  const fetchDistricts = async (provinceCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/districts/getByProvince?provinceCode=${provinceCode}&limit=-1`
+      );
+      const data = await response.json();
+      const districtsArray = Array.isArray(data.data.data)
+        ? data.data.data
+        : [];
+      setDistrictList(districtsArray);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách quận:", error);
+      setDistrictList([]);
+    }
+  };
+
+  const fetchWards = async (districtCode) => {
+    try {
+      const response = await fetch(
+        `${baseURL}/wards/getByDistrict?districtCode=${districtCode}&limit=-1`
+      );
+      const data = await response.json();
+      const wardsArray = Array.isArray(data.data.data) ? data.data.data : [];
+      setWardList(wardsArray);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách phường:", error);
+      setWardList([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (selectedProvince) {
+      fetchDistricts(selectedProvince);
+      setSelectedDistrict("");
+      setSelectedWard("");
+    }
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (selectedDistrict) {
+      fetchWards(selectedDistrict);
+      setSelectedWard("");
+    }
+  }, [selectedDistrict]);
+
+  const buildFullAddress = () => {
+    const province =
+      provinceList.find((p) => p.code === selectedProvince)?.name || "";
+    const district =
+      districtList.find((d) => d.code === selectedDistrict)?.name || "";
+    const ward = wardList.find((w) => w.code === selectedWard)?.name || "";
+    const parts = [specificAddress, ward, district, province].filter(Boolean);
+    return parts.length > 0 ? parts.join(", ") : "";
+  };
+  console.log(buildFullAddress);
+  useEffect(() => {
+    if (isSignUpMode) {
+      const newAddress = buildFullAddress();
+      setFormValues((prev) => ({
+        ...prev,
+        address: newAddress,
+      }));
+    }
+  }, [
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+    specificAddress,
+    isSignUpMode,
+  ]);
 
   if (isVerifying) {
     return <EmailVerification />;
@@ -398,6 +511,7 @@ function LoginInput() {
           </Form>
 
           <Form
+            form={form}
             labelCol={{
               span: 24,
             }}
@@ -416,12 +530,64 @@ function LoginInput() {
             <h2 className={styles.title}>Đăng ký</h2>
 
             <Form.Item
+              label="Họ"
+              name="first-name"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập họ của bạn!",
+                },
+                {
+                  pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                  message: "Họ chỉ được chứa chữ cái và khoảng trắng!",
+                },
+                {
+                  min: 2,
+                  message: "Họ phải có ít nhất 2 ký tự!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Họ"
+                prefix={<i className="fas fa-user"></i>}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Tên"
+              name="last-name"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập tên của bạn!",
+                },
+                {
+                  pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                  message: "Tên chỉ được chứa chữ cái và khoảng trắng!",
+                },
+                {
+                  min: 2,
+                  message: "Tên phải có ít nhất 2 ký tự!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Tên"
+                prefix={<i className="fas fa-user"></i>}
+              />
+            </Form.Item>
+
+            <Form.Item
               label="Email"
               name="email"
               rules={[
                 {
                   required: true,
                   message: "Vui lòng nhập email của bạn!",
+                },
+                {
+                  type: "email",
+                  message: "Email không hợp lệ!",
                 },
               ]}
             >
@@ -430,6 +596,83 @@ function LoginInput() {
                 prefix={<i className="fas fa-envelope"></i>}
               />
             </Form.Item>
+
+            <Form.Item
+              label="Số điện thoại"
+              name="phone-number"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập số điện thoại của bạn!",
+                },
+                {
+                  pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b/,
+                  message: "Số điện thoại không hợp lệ! (VD: 0912345678)",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Số điện thoại"
+                prefix={<i className="fas fa-phone"></i>}
+              />
+            </Form.Item>
+
+            <Form.Item label="Địa chỉ">
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <Select
+                    className="w-full"
+                    value={selectedProvince || undefined}
+                    placeholder="Chọn tỉnh/thành phố"
+                    onChange={(value) => setSelectedProvince(value)}
+                    size="large"
+                  >
+                    {provinceList.map((province) => (
+                      <Option key={province.code} value={province.code}>
+                        {province.name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    className="w-full"
+                    value={selectedDistrict || undefined}
+                    placeholder="Chọn quận/huyện"
+                    onChange={(value) => setSelectedDistrict(value)}
+                    size="large"
+                    disabled={!selectedProvince}
+                  >
+                    {districtList.map((district) => (
+                      <Option key={district.code} value={district.code}>
+                        {district.name}
+                      </Option>
+                    ))}
+                  </Select>
+                  <Select
+                    className="w-full"
+                    value={selectedWard || undefined}
+                    placeholder="Chọn phường/xã"
+                    onChange={(value) => setSelectedWard(value)}
+                    size="large"
+                    disabled={!selectedDistrict}
+                  >
+                    {wardList.map((ward) => (
+                      <Option key={ward.code} value={ward.code}>
+                        {ward.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </div>
+                <Input
+                  placeholder="Số nhà, tên đường"
+                  value={specificAddress}
+                  onChange={(e) => setSpecificAddress(e.target.value)}
+                />
+                <Form.Item name="address" hidden>
+                  <Input />
+                </Form.Item>
+              </div>
+            </Form.Item>
+
             <Form.Item
               label="Mật khẩu"
               name="password"
@@ -445,6 +688,7 @@ function LoginInput() {
                 prefix={<i className="fas fa-lock"></i>}
               />
             </Form.Item>
+
             <Form.Item
               wrapperCol={{
                 span: 24,
@@ -453,11 +697,12 @@ function LoginInput() {
               <Button
                 type="primary"
                 htmlType="submit"
-                className={`${styles.btnBlue} ${styles.transparent} `}
+                className={`${styles.btnBlue} ${styles.transparent}`}
               >
                 Tạo tài khoản
               </Button>
             </Form.Item>
+
             <p className={styles.socialText}>
               Hoặc đăng ký bằng các nền tảng xã hội
             </p>
@@ -538,11 +783,11 @@ function LoginInput() {
       </div>
       <Modal
         title="Yêu cầu xác thực email"
-        visible={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalOk}
+        visible={isVerificationModalVisible}
+        onOk={handleVerificationModalOk}
+        onCancel={handleVerificationModalOk}
         footer={[
-          <Button key="ok" type="primary" onClick={handleModalOk}>
+          <Button key="ok" type="primary" onClick={handleVerificationModalOk}>
             OK
           </Button>,
         ]}
@@ -556,17 +801,21 @@ function LoginInput() {
 
       <Modal
         title="Yêu cầu cài lại mật khẩu"
-        visible={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalOk}
+        visible={isResetPasswordModalVisible}
+        onOk={() => setIsResetPasswordModalVisible(false)}
+        onCancel={() => setIsResetPasswordModalVisible(false)}
         footer={[
-          <Button key="ok" type="primary" onClick={handleModalOk}>
+          <Button
+            key="ok"
+            type="primary"
+            onClick={() => setIsResetPasswordModalVisible(false)}
+          >
             OK
           </Button>,
         ]}
       >
         <p>
-          Chúng tôi đã gửi một email xác thực đến địa chỉ {verificationEmail}.
+          Chúng tôi đã gửi một email xác thực đến địa chỉ {resetPasswordEmail}.
           Vui lòng kiểm tra hộp thư của bạn và làm theo hướng dẫn để hoàn tất
           việc thay đổi mật khẩu!
         </p>
