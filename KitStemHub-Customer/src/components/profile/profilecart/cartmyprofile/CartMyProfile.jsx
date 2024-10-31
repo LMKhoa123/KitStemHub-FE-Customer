@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Modal } from "antd";
+import { Table, Button, Modal, Space, DatePicker } from "antd";
 import api from "../../../../config/axios";
 import { useNavigate } from "react-router-dom";
 import ProfileMyLab from "../../profilelab/profilemylab/ProfileMyLab";
@@ -15,13 +15,27 @@ function CartMyProfile() {
   const [currentPage, setCurrentPage] = useState(1); // Giao diện bắt đầu từ trang 1
   const [totalPages, setTotalPages] = useState(0); // Tổng số trang
   const pageSize = 20; // Số lượng order trên mỗi trang
+  const [filters, setFilters] = useState({
+    createdFrom: null,
+    createdTo: null,
+  });
 
   // Gọi API để lấy dữ liệu đơn hàng
   const fetchOrders = async (page = 1) => {
     setLoading(true);
     try {
+      const params = {
+        page: page - 1,
+      };
+      // Conditionally add `created-from` and `created-to` if they are defined
+      if (filters.createdFrom) {
+        params["created-from"] = filters.createdFrom.format("YYYY-MM-DD");
+      }
+      if (filters.createdTo) {
+        params["created-to"] = filters.createdTo.format("YYYY-MM-DD");
+      }
       // Lấy dữ liệu từ API, giảm `page` để phù hợp với zero-based indexing của API
-      const response = await api.get(`orders/customers?page=${page - 1}`);
+      const response = await api.get("orders/customers", { params });
       console.log(response.data);
       const { data } = response.data.details;
 
@@ -43,13 +57,21 @@ function CartMyProfile() {
 
   useEffect(() => {
     fetchOrders(currentPage); // Gọi API khi trang hiện tại thay đổi
-  }, [currentPage]);
+  }, [currentPage, filters]);
 
   const handleTableChange = (pagination) => {
     const page = pagination?.current;
     console.log("Changing to page:", page);
     setCurrentPage(page);
     fetchOrders(page);
+  };
+
+  const handleDateChange = (dates) => {
+    setFilters({
+      createdFrom: dates ? dates[0] : null,
+      createdTo: dates ? dates[1] : null,
+    });
+    setCurrentPage(1);
   };
 
   const formatDateTime = (dateString) => {
@@ -184,6 +206,13 @@ function CartMyProfile() {
   return (
     <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
       <h1 className="text-2xl font-semibold mb-6">Đơn hàng của bạn</h1>
+      <Space style={{ marginBottom: 16 }}>
+        <DatePicker.RangePicker
+          onChange={handleDateChange}
+          format="YYYY-MM-DD"
+          value={[filters.createdFrom, filters.createdTo]}
+        />
+      </Space>
       <Table
         dataSource={orders} // Hiển thị danh sách đơn hàng
         columns={columns}
