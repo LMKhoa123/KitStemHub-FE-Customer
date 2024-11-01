@@ -42,7 +42,7 @@ function HomeProductCarousel() {
               params: {
                 "category-name": category.name,
                 page: 0,
-                "per-page": 5,
+                status: true,
               },
             });
             return {
@@ -56,7 +56,7 @@ function HomeProductCarousel() {
         const allKitsResponse = await api.get("kits", {
           params: {
             page: 0,
-            "per-page": 5,
+            status: true,
           },
         });
 

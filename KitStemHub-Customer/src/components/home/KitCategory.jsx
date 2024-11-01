@@ -55,6 +55,7 @@ function KitCategory({ initialSearchTerm }) {
       const params = {
         page: pageToFetch,
         "kit-name": searchTerm,
+        status: true,
       };
 
       // Chỉ thêm category-name nếu categoryName không phải "all"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Card,
   Steps,
@@ -16,6 +16,9 @@ import {
   DownloadOutlined,
   HomeOutlined,
   PhoneOutlined,
+  ExclamationCircleOutlined,
+  CloseCircleOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 
@@ -28,13 +31,22 @@ const { Title, Text } = Typography;
 
 function OrderDetail() {
   const { orderId } = useParams();
-  const location = useLocation();
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [labs, setLabs] = useState([]);
   const orderKey = `order_${orderId}`;
   const orderDetails = JSON.parse(localStorage.getItem(orderKey));
   console.log(orderDetails.paymentMethod);
+
+  const formatDate = (date) => {
+    if (!date) return "Đang chờ";
+    return new Date(date).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   useEffect(() => {
     const fetchOrderData = async () => {
       setLoading(true);
@@ -129,19 +141,30 @@ function OrderDetail() {
   const orderSteps = [
     {
       title: "Chờ Xác Nhận",
-      date: new Date(orderData["created-at"]).toLocaleDateString(),
+      date: formatDate(orderData["created-at"]),
+      icon: null,
     },
-    { title: "Xác Nhận", date: "Đơn hàng đã duyệt" },
-    { title: "Giao Hàng", date: "Đang giao hàng" },
     {
-      title: "Giao Hàng Thành Công",
-      date: orderData["delivered-at"]
-        ? new Date(orderData["delivered-at"]).toLocaleDateString()
-        : "Dự kiến",
+      title: "Xác Nhận",
+      date: "Đơn hàng đã duyệt",
+      icon: null,
+    },
+    {
+      title: "Giao Hàng",
+      date: "Đang giao hàng",
+      icon: null,
+    },
+    {
+      title: "Trạng Thái Giao Hàng",
+      date: formatDate(orderData["delivered-at"]),
+      icon: null,
     },
   ];
 
   let currentStep;
+  let stepStatus = "process";
+  let failureReason = "";
+
   switch (orderData["shipping-status"]) {
     case "CHỜ XÁC NHẬN":
       currentStep = 1;
@@ -154,6 +177,58 @@ function OrderDetail() {
       break;
     case "GIAO HÀNG THÀNH CÔNG":
       currentStep = 4;
+      stepStatus = "finish";
+      orderSteps[3] = {
+        title: (
+          <span className="text-green-500 font-medium">
+            Giao Hàng Thành Công
+          </span>
+        ),
+        date: (
+          <div className="space-y-1">
+            <div className="flex items-center text-green-500">
+              <CheckCircleOutlined className="mr-1" />
+              <span>{formatDate(orderData["delivered-at"])}</span>
+            </div>
+            <div className="text-green-400 text-sm">
+              <span>Đã giao thành công</span>
+            </div>
+          </div>
+        ),
+        icon: (
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-50">
+            <CheckCircleOutlined className="text-green-500 text-lg" />
+          </div>
+        ),
+      };
+      break;
+    case "GIAO HÀNG THẤT BẠI":
+      currentStep = 4;
+      stepStatus = "error";
+      failureReason =
+        orderData["failure-reason"] || "Không thể liên hệ với người nhận";
+      orderSteps[3] = {
+        title: (
+          <span className="text-red-500 font-medium">Giao Hàng Thất Bại</span>
+        ),
+        date: (
+          <div className="space-y-1">
+            <div className="flex items-center text-red-500">
+              <CloseCircleOutlined className="mr-1" />
+              <span>{formatDate(orderData["delivered-at"])}</span>
+            </div>
+            <div className="text-red-400 text-sm">
+              <ExclamationCircleOutlined className="mr-1" />
+              {failureReason}
+            </div>
+          </div>
+        ),
+        icon: (
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50">
+            <CloseCircleOutlined className="text-red-500 text-lg" />
+          </div>
+        ),
+      };
       break;
     default:
       currentStep = 0; // Mặc định là bước đầu tiên nếu status không khớp
@@ -220,17 +295,13 @@ function OrderDetail() {
                 <Text type="secondary">
                   Ngày đặt hàng:{" "}
                   <span className="font-semibold">
-                    {new Date(orderData["created-at"]).toLocaleDateString()}
+                    {formatDate(orderData["created-at"])}
                   </span>
                 </Text>
                 <Text type="success">
-                  Ngày giao hàng dự kiến:{" "}
+                  Ngày chuẩn bị hàng:{" "}
                   <span className="font-semibold">
-                    {orderData["delivered-at"] !== null
-                      ? new Date(
-                          orderData["deliveried-at"]
-                        ).toLocaleDateString()
-                      : "Đang chờ"}
+                    {formatDate(orderData["delivered-at"])}
                   </span>
                 </Text>
               </Space>
@@ -255,15 +326,64 @@ function OrderDetail() {
             </Space> */}
           </div>
 
-          <Steps current={currentStep} className="my-8 px-6">
-            {orderSteps.map((step, index) => (
-              <Step
-                key={index}
-                title={step.title}
-                description={index <= currentStep ? step.date : null} // Chỉ hiển thị ngày nếu bước đã hoàn thành />
-              />
-            ))}
-          </Steps>
+          <div className="relative">
+            <Steps
+              current={currentStep}
+              status={stepStatus}
+              className="my-8 px-6"
+            >
+              {orderSteps.map((step, index) => (
+                <Step
+                  key={index}
+                  title={step.title}
+                  description={index <= currentStep ? step.date : null}
+                  icon={step.icon}
+                />
+              ))}
+            </Steps>
+
+            {/* Thông báo khi giao hàng thành công */}
+            {orderData["shipping-status"] === "GIAO HÀNG THÀNH CÔNG" && (
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg mx-6 shadow-sm">
+                <div className="flex items-start">
+                  <CheckCircleOutlined className="text-green-500 text-lg mt-1 mr-2" />
+                  <div>
+                    <Text strong className="text-green-500 block mb-1">
+                      Đơn hàng đã giao thành công
+                    </Text>
+                    <Text className="text-green-600">
+                      Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi
+                    </Text>
+                    <div className="mt-2">
+                      <Text type="success" className="text-sm">
+                        Trân Trọng!
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Thông báo khi giao hàng thất bại */}
+            {orderData["shipping-status"] === "GIAO HÀNG THẤT BẠI" && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg mx-6 shadow-sm">
+                <div className="flex items-start">
+                  <ExclamationCircleOutlined className="text-red-500 text-lg mt-1 mr-2" />
+                  <div>
+                    <Text strong className="text-red-500 block mb-1">
+                      Đơn hàng giao không thành công
+                    </Text>
+                    <Text className="text-red-600">{failureReason}</Text>
+                    <div className="mt-2">
+                      <Text type="secondary" className="text-sm">
+                        Vui lòng liên hệ hotline của cửa hàng để được hỗ trợ
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
           <Divider className="my-6" />
 
