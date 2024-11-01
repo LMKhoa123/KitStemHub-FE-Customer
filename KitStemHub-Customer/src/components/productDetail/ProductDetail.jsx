@@ -65,7 +65,9 @@ const ProductDetail = () => {
       setKitImage(kitData["kit-images"]?.[0]?.url || "Ảnh Kit");
       setComponents(kitData.components || []);
 
-      const packageResponse = await api.get(`kits/${kitId}/packages`);
+      const packageResponse = await api.get(
+        `kits/${kitId}/packages?package-status=true`
+      );
       const packageData = packageResponse.data.details.data.packages;
 
       if (!packageData || packageData.length === 0) {
