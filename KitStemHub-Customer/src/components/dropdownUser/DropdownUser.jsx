@@ -19,6 +19,10 @@ function DropdownUser({ onLogout, onProfile }) {
       overlay={menu}
       placement="bottomRight"
       arrow={{ pointAtCenter: true }}
+      trigger={["hover"]}
+      overlayStyle={{
+        minWidth: "180px", // Make dropdown wider
+      }}
     >
       <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
         <UserOutlined />

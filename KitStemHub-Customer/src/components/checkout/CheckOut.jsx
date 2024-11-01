@@ -337,10 +337,13 @@ const CheckOut = () => {
 
   const buildFullAddress = (includeSpecific = true) => {
     const province =
-      provinceList.find((p) => p.code === selectedProvince)?.name || "";
+      provinceList.find((p) => p.code === selectedProvince)?.name_with_type ||
+      "";
     const district =
-      districtList.find((d) => d.code === selectedDistrict)?.name || "";
-    const ward = wardList.find((w) => w.code === selectedWard)?.name || "";
+      districtList.find((d) => d.code === selectedDistrict)?.name_with_type ||
+      "";
+    const ward =
+      wardList.find((w) => w.code === selectedWard)?.name_with_type || "";
     const parts = includeSpecific
       ? [specificAddress, ward, district, province]
       : [ward, district, province];
@@ -485,7 +488,7 @@ const CheckOut = () => {
                   >
                     {provinceList.map((province) => (
                       <Option key={province.code} value={province.code}>
-                        {province.name}
+                        {province.name_with_type}
                       </Option>
                     ))}
                   </Select>
@@ -500,7 +503,7 @@ const CheckOut = () => {
                   >
                     {districtList.map((district) => (
                       <Option key={district.code} value={district.code}>
-                        {district.name}
+                        {district.name_with_type}
                       </Option>
                     ))}
                   </Select>
@@ -513,7 +516,7 @@ const CheckOut = () => {
                   >
                     {wardList.map((ward) => (
                       <Option key={ward.code} value={ward.code}>
-                        {ward.name}
+                        {ward.name_with_type}
                       </Option>
                     ))}
                   </Select>
