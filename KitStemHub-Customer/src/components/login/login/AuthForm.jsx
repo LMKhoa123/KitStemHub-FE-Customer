@@ -369,10 +369,13 @@ function LoginInput() {
 
   const buildFullAddress = () => {
     const province =
-      provinceList.find((p) => p.code === selectedProvince)?.name || "";
+      provinceList.find((p) => p.code === selectedProvince)?.name_with_type ||
+      "";
     const district =
-      districtList.find((d) => d.code === selectedDistrict)?.name || "";
-    const ward = wardList.find((w) => w.code === selectedWard)?.name || "";
+      districtList.find((d) => d.code === selectedDistrict)?.name_with_type ||
+      "";
+    const ward =
+      wardList.find((w) => w.code === selectedWard)?.name_with_type || "";
     const parts = [specificAddress, ward, district, province].filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : "";
   };
@@ -629,7 +632,7 @@ function LoginInput() {
                   >
                     {provinceList.map((province) => (
                       <Option key={province.code} value={province.code}>
-                        {province.name}
+                        {province.name_with_type}
                       </Option>
                     ))}
                   </Select>
@@ -643,7 +646,7 @@ function LoginInput() {
                   >
                     {districtList.map((district) => (
                       <Option key={district.code} value={district.code}>
-                        {district.name}
+                        {district.name_with_type}
                       </Option>
                     ))}
                   </Select>
@@ -657,7 +660,7 @@ function LoginInput() {
                   >
                     {wardList.map((ward) => (
                       <Option key={ward.code} value={ward.code}>
-                        {ward.name}
+                        {ward.name_with_type}
                       </Option>
                     ))}
                   </Select>

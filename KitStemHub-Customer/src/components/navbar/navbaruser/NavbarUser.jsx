@@ -94,7 +94,7 @@ function NavbarUser() {
               />
             </Badge>
           </li>
-          <li className="hover:text-gray-800 transition p-4 text-xl cursor-pointer">
+          <li className="hover:text-gray-800 transition p-4 text-2xl cursor-pointer relative">
             <DropdownUser
               onLogout={handleLogout}
               onProfile={handleNavigate("/profile")}

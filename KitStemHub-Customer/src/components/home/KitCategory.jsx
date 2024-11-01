@@ -159,7 +159,7 @@ function KitCategory({ initialSearchTerm }) {
   };
 
   return (
-    <div className=" mx-auto py-20 px-8">
+    <div className="bg-gradient-to-b from-gray-50 to-white p-4 mx-auto py-20 px-8">
       {/* Tiêu đề */}
       <h2 className="text-2xl mb-14 font-bold font-sans">
         {categoryName || "Tất cả sản phẩm"} (
@@ -168,9 +168,9 @@ function KitCategory({ initialSearchTerm }) {
 
       {/* Container cho sidebar và content */}
       <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar - Fixed on the left */}
+        {/* Sidebar - Sticky on scroll */}
         <div className="w-full md:w-64 shrink-0">
-          <div className="bg-white p-4 rounded-lg shadow-md ">
+          <div className="bg-white p-4 rounded-lg shadow-md sticky top-3">
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-4">Tìm kiếm</h3>
               <Input.Search
