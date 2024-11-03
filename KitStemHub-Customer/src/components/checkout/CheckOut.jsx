@@ -99,9 +99,9 @@ const CheckOut = () => {
       if (!selectedDistrict) {
         tempErrors.district = "Vui lòng chọn quận/huyện";
       }
-      if (!selectedWard) {
-        tempErrors.ward = "Vui lòng chọn phường/xã";
-      }
+      // if (!selectedWard) {
+      //   tempErrors.ward = "Vui lòng chọn phường/xã";
+      // }
       if (!specificAddress) {
         tempErrors.specificAddress = "Vui lòng nhập địa chỉ cụ thể";
       }
@@ -468,6 +468,7 @@ const CheckOut = () => {
                   onChange={(e) => setShippingAddress(e.target.value)}
                   disabled={useNewAddress}
                   placeholder="Không có địa chỉ đã lưu"
+                  readOnly
                 />
               </Radio>
               <Radio value="new" className="block">
@@ -565,8 +566,9 @@ const CheckOut = () => {
                 type="text"
                 className={`w-full p-3 border rounded-md  focus:ring-2 focus:ring-primary focus:border-transparent ${errors.phone && !useNewPhoneNumber ? "border-red-500" : ""}`}
                 value={selectedPhoneNumber || ""}
-                disabled
                 placeholder="Không có số điện thoại đã lưu"
+                disabled={useNewPhoneNumber}
+                readOnly
               />
               {/* Hiển thị thông báo lỗi nếu có lỗi và đang sử dụng số điện thoại đã lưu */}
               {!useNewPhoneNumber && errors.phone && (

@@ -10,6 +10,7 @@ import {
   Typography,
   Divider,
   Breadcrumb,
+  Modal,
 } from "antd";
 import { motion } from "framer-motion";
 import {
@@ -285,9 +286,12 @@ function OrderDetail() {
         <Card className="mb-8 shadow-lg rounded-lg overflow-hidden">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-gray-50 p-6 rounded-t-lg">
             <div>
-              <Title level={3} className="mb-2 text-gray-800">
-                Mã đơn hàng: {orderData.id}
-              </Title>
+              <Space>
+                <Title level={3} className="mb-2 text-gray-800">
+                  Mã đơn hàng: {orderData.id}
+                </Title>
+              </Space>
+
               <Space direction="vertical" size="small">
                 <Text type="secondary">
                   Ngày đặt hàng:{" "}
@@ -303,24 +307,37 @@ function OrderDetail() {
                 </Text>
               </Space>
             </div>
-            {/* <Space className="mt-4 md:mt-0">
-              <Button
-                icon={<FilePdfOutlined />}
-                className="bg-white hover:bg-gray-100"
-              >
-                Hóa đơn
-              </Button>
+            <Space className="mt-4 md:mt-0">
               <Button
                 type="primary"
-                danger
                 disabled={
-                  orderData["shipping-status"] !== "GIAO HÀNG THÀNH CÔNG"
+                  orderData["shipping-status"] !== "CHỜ XÁC NHẬN" &&
+                  orderData["shipping-status"] !== "ĐÃ XÁC NHẬN"
                 }
-                className="hover:opacity-90"
+                danger
+                onClick={() => {
+                  Modal.confirm({
+                    title: "Xác nhận hủy đơn hàng",
+                    content: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+                    okText: "Xác nhận",
+                    cancelText: "Hủy",
+                    onOk: async () => {
+                      try {
+                        await api.put(`orders/${orderData.id}/cancel`);
+                        toast.success("Đơn hàng đã được hủy thành công");
+                        const response = await api.get(`orders/${orderId}`);
+                        setOrderData(response.data.details.data.order);
+                      } catch (err) {
+                        console.error("Error canceling order:", err);
+                        toast.error("Có lỗi xảy ra khi hủy đơn hàng");
+                      }
+                    },
+                  });
+                }}
               >
-                Yêu cầu hoàn tiền
+                Hủy đơn hàng
               </Button>
-            </Space> */}
+            </Space>
           </div>
 
           <div className="relative">
