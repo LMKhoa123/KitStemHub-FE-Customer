@@ -77,11 +77,11 @@ function NavbarUser() {
     <NavbarEx
       childrenItem={
         <ul className="lg:flex hidden lg:justify-between lg:items-center text-gray-400 lg:gap-4 text-md font-normal">
-          <li className="hover:text-gray-800 transition p-4 text-xl">
+          {/* <li className="hover:text-gray-800 transition p-4 text-xl">
             <a href="#" className="">
               <HeartOutlined />
             </a>
-          </li>
+          </li> */}
           <li className="hover:text-gray-800 transition p-4 text-xl">
             <Badge
               count={cartItemCount} // Hiển thị tổng số lượng sản phẩm trong giỏ hàng

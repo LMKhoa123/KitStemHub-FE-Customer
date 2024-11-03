@@ -109,7 +109,7 @@ function Navbar({ childrenItem }) {
                     : "kt-menu-item"
                 }
               >
-                About Us
+                Về chúng tôi
               </NavLink>
             </li>
             <li className="">

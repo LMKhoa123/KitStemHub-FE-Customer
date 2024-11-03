@@ -205,8 +205,8 @@ function CartMyProfile() {
 
   return (
     <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
-      <h1 className="text-2xl font-semibold mb-6">Đơn hàng của bạn</h1>
-      <Space style={{ marginBottom: 16 }}>
+      <h1 className="text-3xl font-semibold mb-3">Đơn hàng của bạn</h1>
+      <Space className="mb-3 flex justify-end">
         <DatePicker.RangePicker
           onChange={handleDateChange}
           format="YYYY-MM-DD"

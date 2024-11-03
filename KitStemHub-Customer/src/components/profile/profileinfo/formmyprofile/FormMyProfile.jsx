@@ -166,12 +166,7 @@ function FormMyProfile() {
     console.log("Payload gửi đi:", cleanData);
 
     try {
-      const response = await api.put("users/profile", cleanData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")?.replaceAll('"', "")}`,
-        },
-      });
+      const response = await api.put("users/profile", cleanData);
       console.log("Profile updated successfully", response.data);
       Swal.fire({
         title: "Bạn có muốn lưu những thay đổi không?",

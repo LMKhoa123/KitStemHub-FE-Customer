@@ -50,46 +50,48 @@ const Result = () => {
 
     const confirmPayment = async () => {
       setLoading(true);
-      try {
-        const queryParams = getQueryParams(location.search);
+      let retryCount = 0;
+      const maxRetries = 5; // Số lần thử lại
+      const retryInterval = 3000; // Khoảng thời gian giữa các lần thử (ms)
 
-        if (paymentMethod === "cash") {
-          // Nếu phương thức thanh toán là COD
-          console.log("COD Payment confirmed");
-          setPaymentStatus("success");
-          setShowConfetti(true);
-          notification.destroy();
-          notification.success({
-            message: "Đơn hàng COD đã được đặt thành công!",
-          });
-        } else if (queryParams.vnp_TransactionStatus) {
-          // Nếu phương thức thanh toán là VNPay
-          const response = await api.get("payments/vnpay/callback", {
-            params: queryParams,
-          });
+      const checkVNPayStatus = async () => {
+        try {
+          const queryParams = getQueryParams(location.search);
 
-          if (response.data.status === "success") {
+          if (paymentMethod === "cash") {
             setPaymentStatus("success");
             setShowConfetti(true);
-            notification.destroy();
-            notification.success({
-              message: "Thanh toán thành công!",
+            setLoading(false);
+            clearInterval(pollingInterval);
+          } else if (queryParams.vnp_TransactionStatus) {
+            const response = await api.get("payments/vnpay/callback", {
+              params: queryParams,
             });
-          } else {
-            console.error("VNPay callback failed:", response.data);
+
+            if (response.data.status === "success") {
+              setPaymentStatus("success");
+              setShowConfetti(true);
+              setLoading(false);
+
+              clearInterval(pollingInterval);
+            } else {
+              throw new Error("VNPay callback failed");
+            }
+          }
+        } catch (error) {
+          console.error("Error in payment confirmation:", error);
+          if (retryCount >= maxRetries) {
             setPaymentStatus("fail");
-            notification.error({ message: "Thanh toán thất bại!" });
+            setLoading(false);
+            clearInterval(pollingInterval);
+          } else {
+            retryCount++;
           }
         }
-      } catch (error) {
-        console.error("Error in payment confirmation:", error);
-        setPaymentStatus("fail");
-        notification.error({
-          message: "Thanh toán thất bại, vui lòng thử lại!",
-        });
-      } finally {
-        setLoading(false);
-      }
+      };
+
+      const pollingInterval = setInterval(checkVNPayStatus, retryInterval);
+      checkVNPayStatus(); // Gọi lần đầu ngay lập tức
     };
 
     confirmPayment();
