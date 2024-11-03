@@ -17,7 +17,7 @@ function NavbarEx({ childrenItem }) {
               <NavLink to="/contact">Liên Hệ</NavLink>
             </li>
             <li className="kt-menu-item">
-              <NavLink to="about">About Us</NavLink>
+              <NavLink to="about">Về chúng tôi</NavLink>
             </li>
           </ul>
 

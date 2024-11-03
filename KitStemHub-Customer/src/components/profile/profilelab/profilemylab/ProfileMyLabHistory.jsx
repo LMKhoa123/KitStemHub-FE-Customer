@@ -23,11 +23,7 @@ function ProfileMyLabHistory() {
         },
       });
 
-      if (
-        response.data &&
-        response.data.details &&
-        response.data.details.data
-      ) {
+      if (response?.data?.details?.data) {
         const labSupportsData = response.data.details.data["lab-supports"];
         const totalPages = response.data.details.data["total-pages"] || 0;
         const currentPage = response.data.details.data["current-page"] || 0;
@@ -40,27 +36,21 @@ function ProfileMyLabHistory() {
             current: currentPage,
             pageSize: pageSize,
           });
-          notification.destroy();
-          notification.success({
-            message: "Thành công",
-            description: "Lấy danh sách lịch sử hỗ trợ lab thành công!",
-            duration: 3,
-          });
+          // notification.destroy();
+          // notification.success({
+          //   message: "Thành công",
+          //   description: "Lấy danh sách lịch sử hỗ trợ lab thành công!",
+          //   duration: 2,
+          // });
         } else {
           setDataSource([]); // Không có dữ liệu
           notification.destroy();
           notification.info({
-            message: "Không có dữ liệu",
-            description: "Không có lịch sử hỗ trợ lab cho trang này.",
+            message: "Chưa có dữ liệu",
+            description: "Chưa có lịch sử hỗ trợ lab.",
+            duration: 2,
           });
         }
-      } else {
-        setDataSource([]);
-        notification.destroy();
-        notification.error({
-          message: "Lỗi",
-          description: "Không có dữ liệu lịch sử hỗ trợ lab!",
-        });
       }
     } catch (error) {
       console.error("Error fetching lab supports:", error);
@@ -224,7 +214,7 @@ function ProfileMyLabHistory() {
 
   return (
     <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
-      <h1 className="text-2xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
+      <h1 className="text-3xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
       <Spin spinning={loading}>
         <Table
           dataSource={dataSource} // Dữ liệu từ API

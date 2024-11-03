@@ -58,10 +58,6 @@ const Result = () => {
           console.log("COD Payment confirmed");
           setPaymentStatus("success");
           setShowConfetti(true);
-          notification.destroy();
-          notification.success({
-            message: "Đơn hàng COD đã được đặt thành công!",
-          });
         } else if (queryParams.vnp_TransactionStatus) {
           // Nếu phương thức thanh toán là VNPay
           const response = await api.get("payments/vnpay/callback", {
@@ -71,10 +67,6 @@ const Result = () => {
           if (response.data.status === "success") {
             setPaymentStatus("success");
             setShowConfetti(true);
-            notification.destroy();
-            notification.success({
-              message: "Thanh toán thành công!",
-            });
           } else {
             console.error("VNPay callback failed:", response.data);
             setPaymentStatus("fail");
