@@ -3,8 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import { Card, Button, Spin, Tooltip, Tag } from "antd";
 import {
   RightOutlined,
-  HeartOutlined,
-  EyeOutlined,
+  // HeartOutlined,
+  // EyeOutlined,
   ArrowUpOutlined,
 } from "@ant-design/icons";
 import api from "../../../config/axios";
@@ -186,7 +186,7 @@ function HomeProductCarousel() {
                     </>
                   }
                 />
-                <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
+                {/* <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
                   <Button
                     shape="circle"
                     icon={<HeartOutlined />}
@@ -205,7 +205,7 @@ function HomeProductCarousel() {
                       console.log("Đã nhấn vào biểu tượng mắt");
                     }}
                   />
-                </div>
+                </div> */}
               </Card>
             ))}
           </div>
@@ -294,7 +294,7 @@ function HomeProductCarousel() {
                       </>
                     }
                   />
-                  <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
+                  {/* <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
                     <Button
                       shape="circle"
                       icon={<HeartOutlined />}
@@ -313,7 +313,7 @@ function HomeProductCarousel() {
                         console.log("Đã nhấn vào biểu tượng mắt");
                       }}
                     />
-                  </div>
+                  </div> */}
                 </Card>
               ))}
             </div>
