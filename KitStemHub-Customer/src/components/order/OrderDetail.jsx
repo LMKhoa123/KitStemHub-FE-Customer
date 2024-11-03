@@ -203,18 +203,13 @@ function OrderDetail() {
     case "GIAO HÀNG THẤT BẠI":
       currentStep = 4;
       stepStatus = "error";
-      failureReason =
-        orderData["failure-reason"] || "Không thể liên hệ với người nhận";
+      failureReason = "Giao Hàng Thất Bại";
       orderSteps[3] = {
         title: (
           <span className="text-red-500 font-medium">Giao Hàng Thất Bại</span>
         ),
         date: (
           <div className="space-y-1">
-            <div className="flex items-center text-red-500">
-              <CloseCircleOutlined className="mr-1" />
-              <span>{formatDate(orderData["delivered-at"])}</span>
-            </div>
             <div className="text-red-400 text-sm">
               <ExclamationCircleOutlined className="mr-1" />
               {failureReason}
@@ -258,7 +253,7 @@ function OrderDetail() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto p-6"
+        className="max-w-7xl mx-auto p-4 md:p-6"
       >
         <Breadcrumb className="mb-6 text-sm">
           <Breadcrumb.Item>
@@ -284,68 +279,60 @@ function OrderDetail() {
         </Breadcrumb>
 
         <Card className="mb-8 shadow-lg rounded-lg overflow-hidden">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-gray-50 p-6 rounded-t-lg">
-            <div>
-              <Space>
-                <Title level={3} className="mb-2 text-gray-800">
-                  Mã đơn hàng: {orderData.id}
-                </Title>
-              </Space>
-
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 bg-gray-50 p-4 md:p-6 rounded-t-lg">
+            <div className="space-y-2">
+              <Title level={3} className="!mb-1 text-gray-800">
+                Mã đơn hàng: {orderData.id}
+              </Title>
               <Space direction="vertical" size="small">
                 <Text type="secondary">
-                  Ngày đặt hàng:{" "}
+                  Ngày Đặt Hàng:{" "}
                   <span className="font-semibold">
                     {formatDate(orderData["created-at"])}
                   </span>
                 </Text>
                 <Text type="success">
-                  Ngày chuẩn bị hàng:{" "}
+                  Ngày Giao Hàng:{" "}
                   <span className="font-semibold">
                     {formatDate(orderData["delivered-at"])}
                   </span>
                 </Text>
               </Space>
             </div>
-            <Space className="mt-4 md:mt-0">
-              <Button
-                type="primary"
-                disabled={
-                  orderData["shipping-status"] !== "CHỜ XÁC NHẬN" &&
-                  orderData["shipping-status"] !== "ĐÃ XÁC NHẬN"
-                }
-                danger
-                onClick={() => {
-                  Modal.confirm({
-                    title: "Xác nhận hủy đơn hàng",
-                    content: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
-                    okText: "Xác nhận",
-                    cancelText: "Hủy",
-                    onOk: async () => {
-                      try {
-                        await api.put(`orders/${orderData.id}/cancel`);
-                        toast.success("Đơn hàng đã được hủy thành công");
-                        const response = await api.get(`orders/${orderId}`);
-                        setOrderData(response.data.details.data.order);
-                      } catch (err) {
-                        console.error("Error canceling order:", err);
-                        toast.error("Có lỗi xảy ra khi hủy đơn hàng");
-                      }
-                    },
-                  });
-                }}
-              >
-                Hủy đơn hàng
-              </Button>
-            </Space>
+            <Button
+              type="primary"
+              danger
+              className="mt-4 md:mt-0"
+              disabled={
+                orderData["shipping-status"] !== "CHỜ XÁC NHẬN" &&
+                orderData["shipping-status"] !== "ĐÃ XÁC NHẬN"
+              }
+              onClick={() => {
+                Modal.confirm({
+                  title: "Xác nhận hủy đơn hàng",
+                  content: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+                  okText: "Xác nhận",
+                  cancelText: "Hủy",
+                  onOk: async () => {
+                    try {
+                      await api.put(`orders/${orderData.id}/cancel`);
+                      toast.success("Đơn hàng đã được hủy thành công");
+                      const response = await api.get(`orders/${orderId}`);
+                      setOrderData(response.data.details.data.order);
+                    } catch (err) {
+                      console.error("Error canceling order:", err);
+                      toast.error("Có lỗi xảy ra khi hủy đơn hàng");
+                    }
+                  },
+                });
+              }}
+            >
+              Hủy đơn hàng
+            </Button>
           </div>
 
-          <div className="relative">
-            <Steps
-              current={currentStep}
-              status={stepStatus}
-              className="my-8 px-6"
-            >
+          <div className="px-4 md:px-6">
+            <Steps current={currentStep} status={stepStatus} className="my-6">
               {orderSteps.map((step, index) => (
                 <Step
                   key={index}
@@ -356,9 +343,8 @@ function OrderDetail() {
               ))}
             </Steps>
 
-            {/* Thông báo khi giao hàng thành công */}
             {orderData["shipping-status"] === "GIAO HÀNG THÀNH CÔNG" && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg mx-6 shadow-sm">
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg shadow-sm">
                 <div className="flex items-start">
                   <CheckCircleOutlined className="text-green-500 text-lg mt-1 mr-2" />
                   <div>
@@ -378,16 +364,15 @@ function OrderDetail() {
               </div>
             )}
 
-            {/* Thông báo khi giao hàng thất bại */}
             {orderData["shipping-status"] === "GIAO HÀNG THẤT BẠI" && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg mx-6 shadow-sm">
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg shadow-sm">
                 <div className="flex items-start">
                   <ExclamationCircleOutlined className="text-red-500 text-lg mt-1 mr-2" />
                   <div>
                     <Text strong className="text-red-500 block mb-1">
-                      Đơn hàng giao không thành công
+                      Đơn hàng của bạn đã gặp sự cố
                     </Text>
-                    <Text className="text-red-600">{failureReason}</Text>
+
                     <div className="mt-2">
                       <Text type="secondary" className="text-sm">
                         Vui lòng liên hệ hotline của cửa hàng để được hỗ trợ
@@ -399,39 +384,40 @@ function OrderDetail() {
             )}
           </div>
 
-          <Divider className="my-6" />
+          <Divider />
 
-          <div className="px-6">
+          <div className="px-4 md:px-6">
             {packageOrders.length > 0 ? (
               packageOrders.map((packageOrder, index) => (
                 <React.Fragment key={index}>
-                  <div className="flex items-center py-6 hover:bg-gray-50 transition-colors duration-200 rounded-lg">
-                    <div className="mr-6">
-                      <Image
-                        src={
-                          packageOrder.package?.kit?.["kit-images"][0].url ||
-                          "https://via.placeholder.com/100"
-                        }
-                        alt={packageOrder.package?.kit?.name || "Package Image"}
-                        width={100}
-                        height={100}
-                        className="object-cover rounded-lg shadow-md"
-                      />
-                    </div>
-                    <div className="flex-grow">
-                      <Text strong className="text-xl mb-1 block text-gray-800">
+                  <div className="flex flex-col md:flex-row items-start md:items-center gap-4 py-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg">
+                    <Image
+                      src={
+                        packageOrder.package?.kit?.["kit-images"][0].url ||
+                        "https://via.placeholder.com/100"
+                      }
+                      alt={packageOrder.package?.kit?.name || "Package Image"}
+                      width={100}
+                      height={100}
+                      className="object-cover rounded-lg shadow-md"
+                    />
+                    <div className="flex-grow space-y-2">
+                      <Text
+                        strong
+                        className="text-lg md:text-xl block text-gray-800"
+                      >
                         {packageOrder.package?.kit?.name || "Unknown Package"}
                       </Text>
-                      <Text type="secondary" className="text-base block mb-2">
+                      <Text type="secondary" className="block">
                         {packageOrder.package?.name || "Unknown Name"}
                       </Text>
-                      <Text className="text-lg text-gray-600">
+                      <Text className="text-gray-600">
                         {formatCurrency(packageOrder.package?.price || 0)} x{" "}
                         {packageOrder["package-quantity"] || 0}
                       </Text>
                     </div>
                     <div className="text-right">
-                      <Text strong className="text-xl block text-gray-600">
+                      <Text strong className="text-xl text-gray-600">
                         {formatCurrency(
                           (packageOrder.package?.price || 0) *
                             (packageOrder["package-quantity"] || 0)
@@ -440,7 +426,7 @@ function OrderDetail() {
                     </div>
                   </div>
                   {index < packageOrders.length - 1 && (
-                    <Divider className="my-4" />
+                    <Divider className="my-2" />
                   )}
                 </React.Fragment>
               ))
@@ -451,10 +437,10 @@ function OrderDetail() {
             )}
           </div>
 
-          <Divider className="my-6" />
+          <Divider />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 px-6">
-            <Card title="Thông tin thanh toán" className="h-full shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-6">
+            <Card title="Thông tin thanh toán" className="h-full shadow-sm">
               <Space align="center" size="large">
                 {orderData.payment.method.name === "Cash" ? (
                   <>
@@ -481,7 +467,7 @@ function OrderDetail() {
               </Space>
             </Card>
 
-            <Card title="Thông tin giao hàng" className="h-full shadow-md">
+            <Card title="Thông tin giao hàng" className="h-full shadow-sm">
               <Text strong className="block mb-2">
                 Địa chỉ giao hàng:
               </Text>
@@ -501,36 +487,33 @@ function OrderDetail() {
             </Card>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 px-6 mt-8">
-            <div className="mb-6 flex-1 py-6 rounded-lg bg-white ">
-              <Title level={4} className="mb-6 !text-gray-800 pb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-6 mt-6">
+            <div className="bg-white rounded-lg">
+              <Title level={4} className="mb-4 text-gray-800">
                 Các bài lab có thể tải về:
               </Title>
-
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {labs.map((lab) => (
                   <div
                     key={lab.id}
-                    className="flex items-center justify-between rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors duration-300"
                   >
-                    <p className="text-base !text-gray-700">{lab.name}</p>
+                    <Text className="text-gray-700">{lab.name}</Text>
                     <Button
                       type="primary"
                       icon={<DownloadOutlined />}
-                      size="large"
-                      className="bg-green-50 
-                      !text-black hover:!text-white hover:!bg-green-600 border-none h-12 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center !px-4"
                       disabled={
                         orderData["shipping-status"] !== "GIAO HÀNG THÀNH CÔNG"
                       }
                       onClick={() => handleLabDownload(lab.id, lab.name)}
+                      className="bg-green-50 hover:bg-green-600 border-none"
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="mb-6 flex-1 py-6 rounded-lg ">
+            <div className="bg-white rounded-lg">
               <Title level={4} className="mb-4 text-gray-800">
                 Tổng kết đơn hàng
               </Title>
@@ -547,18 +530,16 @@ function OrderDetail() {
                 </div>
                 <div className="flex justify-between items-center">
                   <Text className="text-gray-600">Giảm giá</Text>
-                  <Text strong className="text-gray-500">
+                  <Text strong className="text-red-500">
                     -{formatCurrency(orderData.discount)}
                   </Text>
                 </div>
-                <br />
-
                 <Divider />
-                <div className="flex justify-between items-center">
-                  <Text strong className="text-xl text-gray-800 pt-4">
+                <div className="flex justify-between items-center pt-2">
+                  <Text strong className="text-xl text-gray-800">
                     Tổng cộng
                   </Text>
-                  <Text strong className="text-2xl text-green-600 pt-4">
+                  <Text strong className="text-2xl text-green-600">
                     {formatCurrency(orderData["total-price"])}
                   </Text>
                 </div>
