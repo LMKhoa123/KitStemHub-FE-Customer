@@ -306,7 +306,7 @@ function CartContent() {
         <>
           {/* Table for cart items */}
           <Table columns={columns} dataSource={cartItems} pagination={false} />
-          <div className="flex justify-between mt-5">
+          <div className="flex justify-between items-center mt-5">
             <Button
               type="red"
               icon={<HomeOutlined />}
@@ -316,64 +316,32 @@ function CartContent() {
               Tiếp tục mua sắm
             </Button>
 
-            {/* Nút Xóa tất cả sản phẩm */}
-            {/* <Popconfirm
-              title="Bạn có chắc chắn muốn xóa tất cả các sản phẩm không?"
-              onConfirm={deleteAllCarts} // Xóa tất cả sản phẩm
-              okText="Yes"
-              cancelText="No"
-            >
+            <div className="flex items-center gap-4">
               <Button
-                type="primary"
-                icon={<DeleteOutlined />}
-                danger
-                className="h-10 font-semibold"
-                disabled={cartItems.length === 0} // Vô hiệu hóa nút nếu giỏ hàng trống
+                type="red"
+                className="h-10 bg-red-500 text-white font-semibold hover:bg-red-600 flex items-center"
+                onClick={handleProceedToCheckout}
               >
-                Delete all
+                Tiến hành thanh toán <ArrowRightOutlined className="ml-2" />
               </Button>
-            </Popconfirm> */}
+            </div>
           </div>
 
-          {/* Cart Total section */}
-          <Card
-            title="Tổng giá tiền trong giỏ hàng"
-            className="border border-gray-300 rounded-md p-5 mt-16"
+          {/* Modal to show labs */}
+          <Modal
+            title="Labs"
+            visible={labModalVisible}
+            onCancel={() => setLabModalVisible(false)}
+            footer={null}
           >
-            {/* <div className="flex justify-between mb-3 font-medium">
-              <span>Subtotal:</span>
-              <span>{subtotal.toLocaleString("vi-VN")} VND</span>
-            </div> */}
-            <div className="flex justify-between mb-3 font-medium">
-              <span>Tổng:</span>
-              <span>{total.toLocaleString("vi-VN")} VND</span>
-            </div>
-
-            <Button
-              type="red"
-              className="w-full bg-red-500 text-white mt-3 font-semibold hover:bg-red-600"
-              onClick={handleProceedToCheckout}
-            >
-              Tiến hành thanh toán{" "}
-              <ArrowRightOutlined className="font-semibold" />
-            </Button>
-          </Card>
+            <ul>
+              {selectedLabs.map((lab, index) => (
+                <li key={index}>{lab}</li>
+              ))}
+            </ul>
+          </Modal>
         </>
       )}
-
-      {/* Modal to show labs */}
-      <Modal
-        title="Labs"
-        visible={labModalVisible}
-        onCancel={() => setLabModalVisible(false)}
-        footer={null}
-      >
-        <ul>
-          {selectedLabs.map((lab, index) => (
-            <li key={index}>{lab}</li>
-          ))}
-        </ul>
-      </Modal>
     </div>
   );
 }

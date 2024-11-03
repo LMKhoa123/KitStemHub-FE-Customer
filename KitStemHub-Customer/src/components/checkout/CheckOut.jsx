@@ -22,7 +22,7 @@ const { Option } = Select;
 const { Step } = Steps;
 
 const CheckOut = () => {
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const [currentStep, setCurrentStep] = useState(0);
   const [shippingAddress, setShippingAddress] = useState(""); // Địa chỉ giao hàng
   const [selectedPhoneNumber, setSelectedPhoneNumber] = useState(""); // Số điện thoại đã chọn
