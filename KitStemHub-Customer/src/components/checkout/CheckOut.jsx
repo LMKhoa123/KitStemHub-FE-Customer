@@ -691,10 +691,9 @@ const CheckOut = () => {
           </Radio.Group>
 
           <Button
-            type="primary"
-            danger
+            type="red"
             size="large"
-            className="w-full mt-8 h-12 text-lg font-semibold"
+            className="bg-red-500 text-white w-full mt-8 h-12 text-lg font-semibold hover:bg-red-600"
             onClick={handlePlaceOrder}
           >
             Đặt hàng

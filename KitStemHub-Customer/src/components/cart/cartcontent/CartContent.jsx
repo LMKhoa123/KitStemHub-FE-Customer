@@ -1,4 +1,8 @@
-import { DeleteOutlined, HomeOutlined } from "@ant-design/icons";
+import {
+  ArrowRightOutlined,
+  DeleteOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import {
   Table,
   Button,
@@ -150,11 +154,11 @@ function CartContent() {
       });
 
       // Hiển thị thông báo thành công
-      notification.success({
-        message: "Thành công",
-        description: "Số lượng sản phẩm đã được cập nhật.",
-        placement: "topRight",
-      });
+      // notification.success({
+      //   message: "Thành công",
+      //   description: "Số lượng sản phẩm đã được cập nhật.",
+      //   placement: "topRight",
+      // });
 
       // Sau khi thay đổi số lượng, phát lại sự kiện cartUpdate với số loại sản phẩm
       const cartEvent = new CustomEvent("cartUpdate", {
@@ -162,12 +166,12 @@ function CartContent() {
       });
       window.dispatchEvent(cartEvent);
     } catch (error) {
-      // Hiển thị thông báo lỗi
-      notification.error({
-        message: "Thất bại",
-        description: "Cập nhật số lượng sản phẩm thất bại.",
-        placement: "topRight",
-      });
+      // // Hiển thị thông báo lỗi
+      // notification.error({
+      //   message: "Thất bại",
+      //   description: "Cập nhật số lượng sản phẩm thất bại.",
+      //   placement: "topRight",
+      // });
       console.error(
         "Error updating quantity:",
         error.response || error.message
@@ -304,10 +308,10 @@ function CartContent() {
           <Table columns={columns} dataSource={cartItems} pagination={false} />
           <div className="flex justify-between mt-5">
             <Button
-              type="default"
+              type="red"
               icon={<HomeOutlined />}
               onClick={handleGoHome}
-              className="h-10 bg-red-500 text-white font-semibold"
+              className="h-10 bg-red-500 text-white font-semibold hover:bg-red-600"
             >
               Tiếp tục mua sắm
             </Button>
@@ -346,11 +350,12 @@ function CartContent() {
             </div>
 
             <Button
-              type="primary"
-              className="w-full bg-red-500 text-white mt-3 font-semibold"
+              type="red"
+              className="w-full bg-red-500 text-white mt-3 font-semibold hover:bg-red-600"
               onClick={handleProceedToCheckout}
             >
-              Tiến hành thanh toán
+              Tiến hành thanh toán{" "}
+              <ArrowRightOutlined className="font-semibold" />
             </Button>
           </Card>
         </>

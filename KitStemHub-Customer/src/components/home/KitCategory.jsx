@@ -318,7 +318,7 @@ function KitCategory({ initialSearchTerm }) {
                           </>
                         }
                       />
-                      <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
+                      {/* <div className="absolute top-2 right-2 flex flex-col space-y-2 opacity-0 group-hover:opacity-90 transition-opacity duration-300">
                         <Button
                           shape="circle"
                           icon={<HeartOutlined />}
@@ -337,7 +337,7 @@ function KitCategory({ initialSearchTerm }) {
                             console.log("Đã nhấn vào biểu tượng mắt");
                           }}
                         />
-                      </div>
+                      </div> */}
                     </Card>
                   </div>
                 ))

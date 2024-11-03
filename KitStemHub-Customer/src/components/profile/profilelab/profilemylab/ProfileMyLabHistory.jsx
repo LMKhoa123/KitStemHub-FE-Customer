@@ -44,21 +44,21 @@ function ProfileMyLabHistory() {
           // });
         } else {
           setDataSource([]); // Không có dữ liệu
-          notification.destroy();
-          notification.info({
-            message: "Chưa có dữ liệu",
-            description: "Chưa có lịch sử hỗ trợ lab.",
-            duration: 2,
-          });
+          // notification.destroy();
+          // notification.info({
+          //   message: "Chưa có dữ liệu",
+          //   description: "Chưa có lịch sử hỗ trợ lab.",
+          //   duration: 2,
+          // });
         }
       }
     } catch (error) {
       console.error("Error fetching lab supports:", error);
-      notification.error({
-        message: "Lỗi",
-        description: "Có lỗi xảy ra khi lấy dữ liệu lịch sử hỗ trợ lab!",
-        duration: 3,
-      });
+      // notification.error({
+      //   message: "Lỗi",
+      //   description: "Có lỗi xảy ra khi lấy dữ liệu lịch sử hỗ trợ lab!",
+      //   duration: 3,
+      // });
     } finally {
       setLoading(false); // Tắt trạng thái loading
     }
