@@ -50,6 +50,15 @@ const Result = () => {
 
     const confirmPayment = async () => {
       setLoading(true);
+
+      // cash
+      if (paymentMethod === "cash") {
+        setPaymentStatus("success");
+        setShowConfetti(true);
+        setLoading(false);
+        return;
+      }
+
       let retryCount = 0;
       const maxRetries = 5; // Số lần thử lại
       const retryInterval = 3000; // Khoảng thời gian giữa các lần thử (ms)
@@ -57,26 +66,27 @@ const Result = () => {
       const checkVNPayStatus = async () => {
         try {
           const queryParams = getQueryParams(location.search);
-
-          if (paymentMethod === "cash") {
+          const { vnp_TransactionStatus } = queryParams;
+          const response = await api.get("payments/vnpay/callback", {
+            params: queryParams,
+          });
+          console.log(response.data);
+          if (
+            vnp_TransactionStatus === "00" &&
+            response.data.status === "success"
+          ) {
+            console.log(vnp_TransactionStatus);
             setPaymentStatus("success");
             setShowConfetti(true);
             setLoading(false);
             clearInterval(pollingInterval);
-          } else if (queryParams.vnp_TransactionStatus) {
-            const response = await api.get("payments/vnpay/callback", {
-              params: queryParams,
-            });
-
-            if (response.data.status === "success") {
-              setPaymentStatus("success");
-              setShowConfetti(true);
-              setLoading(false);
-
-              clearInterval(pollingInterval);
-            } else {
-              throw new Error("VNPay callback failed");
-            }
+          } else if (vnp_TransactionStatus === "02") {
+            console.log(vnp_TransactionStatus);
+            setPaymentStatus("fail");
+            setLoading(false);
+            clearInterval(pollingInterval);
+          } else {
+            throw new Error("VNPay callback failed");
           }
         } catch (error) {
           console.error("Error in payment confirmation:", error);
@@ -158,7 +168,9 @@ const Result = () => {
 
             <Title level={2} className="text-rose-500">
               {paymentStatus === "success"
-                ? "Thực hiện giao dịch thanh toán thành công!"
+                ? paymentMethod === "cash"
+                  ? "Đặt hàng thành công!"
+                  : "Thực hiện thanh toán thành công!"
                 : "Đã có lỗi xảy ra khi thanh toán!"}
             </Title>
             <Text className="text-black text-lg">
