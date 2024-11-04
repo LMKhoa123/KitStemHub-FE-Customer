@@ -306,6 +306,20 @@ function CartContent() {
         <>
           {/* Table for cart items */}
           <Table columns={columns} dataSource={cartItems} pagination={false} />
+
+          {/* Add Total Card */}
+          <Card className="mt-4 mb-4">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-medium">Tổng tiền:</span>
+              <span className="text-xl font-bold text-gray-900">
+                {cartItems
+                  .reduce((sum, item) => sum + item.subtotal, 0)
+                  .toLocaleString("vi-VN")}{" "}
+                VND
+              </span>
+            </div>
+          </Card>
+
           <div className="flex justify-between items-center mt-5">
             <Button
               type="red"
