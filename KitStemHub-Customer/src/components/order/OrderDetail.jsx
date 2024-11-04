@@ -37,7 +37,7 @@ function OrderDetail() {
   const [labs, setLabs] = useState([]);
 
   const formatDate = (date) => {
-    if (!date) return "Đang chờ";
+    if (!date) return "";
     return new Date(date).toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -124,6 +124,19 @@ function OrderDetail() {
     }
   };
 
+  const handleCancelOrder = async () => {
+    try {
+      await api.put(`orders/${orderData.id}/cancel`);
+      toast.success("Đơn hàng đã được hủy thành công");
+      // Re-fetch order data instead of full page reload
+      const response = await api.get(`orders/${orderId}`);
+      setOrderData(response.data.details.data.order);
+    } catch (err) {
+      console.error("Error canceling order:", err);
+      toast.error("Có lỗi xảy ra khi hủy đơn hàng");
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -143,13 +156,13 @@ function OrderDetail() {
       icon: null,
     },
     {
-      title: "Xác Nhận",
-      date: "Đơn hàng đã duyệt",
+      title: "Đã Xác Nhận",
+      date: formatDate(orderData["confirmed-at"]),
       icon: null,
     },
     {
-      title: "Giao Hàng",
-      date: "Đang giao hàng",
+      title: "Đang Giao Hàng",
+      date: formatDate(orderData["shipping-at"]),
       icon: null,
     },
     {
@@ -161,20 +174,70 @@ function OrderDetail() {
 
   let currentStep;
   let stepStatus = "process";
-  let failureReason = "";
 
   switch (orderData["shipping-status"]) {
     case "CHỜ XÁC NHẬN":
+      currentStep = 0;
+      break;
+
+    case "ĐÃ XÁC NHẬN":
       currentStep = 1;
       break;
-    case "ĐÃ XÁC NHẬN":
+
+    case "ĐANG GIAO HÀNG":
       currentStep = 2;
       break;
-    case "ĐANG GIAO HÀNG":
+
+    case "GIAO HÀNG THẤT BẠI":
       currentStep = 3;
+      stepStatus = "error";
+      orderSteps[3] = {
+        title: (
+          <span className="text-red-500 font-medium">Giao Hàng Thất Bại</span>
+        ),
+        date: (
+          <div className="space-y-1">
+            <div className="text-red-400 text-sm">
+              <ExclamationCircleOutlined className="mr-1" />
+              {orderData["delivered-at"] !== null
+                ? "Gặp sự cố khi giao hàng"
+                : "Đơn hàng đã hủy"}
+            </div>
+          </div>
+        ),
+        icon: (
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50">
+            <CloseCircleOutlined className="text-red-500 text-lg" />
+          </div>
+        ),
+      };
       break;
+
+    case "ĐÃ HỦY":
+      currentStep = 0;
+      stepStatus = "error";
+      orderSteps[0] = {
+        title: (
+          <span className="text-red-500 font-medium">Đơn hàng đã hủy</span>
+        ),
+        date: (
+          <div className="space-y-1">
+            <div className="text-red-400 text-sm">
+              <ExclamationCircleOutlined className="mr-1" />
+              Đã hủy đơn hàng
+            </div>
+          </div>
+        ),
+        icon: (
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50">
+            <CloseCircleOutlined className="text-red-500 text-lg" />
+          </div>
+        ),
+      };
+      break;
+
     case "GIAO HÀNG THÀNH CÔNG":
-      currentStep = 4;
+      currentStep = 3;
       stepStatus = "finish";
       orderSteps[3] = {
         title: (
@@ -200,31 +263,9 @@ function OrderDetail() {
         ),
       };
       break;
-    case "GIAO HÀNG THẤT BẠI":
-      currentStep = 4;
-      stepStatus = "error";
-      failureReason = "Giao Hàng Thất Bại";
-      orderSteps[3] = {
-        title: (
-          <span className="text-red-500 font-medium">Giao Hàng Thất Bại</span>
-        ),
-        date: (
-          <div className="space-y-1">
-            <div className="text-red-400 text-sm">
-              <ExclamationCircleOutlined className="mr-1" />
-              {failureReason}
-            </div>
-          </div>
-        ),
-        icon: (
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50">
-            <CloseCircleOutlined className="text-red-500 text-lg" />
-          </div>
-        ),
-      };
-      break;
+
     default:
-      currentStep = 0; // Mặc định là bước đầu tiên nếu status không khớp
+      currentStep = 0;
   }
 
   // Nếu lab đã được tải xuống, đặt currentStep thành bước cuối cùng
@@ -292,7 +333,7 @@ function OrderDetail() {
                   </span>
                 </Text>
                 <Text type="success">
-                  Ngày Giao Hàng:{" "}
+                  Ngày Giao Thành Công:{" "}
                   <span className="font-semibold">
                     {formatDate(orderData["delivered-at"])}
                   </span>
@@ -313,17 +354,7 @@ function OrderDetail() {
                   content: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
                   okText: "Xác nhận",
                   cancelText: "Hủy",
-                  onOk: async () => {
-                    try {
-                      await api.put(`orders/${orderData.id}/cancel`);
-                      toast.success("Đơn hàng đã được hủy thành công");
-                      const response = await api.get(`orders/${orderId}`);
-                      setOrderData(response.data.details.data.order);
-                    } catch (err) {
-                      console.error("Error canceling order:", err);
-                      toast.error("Có lỗi xảy ra khi hủy đơn hàng");
-                    }
-                  },
+                  onOk: handleCancelOrder,
                 });
               }}
             >
@@ -352,7 +383,7 @@ function OrderDetail() {
                       Đơn hàng đã giao thành công
                     </Text>
                     <Text className="text-green-600">
-                      Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi
+                      Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi.
                     </Text>
                     <div className="mt-2">
                       <Text type="success" className="text-sm">
@@ -370,12 +401,14 @@ function OrderDetail() {
                   <ExclamationCircleOutlined className="text-red-500 text-lg mt-1 mr-2" />
                   <div>
                     <Text strong className="text-red-500 block mb-1">
-                      Đơn hàng của bạn đã gặp sự cố
+                      Đơn hàng của bạn đã được hủy!
                     </Text>
 
                     <div className="mt-2">
                       <Text type="secondary" className="text-sm">
-                        Vui lòng liên hệ hotline của cửa hàng để được hỗ trợ
+                        Đơn hàng của bạn đã được hủy. Nếu bạn cần hỗ trợ hoặc có
+                        bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi để
+                        được giúp đỡ.
                       </Text>
                     </div>
                   </div>
@@ -506,7 +539,7 @@ function OrderDetail() {
                         orderData["shipping-status"] !== "GIAO HÀNG THÀNH CÔNG"
                       }
                       onClick={() => handleLabDownload(lab.id, lab.name)}
-                      className="bg-green-50 hover:bg-green-600 border-none"
+                      className="bg-green-500 hover:!bg-green-600 border-none"
                     />
                   </div>
                 ))}

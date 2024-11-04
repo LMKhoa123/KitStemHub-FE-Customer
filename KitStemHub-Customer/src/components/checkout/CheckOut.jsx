@@ -639,7 +639,7 @@ const CheckOut = () => {
                   <p className="text-sm text-gray-500">Gói: {item.package}</p>
                 </div>
               </div>
-              <span className="font-bold text-lg text-primary">
+              <span className="font-semibold text-lg text-primary">
                 {(item.price * item.quantity).toLocaleString("vi-VN")} VND
               </span>
             </div>
