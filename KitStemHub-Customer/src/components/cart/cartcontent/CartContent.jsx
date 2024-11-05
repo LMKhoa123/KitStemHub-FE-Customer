@@ -11,6 +11,7 @@ import {
   Popconfirm,
   Modal,
   notification,
+  Spin,
 } from "antd";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +29,7 @@ function CartContent() {
   // Fetch dữ liệu từ API khi component render
   const fetchCartData = async () => {
     try {
+      setLoading(true);
       // Gọi API để lấy dữ liệu từ giỏ hàng
       const cartResponse = await api.get("carts");
       const kitsResponse = await api.get("kits");
@@ -58,9 +60,10 @@ function CartContent() {
       );
 
       setCartItems(cartsData);
-      setLoading(false); // Đặt trạng thái tải về false khi dữ liệu đã được fetch
     } catch (error) {
       console.error("Error fetching cart data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -289,8 +292,11 @@ function CartContent() {
 
   return (
     <div className="w-2/3 p-5">
-      {/* Kiểm tra nếu giỏ hàng trống */}
-      {cartItems.length === 0 && !loading ? (
+      {loading ? (
+        <div className="flex justify-center items-center h-full">
+          <Spin size="large" tip="Đang tải giỏ hàng..." />
+        </div>
+      ) : cartItems.length === 0 ? (
         <div className="text-center my-10">
           <h2 className="text-xl font-semibold">Giỏ hàng của bạn đang trống</h2>
           <Button
@@ -304,10 +310,8 @@ function CartContent() {
         </div>
       ) : (
         <>
-          {/* Table for cart items */}
           <Table columns={columns} dataSource={cartItems} pagination={false} />
 
-          {/* Add Total Card */}
           <Card className="mt-4 mb-4">
             <div className="flex justify-between items-center">
               <span className="text-lg font-medium">Tổng tiền:</span>
@@ -329,19 +333,15 @@ function CartContent() {
             >
               Tiếp tục mua sắm
             </Button>
-
-            <div className="flex items-center gap-4">
-              <Button
-                type="red"
-                className="h-10 bg-red-500 text-white font-semibold hover:bg-red-600 flex items-center"
-                onClick={handleProceedToCheckout}
-              >
-                Tiến hành thanh toán <ArrowRightOutlined className="ml-2" />
-              </Button>
-            </div>
+            <Button
+              type="red"
+              className="h-10 bg-red-500 text-white font-semibold hover:bg-red-600 flex items-center"
+              onClick={handleProceedToCheckout}
+            >
+              Tiến hành thanh toán <ArrowRightOutlined className="ml-2" />
+            </Button>
           </div>
 
-          {/* Modal to show labs */}
           <Modal
             title="Labs"
             visible={labModalVisible}
