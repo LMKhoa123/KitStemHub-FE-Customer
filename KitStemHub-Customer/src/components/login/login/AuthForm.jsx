@@ -109,6 +109,7 @@ function LoginInput() {
       const result = await signInWithPopup(auth, googleProvider);
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
+      console.log("Credential: ", JSON.stringify(credential));
       const accessToken = credential.accessToken;
       // console.log("acc " + accessToken);
       const idToken = credential.idToken;
@@ -116,6 +117,7 @@ function LoginInput() {
       const pendingToken = credential.pendingToken;
       // console.log(pendingToken);
       const user = result.user;
+      console.log("user: ", JSON.stringify(user));
 
       if (user) {
         try {
