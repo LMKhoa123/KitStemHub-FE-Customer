@@ -11,7 +11,7 @@ function ProfileCart() {
         <ProfileNav />
 
         {/* Flex container để sidebar và profile cùng một hàng */}
-        <div className="flex flex-row gap-10 min-h-screen ml-44">
+        <div className="flex flex-wrap gap-10 min-h-screen ml-44">
           {/* Sidebar */}
           <div className="">
             <ProfileSidebar className="w-1/4" />

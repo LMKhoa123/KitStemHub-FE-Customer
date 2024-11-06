@@ -14,7 +14,7 @@ function ProfileLab() {
         <Layout className="">
           {/* side bar */}
 
-          <div className="flex flex-row min-h-screen gap-10 ml-44">
+          <div className="flex flex-wrap min-h-screen gap-10 ml-44">
             <div className="">
               <ProfileSidebar className="w-1/4" />
             </div>
