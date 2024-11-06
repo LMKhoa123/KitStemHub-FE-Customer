@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const baseUrl = "https://54.66.193.22:5000/api/";
 // const baseUrl = "http://54.66.193.22:5001/api/";
@@ -36,7 +37,7 @@ api.interceptors.response.use(
         }
 
         const response = await axios.post(
-          `${baseUrl}Users/RefreshToken/${currentRefreshToken}`
+          `${baseUrl}users/refreshtoken/${currentRefreshToken}`
         );
 
         const { accessToken, refreshToken } = response.data.details;
@@ -46,12 +47,15 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Return error response instead of creating new object
+        // Clear tokens when refresh fails
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/";
+
         return Promise.reject(error);
       }
     }
 
-    // Return original error for all other cases
     return Promise.reject(error);
   }
 );
