@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // const baseUrl = "https://54.66.193.22:5000/api/";
 const baseUrl = "http://54.66.193.22:5001/api/";
@@ -32,26 +33,34 @@ api.interceptors.response.use(
       try {
         const currentRefreshToken = localStorage.getItem("refreshToken");
         if (!currentRefreshToken) {
+          console.log(currentRefreshToken);
           throw new Error("No refresh token available");
         }
 
-        const response = await axios.post(
-          `${baseUrl}Users/RefreshToken/${currentRefreshToken}`
+        const response = await api.post(
+          `${baseUrl}users/refreshtoken/${currentRefreshToken}`
         );
 
-        const { accessToken, refreshToken } = response.data.details;
+        const accessToken = response.data.details["access-token"];
+        const refreshToken = response.data.details["refresh-token"];
+        console.log(refreshToken);
+
+        // Store the new tokens in localStorage
         localStorage.setItem("token", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
+        // Update the Authorization header with the new access token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        // Retry the original request with the new token
         return api(originalRequest);
       } catch (refreshError) {
-        // Return error response instead of creating new object
+        // Chỉ xử lý lỗi khi không thể refresh token
+        console.error("Error refreshing token:", refreshError);
         return Promise.reject(error);
       }
     }
 
-    // Return original error for all other cases
     return Promise.reject(error);
   }
 );
