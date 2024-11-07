@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 function CartNav() {
   return (
     <div>
-      <div className="flex justify-between shrink p-14">
+      <div className="text-base">
         <Breadcrumb>
           <Breadcrumb.Item>
             <Link to="/">Trang Chủ</Link>

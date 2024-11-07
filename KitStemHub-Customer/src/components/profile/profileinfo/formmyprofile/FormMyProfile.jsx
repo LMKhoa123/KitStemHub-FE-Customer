@@ -202,7 +202,7 @@ function FormMyProfile() {
   }, [isUpdated]);
 
   return (
-    <div className="bg-white p-10 rounded-lg shadow-md max-w-7xl mx-auto">
+    <div className="bg-white p-10 rounded-lg shadow-md mb-32 w-full">
       <h1 className="text-3xl font-semibold text-center text-rose-600 mb-8">
         Cập nhật thông tin cá nhân
       </h1>
@@ -269,7 +269,7 @@ function FormMyProfile() {
         <div className="mb-4">
           <label className="text-gray-700 font-semibold">Email</label>
           <input
-            className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
+            className="w-full px-4 py-2 mt-2 border rounded-md bg-white"
             value={profileData.userName}
             disabled
           />
@@ -287,7 +287,7 @@ function FormMyProfile() {
           <label className="text-gray-700 font-semibold">Điểm</label>
           <input
             disabled
-            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring"
+            className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring bg-white"
             value={profileData.points}
             onChange={(e) =>
               setProfileData({ ...profileData, points: e.target.value })
@@ -417,7 +417,7 @@ function FormMyProfile() {
       <div className="mt-6">
         <label className="text-gray-700 font-semibold">Địa chỉ đầy đủ</label>
         <input
-          className="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100"
+          className="w-full px-4 py-2 mt-2 border rounded-md bg-white"
           value={fullAddress}
           readOnly
         />

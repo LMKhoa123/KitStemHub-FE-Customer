@@ -1,34 +1,32 @@
-import { Layout } from "antd";
+import { useState } from "react";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
 import ProfileMyLabHistory from "./profilemylab/ProfileMyLabHistory";
 // import ProfileMyLab from "./profilemylab/ProfileMyLab";
 
 function ProfileLab() {
+  const [currentTab, setCurrentTab] = useState("Lịch sử hỗ trợ");
   return (
-    <Layout className="min-h-screen">
-      <div className="px-11">
-        {/* Nav profile */}
-        <ProfileNav />
-
-        <Layout className="">
-          {/* side bar */}
-
-          <div className="flex flex-wrap min-h-screen gap-10 ml-44">
-            <div className="">
-              <ProfileSidebar className="w-1/4" />
-            </div>
-
-            <div className="mt-14">
-              {/* form profile */}
-
-              {/* <ProfileMyLab /> */}
-              <ProfileMyLabHistory className="w-3/4" />
-            </div>
-          </div>
-        </Layout>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+      {/* Nav profile */}
+      <div className="md:my-16">
+        <ProfileNav currentTab={currentTab} />
       </div>
-    </Layout>
+
+      {/* Flex container để sidebar và profile cùng một hàng */}
+      <div className="flex flex-col gap-2">
+        {/* Sidebar */}
+
+        <div className="w-full">
+          <ProfileSidebar />
+        </div>
+
+        {/* Nội dung chi tiết đơn hàng */}
+        <div className="w-full">
+          <ProfileMyLabHistory />
+        </div>
+      </div>
+    </div>
   );
 }
 
