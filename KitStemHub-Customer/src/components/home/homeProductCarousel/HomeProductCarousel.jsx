@@ -110,7 +110,9 @@ function HomeProductCarousel() {
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-white p-4">
-      <CategoryCarousel onCategoryClick={handleCategoryClick} />
+      <div className="container mx-auto">
+        <CategoryCarousel onCategoryClick={handleCategoryClick} />
+      </div>
       <div className="container mx-auto py-12 px-4">
         {/* Thêm phần hiển thị All Kits ở đầu */}
         <div className="mb-16" data-aos="fade-up">

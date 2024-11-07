@@ -1,33 +1,31 @@
-import { Layout } from "antd";
 import FormMyProfile from "./formmyprofile/FormMyProfile";
 import ProfileNav from "../profilenav/ProfileNav";
 import ProfileSidebar from "../profilesidebar/ProfileSidebar";
-
-const { Content } = Layout;
+import { useState } from "react";
 
 function ProfileInfo() {
+  const [currentTab, setCurrentTab] = useState("Quản lí tài khoản");
   return (
-    <Layout className="">
-      <Content className="px-12">
-        {/* Nav profile */}
-        <ProfileNav />
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+      {/* Nav profile */}
+      <div className="md:my-16">
+        <ProfileNav currentTab={currentTab} />
+      </div>
 
-        <Layout className="">
-          {/* side bar */}
+      {/* Flex container để sidebar và profile cùng một hàng */}
+      <div className="flex flex-col gap-2">
+        {/* Sidebar */}
 
-          <Content className="flex justify-center flex-wrap">
-            <div className="pr-2 max-w-xs">
-              <ProfileSidebar />
-            </div>
+        <div className="w-full">
+          <ProfileSidebar />
+        </div>
 
-            {/* form profile */}
-            <div className="p-14 ">
-              <FormMyProfile />
-            </div>
-          </Content>
-        </Layout>
-      </Content>
-    </Layout>
+        {/* Nội dung chi tiết đơn hàng */}
+        <div className="w-full">
+          <FormMyProfile />
+        </div>
+      </div>
+    </div>
   );
 }
 

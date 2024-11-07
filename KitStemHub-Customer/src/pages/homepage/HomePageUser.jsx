@@ -4,7 +4,7 @@ import NavbarUser from "../../components/navbar/navbaruser/NavbarUser";
 
 function HomePageUser() {
   return (
-    <div className="shrink h-screen">
+    <div className="h-screen">
       <NavbarUser />
       <HomeUser />
       <Footer />

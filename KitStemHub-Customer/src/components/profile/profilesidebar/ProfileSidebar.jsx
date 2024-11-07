@@ -1,64 +1,60 @@
 import { ShoppingOutlined, UserOutlined } from "@ant-design/icons";
-import { Layout, Menu } from "antd";
-import Sider from "antd/es/layout/Sider";
-import { useNavigate } from "react-router-dom";
-
-// eslint-disable-next-line react/prop-types
-const MenuItem = ({ label, className }) => {
-  return <span className={className}>{label}</span>;
-};
+import { Tabs } from "antd";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function ProfileSidebar() {
   const navigate = useNavigate();
-  const handleNavigate = (path) => () => {
-    navigate(path);
+  const location = useLocation();
+
+  // Xác định `activeKey` dựa trên `location.pathname`
+  const activeKey = location.pathname.includes("/profile/lab")
+    ? "3"
+    : location.pathname.includes("/profile/cart")
+      ? "2"
+      : "1";
+
+  // Hàm xử lý khi nhấn vào tab
+  const onChange = (key) => {
+    // Điều hướng sang route tương ứng với tab mà không thay đổi `activeKey` trực tiếp
+    if (key === "1") {
+      navigate("/profile");
+    } else if (key === "2") {
+      navigate("/profile/cart");
+    } else if (key === "3") {
+      navigate("/profile/lab");
+    }
   };
+
+  // Danh sách các tab
   const items = [
     {
-      key: "sub1",
-      icon: <UserOutlined />,
-      label: <p className="font-medium">Quản lí tài khoản</p>,
-      children: [
-        {
-          key: "1",
-          label: (
-            <MenuItem label="Thông tin tài khoản" className="text-gray-500" />
-          ),
-          onClick: handleNavigate("/profile"),
-        },
-      ],
+      label: (
+        <span>
+          <UserOutlined /> Quản lí tài khoản
+        </span>
+      ),
+      key: "1",
     },
     {
-      key: "sub2",
-      icon: <ShoppingOutlined />,
-      label: <p className="font-medium">Quản lí đơn hàng</p>,
-      children: [
-        {
-          key: "3",
-          label: (
-            <MenuItem label="Đơn hàng của bạn" className="text-gray-500" />
-          ),
-          onClick: handleNavigate("/profile/cart"),
-        },
-        {
-          key: "4",
-          label: <MenuItem label="Lịch sử hỗ trợ" className="text-gray-500" />,
-          onClick: handleNavigate("/profile/lab"),
-        },
-      ],
+      label: (
+        <span>
+          <ShoppingOutlined /> Quản lí đơn hàng
+        </span>
+      ),
+      key: "2",
+    },
+    {
+      label: (
+        <span>
+          <ShoppingOutlined /> Lịch sử hỗ trợ
+        </span>
+      ),
+      key: "3",
     },
   ];
+
   return (
-    <Layout className="shrink pt-14 pl-14">
-      <Sider width={200}>
-        <Menu
-          mode="inline"
-          defaultOpenKeys={["sub1", "sub2", "sub3"]}
-          style={{ height: "100%", borderRight: 0 }}
-          items={items}
-        />
-      </Sider>
-    </Layout>
+    <Tabs activeKey={activeKey} onChange={onChange} type="card" items={items} />
   );
 }
 

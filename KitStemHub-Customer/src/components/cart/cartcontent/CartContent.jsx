@@ -31,8 +31,9 @@ function CartContent() {
     try {
       setLoading(true);
       // Gọi API để lấy dữ liệu từ giỏ hàng
-      const cartResponse = await api.get("carts");
-      const kitsResponse = await api.get("kits");
+      const cartResponse = await api.get("/carts");
+      const kitsResponse = await api.get("/kits");
+      console.log(cartResponse.data);
 
       const kitsData = kitsResponse.data.details.data.kits;
 
@@ -112,32 +113,6 @@ function CartContent() {
     }
   };
 
-  // Hàm xóa tất cả sản phẩm trong giỏ hàng
-  // const deleteAllCarts = async () => {
-  //   try {
-  //     await api.delete("carts"); // Gọi API xóa tất cả sản phẩm
-  //     notification.success({
-  //       message: "Thành công",
-  //       description: "Tất cả sản phẩm đã được xóa khỏi giỏ hàng.",
-  //       placement: "topRight",
-  //     });
-  //     setCartItems([]);
-  //     updateTotals([]);
-  //     localStorage.removeItem("cart"); // Xóa giỏ hàng trong localStorage
-
-  //     // Phát sự kiện để cập nhật badge giỏ hàng
-  //     const cartEvent = new Event("cartUpdate");
-  //     window.dispatchEvent(cartEvent);
-  //   } catch (error) {
-  //     notification.error({
-  //       message: "Thất bại",
-  //       description: "Xóa tất cả sản phẩm khỏi giỏ hàng thất bại.",
-  //       placement: "topRight",
-  //     });
-  //     console.error("Error deleting all carts:", error);
-  //   }
-  // };
-
   // Hàm xử lý khi thay đổi số lượng sản phẩm
   const handleQuantityChange = async (value, record) => {
     const newCartItems = cartItems.map((item) =>
@@ -156,25 +131,12 @@ function CartContent() {
         "package-quantity": value,
       });
 
-      // Hiển thị thông báo thành công
-      // notification.success({
-      //   message: "Thành công",
-      //   description: "Số lượng sản phẩm đã được cập nhật.",
-      //   placement: "topRight",
-      // });
-
       // Sau khi thay đổi số lượng, phát lại sự kiện cartUpdate với số loại sản phẩm
       const cartEvent = new CustomEvent("cartUpdate", {
         detail: cartItems.length, // Đếm số loại sản phẩm
       });
       window.dispatchEvent(cartEvent);
     } catch (error) {
-      // // Hiển thị thông báo lỗi
-      // notification.error({
-      //   message: "Thất bại",
-      //   description: "Cập nhật số lượng sản phẩm thất bại.",
-      //   placement: "topRight",
-      // });
       console.error(
         "Error updating quantity:",
         error.response || error.message
@@ -291,10 +253,10 @@ function CartContent() {
   ];
 
   return (
-    <div className="w-2/3 p-5">
+    <div className="w-full mb-32">
       {loading ? (
         <div className="flex justify-center items-center h-full">
-          <Spin size="large" tip="Đang tải giỏ hàng..." />
+          <Spin size="default" tip="Đang tải giỏ hàng..." />
         </div>
       ) : cartItems.length === 0 ? (
         <div className="text-center my-10">

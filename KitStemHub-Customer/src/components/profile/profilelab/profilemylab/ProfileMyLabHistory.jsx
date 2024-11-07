@@ -22,6 +22,7 @@ function ProfileMyLabHistory() {
           supported: true, // Thêm tham số supported=true
         },
       });
+      console.log("ne: ", response.data);
 
       if (response?.data?.details?.data) {
         const labSupportsData = response.data.details.data["lab-supports"];
@@ -124,14 +125,18 @@ function ProfileMyLabHistory() {
   // Cấu hình các cột của bảng
   const columns = [
     {
-      title: "Tên Nhân Viên Hỗ Trợ",
-      dataIndex: ["staff", "first-name"],
+      title: "Nhân Viên Hỗ Trợ",
       key: "staff",
       render: (_, record) => {
-        const { firstName, lastName } = record.staff || {};
-        return firstName || lastName ? `${firstName} ${lastName}` : "Chưa có";
+        const firstName = record.staff["first-name"];
+        const lastName = record.staff["last-name"];
+        const email = record.staff["email"];
+        return firstName && lastName && email
+          ? `${lastName} ${firstName} 
+           ${email}`.trim()
+          : "Chưa có";
       },
-      width: 200,
+      width: 300,
     },
     {
       title: "Ngày",
@@ -213,8 +218,8 @@ function ProfileMyLabHistory() {
   ];
 
   return (
-    <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
-      <h1 className="text-3xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
+    <div className="bg-white p-10 w-full shadow-lg rounded mb-32">
+      <h1 className="text-2xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
       <Spin spinning={loading}>
         <Table
           dataSource={dataSource} // Dữ liệu từ API

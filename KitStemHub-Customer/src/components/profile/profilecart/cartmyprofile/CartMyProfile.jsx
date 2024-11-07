@@ -139,7 +139,7 @@ function CartMyProfile() {
       title: "Đơn hàng",
       dataIndex: "id",
       key: "id",
-      width: 400,
+      width: 300,
     },
     {
       title: "Thời gian đặt hàng",
@@ -166,7 +166,7 @@ function CartMyProfile() {
       dataIndex: "total-price",
       key: "total-price",
       render: (price) => price.toLocaleString("vi-VN") + " VND",
-      width: 100,
+      width: 150,
     },
     {
       title: "Xem Lab & Hỗ trợ",
@@ -182,7 +182,7 @@ function CartMyProfile() {
       title: "Ghi chú",
       dataIndex: "note",
       key: "note",
-      width: 70,
+      width: 100,
       render: (note) =>
         note ? (
           <Button type="link" onClick={() => handleShowNoteModal(note)}>
@@ -204,8 +204,8 @@ function CartMyProfile() {
   ];
 
   return (
-    <div className="bg-white p-14 max-w-7xl shadow-lg rounded mb-6 ">
-      <h1 className="text-3xl font-semibold mb-3">Đơn hàng của bạn</h1>
+    <div className="bg-white p-10 w-full shadow-lg rounded mb-32">
+      <h1 className="text-2xl font-semibold mb-3">Đơn hàng của bạn</h1>
       <Space className="mb-3 flex justify-end">
         <DatePicker.RangePicker
           onChange={handleDateChange}

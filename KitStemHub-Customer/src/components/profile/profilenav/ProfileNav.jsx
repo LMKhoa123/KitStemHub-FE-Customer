@@ -1,11 +1,16 @@
+/* eslint-disable react/prop-types */
+// ProfileNav.js
 import { Breadcrumb } from "antd";
+import { Link } from "react-router-dom";
 
-function ProfileNav() {
+function ProfileNav({ currentTab }) {
   return (
-    <div className="flex justify-between shrink p-14 pl-64">
-      <Breadcrumb>
-        <Breadcrumb.Item>Trang chủ</Breadcrumb.Item>
-        <Breadcrumb.Item>Quản lý tài khoản</Breadcrumb.Item>
+    <div>
+      <Breadcrumb className="text-base">
+        <Breadcrumb.Item>
+          <Link to="/">Trang Chủ</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>{currentTab}</Breadcrumb.Item>
       </Breadcrumb>
     </div>
   );
