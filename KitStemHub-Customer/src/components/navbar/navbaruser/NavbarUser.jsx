@@ -76,7 +76,7 @@ function NavbarUser() {
   return (
     <NavbarEx
       childrenItem={
-        <ul className="lg:flex hidden lg:justify-between lg:items-center text-gray-400 lg:gap-4 text-md font-normal">
+        <ul className="flex  justify-between items-center text-gray-400 lg:gap-4 text-md font-normal">
           {/* <li className="hover:text-gray-800 transition p-4 text-xl">
             <a href="#" className="">
               <HeartOutlined />
