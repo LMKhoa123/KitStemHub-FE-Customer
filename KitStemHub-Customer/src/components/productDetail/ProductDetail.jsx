@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Breadcrumb,
-  Rate,
   Button,
   Tooltip,
   List,
@@ -25,7 +24,6 @@ import {
 } from "@ant-design/icons";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import api from "../../config/axios";
-import { toast } from "react-toastify";
 
 const ProductDetail = () => {
   const { kitId } = useParams();
@@ -40,15 +38,49 @@ const ProductDetail = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null); // Lưu package chi tiết trong modal
   const [relatedProducts, setRelatedProducts] = useState([]); // Lưu trữ sản phẩm cùng loại
+  const [kitImages, setKitImages] = useState([]); // Lưu trữ tất cả ảnh
+  const [selectedImage, setSelectedImage] = useState(0); // Index của ảnh đang được chọn
+  const [autoPlayInterval, setAutoPlayInterval] = useState(null);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (kitId) {
-      console.log("Kit ID:", kitId); // Kiểm tra kitId có hợp lệ không
-      fetchKitDetail();
-      fetchLabsByKit();
+      Promise.all([fetchKitDetail(), fetchLabsByKit()]).catch((error) => {
+        console.error("Lỗi khi tải dữ liệu:", error);
+      });
     }
   }, [kitId]);
+
+  useEffect(() => {
+    if (kitImages.length > 0) {
+      setKitImage(kitImages[selectedImage]);
+    }
+  }, [selectedImage, kitImages]);
+
+  useEffect(() => {
+    if (isPreviewVisible) {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        setAutoPlayInterval(null);
+      }
+      return;
+    }
+
+    if (kitImages.length > 1 && !isPreviewVisible) {
+      const interval = setInterval(() => {
+        setSelectedImage((current) => (current + 1) % kitImages.length);
+      }, 10000);
+      setAutoPlayInterval(interval);
+    }
+
+    return () => {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        setAutoPlayInterval(null);
+      }
+    };
+  }, [kitImages.length, isPreviewVisible]);
 
   const fetchKitDetail = async () => {
     setLoading(true);
@@ -61,29 +93,44 @@ const ProductDetail = () => {
       }
 
       setKitDetail(kitData);
-      fetchRelatedProducts(kitData["kits-category"].name);
-      setKitImage(kitData["kit-images"]?.[0]?.url || "Ảnh Kit");
       setComponents(kitData.components || []);
 
-      const packageResponse = await api.get(
-        `kits/${kitId}/packages?package-status=true`
-      );
-      const packageData = packageResponse.data.details.data.packages;
-
-      if (!packageData || packageData.length === 0) {
-        setPackages([]);
-        setPackageDetail(null);
-      } else {
-        setPackages(packageData);
-        setPackageDetail(packageData[0]);
+      // Xử lý ảnh kit
+      const images = kitData["kit-images"] || [];
+      if (images.length > 0) {
+        const imageUrls = images.slice(0, 5).map((img) => img.url);
+        setKitImages(imageUrls);
+        setKitImage(imageUrls[0]);
       }
 
-      setLoading(false);
+      try {
+        const packageResponse = await api.get(
+          `kits/${kitId}/packages?package-status=true`
+        );
+        const packageData = packageResponse.data.details.data.packages;
+
+        setPackages(packageData || []);
+        setPackageDetail(packageData?.length > 0 ? packageData[0] : null);
+      } catch (error) {
+        console.error("Lỗi khi tải packages:", error);
+        setPackages([]);
+        setPackageDetail(null);
+      }
+
+      // Fetch related products
+      try {
+        await fetchRelatedProducts(kitData["kits-category"].name);
+      } catch (error) {
+        console.error("Lỗi khi tải sản phẩm liên quan:", error);
+        setRelatedProducts([]);
+      }
     } catch (error) {
       console.error("Lỗi khi tải thông tin kit:", error);
       setKitDetail(null);
       setPackages([]);
       setPackageDetail(null);
+      setKitImages([]);
+    } finally {
       setLoading(false);
     }
   };
@@ -106,16 +153,9 @@ const ProductDetail = () => {
 
   const fetchLabsByKit = async () => {
     try {
-      console.log("Gọi API lấy labs"); // Kiểm tra API có được gọi không
       const labResponse = await api.get(`/kits/${kitId}/lab`);
       const labData = labResponse.data.details.data.labs;
-      console.log("Dữ liệu bài lab từ API:", labData); // Kiểm tra dữ liệu trả về
-
-      if (!labData || labData.length === 0) {
-        console.warn("Không tìm thấy bài lab nào cho kit này.");
-      }
-
-      setLabs(labData); // Cập nhật danh sách bài lab
+      setLabs(labData || []);
     } catch (error) {
       console.error("Lỗi khi tải danh sách bài lab:", error);
       setLabs([]);
@@ -217,6 +257,22 @@ const ProductDetail = () => {
     setSelectedPackage(null); // Xóa package được chọn
   };
 
+  const handleThumbnailClick = (index) => {
+    setSelectedImage(index);
+    // Reset autoplay interval
+    if (autoPlayInterval) {
+      clearInterval(autoPlayInterval);
+      setAutoPlayInterval(null);
+    }
+    // Chỉ tạo interval mới nếu không trong chế độ preview
+    if (!isPreviewVisible) {
+      const interval = setInterval(() => {
+        setSelectedImage((current) => (current + 1) % kitImages.length);
+      }, 10000);
+      setAutoPlayInterval(interval);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -224,30 +280,6 @@ const ProductDetail = () => {
       </div>
     );
   }
-
-  // if (!kitDetail || !packageDetail) {
-  //   return (
-  //     <div className="flex flex-col items-center justify-center h-screen">
-  //       <div className="text-xl text-gray-600 mb-4">
-  //         Không tìm thấy thông tin sản phẩm
-  //       </div>
-  //       <Button
-  //         type="primary"
-  //         onClick={() => navigate("/")}
-  //         className="bg-blue-500"
-  //       >
-  //         Quay về trang chủ
-  //       </Button>
-  //     </div>
-  //   );
-  // }
-
-  // Lấy hình ảnh từ kitDetail, nếu không có thì trả về mảng rỗng
-  // const images = kitDetail["kit-images"]?.map((img) => img.url) || [];
-
-  // const handleThumbnailClick = (index) => {
-  //   setSelectedImage(index);
-  // };
 
   return (
     <div className="container mx-auto px-4">
@@ -260,29 +292,47 @@ const ProductDetail = () => {
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/2">
-          {/* dung xoa */}
-          {/* <div className="w-1/5">
-              {images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Thumbnail ${index + 1}`}
-                  className={`w-full mb-2 rounded cursor-pointer hover:opacity-75 transition ${
-                    selectedImage === index ? "border-2 border-red-500" : ""
-                  }`}
-                  onClick={() => handleThumbnailClick(index)}
-                />
-              ))}
-            </div> */}
-          <TransformWrapper>
-            <TransformComponent>
-              <Image
-                src={kitImage}
-                alt={kitDetail.name}
-                className="!w-[32rem]  rounded-lg"
-              />
-            </TransformComponent>
-          </TransformWrapper>
+          {kitImages.length > 0 && (
+            <div className="flex gap-4">
+              <div className="w-24 flex flex-col gap-2">
+                {kitImages.map((image, index) => (
+                  <div key={index} className="relative aspect-square">
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className={`absolute inset-0 w-full h-full object-cover rounded cursor-pointer hover:opacity-75 transition ${
+                        selectedImage === index ? "border-2 border-red-500" : ""
+                      }`}
+                      onClick={() => handleThumbnailClick(index)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex-1 relative aspect-square">
+                <TransformWrapper>
+                  <TransformComponent>
+                    <Image
+                      src={kitImage}
+                      alt={kitDetail.name}
+                      className="!w-[400px] !h-full object-contain rounded-lg"
+                      preview={{
+                        onVisibleChange: (visible) => {
+                          setIsPreviewVisible(visible);
+                          if (visible) {
+                            // Khi mở preview
+                            if (autoPlayInterval) {
+                              clearInterval(autoPlayInterval);
+                              setAutoPlayInterval(null);
+                            }
+                          }
+                        },
+                      }}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="md:w-1/2">
