@@ -1,5 +1,4 @@
 import axios from "axios";
-import { toast } from "react-toastify";
 
 const baseUrl = "https://54.66.193.22:5000/api/";
 // const baseUrl = "http://54.66.193.22:5001/api/";
@@ -26,14 +25,18 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized errors and attempt token refresh
+    // Kiểm tra nếu là lỗi 401 và chưa thử refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (error.response?.data?.details?.errors?.["invalid-credentials"]) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+      }
+
       originalRequest._retry = true;
 
       try {
         const currentRefreshToken = localStorage.getItem("refreshToken");
         if (!currentRefreshToken) {
-          console.log(currentRefreshToken);
           throw new Error("No refresh token available");
         }
 
@@ -43,20 +46,13 @@ api.interceptors.response.use(
 
         const accessToken = response.data.details["access-token"];
         const refreshToken = response.data.details["refresh-token"];
-        console.log(refreshToken);
 
-        // Store the new tokens in localStorage
         localStorage.setItem("token", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
 
-        // Update the Authorization header with the new access token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
-        // Retry the original request with the new token
         return api(originalRequest);
-      } catch (refreshError) {
-        // Chỉ xử lý lỗi khi không thể refresh token
-        console.error("Error refreshing token:", refreshError);
+      } catch (error) {
         return Promise.reject(error);
       }
     }
