@@ -12,7 +12,6 @@ const AboutUs = () => {
          
           url('/product-page.png')
         `,
-        backgroundSize: "400px",
         backgroundColor: "#ffffff",
       }}
     >
