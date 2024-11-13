@@ -27,6 +27,8 @@ import ResetPassword from "./components/ResetPassword";
 import KitCategory from "./components/home/KitCategory";
 import CategoryDetailPage from "./pages/categoryDetailPage/CategoryDetailPage";
 import ContactPage from "./pages/contactpage/ContactPage";
+import About from "./components/About";
+import AboutUsPage from "./pages/aboutUsPage/AboutUsPage";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -116,6 +118,7 @@ function App() {
             path="/category/:categoryName"
             element={<CategoryDetailPage />}
           />
+          <Route path="/aboutUs" element={<AboutUsPage />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -117,7 +117,22 @@ function LoginInput() {
       const pendingToken = credential.pendingToken;
       // console.log(pendingToken);
       const user = result.user;
-      console.log("user: ", JSON.stringify(user));
+
+      // Xử lý displayName
+      let firstName = "";
+      let lastName = "";
+
+      if (user.displayName) {
+        if (user.displayName.includes(" ")) {
+          // Nếu có khoảng trắng, tách chuỗi
+          const nameParts = user.displayName.split(" ");
+          firstName = nameParts[0]; // Phần tử đầu tiên là first-name
+          lastName = nameParts.slice(1).join(" "); // Các phần còn lại là last-name
+        } else {
+          // Nếu không có khoảng trắng, toàn bộ là last-name
+          lastName = user.displayName;
+        }
+      }
 
       if (user) {
         try {
@@ -125,7 +140,11 @@ function LoginInput() {
             "pending-token": pendingToken,
             "id-token": idToken,
             "access-token": accessToken,
+            "last-name": lastName,
+            "first-name": firstName,
           });
+          // console.log("last", lastName);
+          // console.log("first", firstName);
           // console.log(response.data);
           if (response.data.status === "success") {
             // console.log(response.data);
@@ -460,6 +479,7 @@ function LoginInput() {
               <Input.Password
                 placeholder="Mật khẩu"
                 prefix={<i className="fas fa-lock"></i>}
+                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
               />
             </Form.Item>
             <Button
@@ -543,8 +563,8 @@ function LoginInput() {
                   message: "Vui lòng nhập họ của bạn!",
                 },
                 {
-                  pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
-                  message: "Họ chỉ được chứa chữ cái và khoảng trắng!",
+                  pattern: /^[a-zA-ZÀ-ỹ]+$/,
+                  message: "Họ chỉ được chứa chữ cái!",
                 },
                 {
                   min: 2,
@@ -685,6 +705,12 @@ function LoginInput() {
                 {
                   required: true,
                   message: "Vui lòng nhập mật khẩu của bạn!",
+                },
+                {
+                  pattern:
+                    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                  message:
+                    "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
                 },
               ]}
             >
