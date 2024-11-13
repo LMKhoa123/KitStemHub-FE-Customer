@@ -26,6 +26,7 @@ import Result from "./components/result/Result";
 import ResetPassword from "./components/ResetPassword";
 import KitCategory from "./components/home/KitCategory";
 import CategoryDetailPage from "./pages/categoryDetailPage/CategoryDetailPage";
+import ContactPage from "./pages/contactpage/ContactPage";
 import About from "./components/About";
 import AboutUsPage from "./pages/aboutUsPage/AboutUsPage";
 // import "antd/dist/antd.css";
@@ -85,6 +86,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/verify" element={<EmailVerification />} />
           <Route path="/password/reset" element={<ResetPassword />} />
           <Route
