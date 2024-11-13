@@ -627,10 +627,6 @@ function LoginInput() {
               name="phone-number"
               rules={[
                 {
-                  required: true,
-                  message: "Vui lòng nhập số điện thoại của bạn!",
-                },
-                {
                   pattern: /^(0[3|5|7|8|9])+([0-9]{8})\b/,
                   message: "Số điện thoại không hợp lệ! (VD: 0912345678)",
                 },
