@@ -1,10 +1,9 @@
-import { notification, Spin, Table, Rate, Input, Button, Tag } from "antd";
+import { notification, Table, Rate, Input, Button, Tag, message } from "antd";
 import { useEffect, useState } from "react";
 import api from "../../../../config/axios";
 
 function ProfileMyLabHistory() {
   const [dataSource, setDataSource] = useState([]); // Dữ liệu lab supports
-  const [loading, setLoading] = useState(true); // Trạng thái loading
   const [pagination, setPagination] = useState({
     current: 1, // Trang hiện tại, hiển thị từ 1
     pageSize: 20, // Số bản ghi trên mỗi trang
@@ -14,7 +13,6 @@ function ProfileMyLabHistory() {
   const [ratings, setRatings] = useState({}); // Lưu trữ đánh giá của người dùng
 
   const fetchLabSupports = async (page = 0, pageSize = 20) => {
-    setLoading(true); // Bắt đầu loading
     try {
       const response = await api.get("/labsupports/customers", {
         params: {
@@ -22,7 +20,6 @@ function ProfileMyLabHistory() {
           supported: true, // Thêm tham số supported=true
         },
       });
-      console.log("ne: ", response.data);
 
       if (response?.data?.details?.data) {
         const labSupportsData = response.data.details.data["lab-supports"];
@@ -37,31 +34,12 @@ function ProfileMyLabHistory() {
             current: currentPage,
             pageSize: pageSize,
           });
-          // notification.destroy();
-          // notification.success({
-          //   message: "Thành công",
-          //   description: "Lấy danh sách lịch sử hỗ trợ lab thành công!",
-          //   duration: 2,
-          // });
         } else {
           setDataSource([]); // Không có dữ liệu
-          // notification.destroy();
-          // notification.info({
-          //   message: "Chưa có dữ liệu",
-          //   description: "Chưa có lịch sử hỗ trợ lab.",
-          //   duration: 2,
-          // });
         }
       }
     } catch (error) {
-      console.error("Error fetching lab supports:", error);
-      // notification.error({
-      //   message: "Lỗi",
-      //   description: "Có lỗi xảy ra khi lấy dữ liệu lịch sử hỗ trợ lab!",
-      //   duration: 3,
-      // });
-    } finally {
-      setLoading(false); // Tắt trạng thái loading
+      console.error(error.response.data.details.message);
     }
   };
 
@@ -92,26 +70,16 @@ function ProfileMyLabHistory() {
 
     try {
       // Gọi API PUT request để lưu đánh giá và nhận xét
-      const respone = await api.put("/labsupports/review", {
+      const response = await api.put("/labsupports/review", {
         id, // ID của bản ghi
         rating, // Đánh giá của người dùng
         "feed-back": feedback, // Phản hồi của người dùng
       });
-      console.log(respone.data);
-      notification.destroy();
-      // Nếu thành công
-      notification.success({
-        message: "Thành công",
-        description: "Lưu đánh giá và nhận xét thành công!",
-      });
+      message.success(response?.data.details.message);
     } catch (error) {
       // Nếu có lỗi xảy ra
       console.error("Error:", error.response?.data || error);
-      notification.destroy();
-      notification.error({
-        message: "Lỗi",
-        description: "Có lỗi khi lưu đánh giá và nhận xét!",
-      });
+      message.error(error.response?.data.details.message);
     }
   };
 
@@ -220,20 +188,19 @@ function ProfileMyLabHistory() {
   return (
     <div className="bg-white p-10 w-full shadow-lg rounded mb-32">
       <h1 className="text-2xl font-semibold mb-6">Lịch sử hỗ trợ</h1>
-      <Spin spinning={loading}>
-        <Table
-          dataSource={dataSource} // Dữ liệu từ API
-          columns={columns} // Cấu trúc các cột
-          rowKey="id" // Khóa duy nhất cho mỗi dòng
-          pagination={{
-            total: pagination.total, // Tổng số bản ghi
-            current: pagination.current, // Trang hiện tại
-            pageSize: pagination.pageSize, // Số bản ghi trên mỗi trang
-            onChange: (page) =>
-              setPagination((prev) => ({ ...prev, current: page })), // Thay đổi trang
-          }}
-        />
-      </Spin>
+
+      <Table
+        dataSource={dataSource} // Dữ liệu từ API
+        columns={columns} // Cấu trúc các cột
+        rowKey="id" // Khóa duy nhất cho mỗi dòng
+        pagination={{
+          total: pagination.total, // Tổng số bản ghi
+          current: pagination.current, // Trang hiện tại
+          pageSize: pagination.pageSize, // Số bản ghi trên mỗi trang
+          onChange: (page) =>
+            setPagination((prev) => ({ ...prev, current: page })), // Thay đổi trang
+        }}
+      />
     </div>
   );
 }

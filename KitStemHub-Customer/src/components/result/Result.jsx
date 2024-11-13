@@ -60,8 +60,8 @@ const Result = () => {
       }
 
       let retryCount = 0;
-      const maxRetries = 5; // Số lần thử lại
-      const retryInterval = 3000; // Khoảng thời gian giữa các lần thử (ms)
+      const maxRetries = 1; // Số lần thử lại
+      const retryInterval = 1500; // Khoảng thời gian giữa các lần thử (ms)
 
       const checkVNPayStatus = async () => {
         try {
@@ -70,18 +70,19 @@ const Result = () => {
           const response = await api.get("payments/vnpay/callback", {
             params: queryParams,
           });
-          console.log(response.data);
           if (
             vnp_TransactionStatus === "00" &&
             response.data.status === "success"
           ) {
-            console.log(vnp_TransactionStatus);
             setPaymentStatus("success");
             setShowConfetti(true);
             setLoading(false);
             clearInterval(pollingInterval);
-          } else if (vnp_TransactionStatus === "02") {
-            console.log(vnp_TransactionStatus);
+          } else if (
+            vnp_TransactionStatus === "02" &&
+            response.data.status === "fail"
+          ) {
+            console.log("fail", response.data.status);
             setPaymentStatus("fail");
             setLoading(false);
             clearInterval(pollingInterval);
