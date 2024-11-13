@@ -26,6 +26,7 @@ import Result from "./components/result/Result";
 import ResetPassword from "./components/ResetPassword";
 import KitCategory from "./components/home/KitCategory";
 import CategoryDetailPage from "./pages/categoryDetailPage/CategoryDetailPage";
+import ContactPage from "./pages/contactpage/ContactPage";
 // import "antd/dist/antd.css";
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
@@ -83,6 +84,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/verify" element={<EmailVerification />} />
           <Route path="/password/reset" element={<ResetPassword />} />
           <Route

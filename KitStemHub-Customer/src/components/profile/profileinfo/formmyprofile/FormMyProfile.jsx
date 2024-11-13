@@ -20,18 +20,16 @@ function FormMyProfile() {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
-  const [specificAddress, setSpecificAddress] = useState(""); // Địa chỉ nhà cụ thể
+  const [specificAddress, setSpecificAddress] = useState("");
   const [fullAddress, setFullAddress] = useState(""); // Địa chỉ đầy đủ
   const [isUpdated, setIsUpdated] = useState(false);
-  const [isAddressModalVisible, setIsAddressModalVisible] = useState(false); // Trạng thái modal
+  const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Hàm để hiển thị modal chỉnh sửa địa chỉ
   const showAddressModal = () => {
     setIsAddressModalVisible(true);
   };
 
-  // Hàm để đóng modal chỉnh sửa địa chỉ
   const handleAddressModalClose = () => {
     setIsAddressModalVisible(false);
   };
@@ -48,16 +46,14 @@ function FormMyProfile() {
 
     const completeAddress = `${specificAddress}, ${selectedWardObj?.name_with_type || ""}, ${selectedDistrictObj?.name_with_type || ""}, ${selectedProvinceObj?.name_with_type || ""}`;
 
-    setFullAddress(completeAddress); // Hiển thị địa chỉ đầy đủ trên giao diện
-    setIsAddressModalVisible(false); // Đóng modal
+    setFullAddress(completeAddress);
+    setIsAddressModalVisible(false);
   };
 
   // Fetch profile data
   const fetchProfile = async () => {
     try {
       const response = await api.get("users/profile");
-      console.log("Lấy dữ liệu thành công", response.data);
-
       const userProfile = response.data.details.data["user-profile-dto"];
 
       setProfileData({
@@ -84,7 +80,6 @@ function FormMyProfile() {
         ? data.data.data
         : [];
       setProvinceList(provincesArray);
-      console.log("Updated provinceList:", provincesArray); // Debug log to verify data
     } catch (error) {
       console.error("Lỗi khi lấy danh sách tỉnh:", error);
     }
