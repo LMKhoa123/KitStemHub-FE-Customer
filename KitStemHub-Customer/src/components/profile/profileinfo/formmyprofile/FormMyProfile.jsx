@@ -75,6 +75,7 @@ function FormMyProfile() {
   const fetchProvinces = async () => {
     try {
       const response = await fetch(`${baseURL}/provinces/getAll?limit=-1`);
+      console.log("tỉnh: ", response);
       const data = await response.json();
       const provincesArray = Array.isArray(data.data.data)
         ? data.data.data
@@ -111,11 +112,8 @@ function FormMyProfile() {
       );
       const data = await response.json();
 
-      console.log("Wards API response:", data); // Kiểm tra phản hồi API
-
       const wardsArray = Array.isArray(data.data.data) ? data.data.data : []; // Truy cập đúng thuộc tính của API
       setWardList(wardsArray);
-      console.log("Updated wardList:", wardsArray); // Kiểm tra dữ liệu danh sách phường
     } catch (error) {
       console.error("Lỗi khi lấy danh sách phường:", error);
       setWardList([]); // Đảm bảo đặt giá trị mặc định nếu có lỗi
@@ -158,11 +156,9 @@ function FormMyProfile() {
       address: fullAddress || profileData.address,
     };
 
-    console.log("Payload gửi đi:", cleanData);
-
     try {
       const response = await api.put("users/profile", cleanData);
-      console.log("Profile updated successfully", response.data);
+
       Swal.fire({
         title: "Bạn có muốn lưu những thay đổi không?",
         showDenyButton: true,
