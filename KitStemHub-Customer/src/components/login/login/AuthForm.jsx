@@ -556,7 +556,7 @@ function LoginInput() {
 
             <Form.Item
               label="Họ"
-              name="first-name"
+              name="last-name"
               rules={[
                 {
                   required: true,
@@ -580,7 +580,7 @@ function LoginInput() {
 
             <Form.Item
               label="Tên"
-              name="last-name"
+              name="first-name"
               rules={[
                 {
                   required: true,
