@@ -203,22 +203,6 @@ function FormMyProfile() {
           <label className="text-gray-700 font-semibold">Họ</label>
           <input
             className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
-              errors.firstName ? "border-red-500" : "border-gray-300"
-            }`}
-            value={profileData.firstName}
-            onChange={(e) =>
-              setProfileData({ ...profileData, firstName: e.target.value })
-            }
-          />
-          {errors.firstName && (
-            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="text-gray-700 font-semibold">Tên</label>
-          <input
-            className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
               errors.lastName ? "border-red-500" : "border-gray-300"
             }`}
             value={profileData.lastName}
@@ -228,6 +212,22 @@ function FormMyProfile() {
           />
           {errors.lastName && (
             <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label className="text-gray-700 font-semibold">Tên</label>
+          <input
+            className={`w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring ${
+              errors.firstName ? "border-red-500" : "border-gray-300"
+            }`}
+            value={profileData.firstName}
+            onChange={(e) =>
+              setProfileData({ ...profileData, firstName: e.target.value })
+            }
+          />
+          {errors.firstName && (
+            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
           )}
         </div>
 
