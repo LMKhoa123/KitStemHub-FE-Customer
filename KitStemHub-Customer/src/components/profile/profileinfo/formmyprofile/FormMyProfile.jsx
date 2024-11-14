@@ -67,7 +67,7 @@ function FormMyProfile() {
 
       setFullAddress(userProfile["address"]); // Hiển thị địa chỉ ban đầu từ API
     } catch (error) {
-      console.log("Lấy dữ liệu thất bại", error);
+      console.log(error.response.data.details.message);
     }
   };
 

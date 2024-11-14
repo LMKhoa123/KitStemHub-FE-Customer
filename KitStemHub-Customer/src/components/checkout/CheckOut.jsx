@@ -158,7 +158,6 @@ const CheckOut = () => {
         ? data.data.data
         : [];
       setProvinceList(provincesArray);
-      console.log("Updated provinceList:", provincesArray); // Debug log to verify data
     } catch (error) {
       console.error("Lỗi khi lấy danh sách tỉnh:", error);
     }
@@ -175,7 +174,6 @@ const CheckOut = () => {
         ? data.data.data
         : [];
       setDistrictList(districtsArray);
-      console.log("Updated districtList:", districtsArray);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách quận:", error);
       setDistrictList([]); // Reset danh sách nếu có lỗi
@@ -189,12 +187,8 @@ const CheckOut = () => {
         `${baseURL}/wards/getByDistrict?districtCode=${districtCode}&limit=-1`
       );
       const data = await response.json();
-
-      console.log("Wards API response:", data); // Kiểm tra phản hồi API
-
       const wardsArray = Array.isArray(data.data.data) ? data.data.data : []; // Truy cập đúng thuộc tính của API
       setWardList(wardsArray);
-      console.log("Updated wardList:", wardsArray); // Kiểm tra dữ liệu danh sách phường
     } catch (error) {
       console.error("Lỗi khi lấy danh sách phường:", error);
       setWardList([]); // Đảm bảo đặt giá trị mặc định nếu có lỗi
@@ -230,15 +224,12 @@ const CheckOut = () => {
         },
       });
 
-      console.log("Thông tin phản hồi:", response.data);
-
       // Kiểm tra headers (chữ thường và chữ hoa)
       const locationHeader =
         response.headers["location"] || response.headers["Location"];
-      console.log(locationHeader);
+
       if (locationHeader) {
         const orderId = locationHeader.split("/").pop(); // Tách orderId từ URL trong header 'location'
-        console.log("Mã đơn hàng:", orderId);
 
         // Lưu `orderId` vào `localStorage` để dùng khi người dùng quay lại từ VNPay
         localStorage.setItem("orderId", orderId);
@@ -255,9 +246,8 @@ const CheckOut = () => {
           const paymentResponse = await api.post("payments/vnpay", {
             "order-id": orderId,
           });
-          console.log("Payment Response:", paymentResponse);
           const paymentUrl = paymentResponse?.data?.details?.data?.url;
-          console.log(paymentUrl);
+
           if (paymentUrl) {
             window.location.href = paymentUrl;
           } else {
@@ -329,7 +319,6 @@ const CheckOut = () => {
       setShippingFee(responseShippingFee.data.details.data.price);
     } catch (error) {
       console.error("Lỗi khi cập nhật phí vận chuyển:", error);
-      // Có thể thêm xử lý lỗi ở đây, ví dụ hiển thị thông báo cho người dùng
     }
   };
 

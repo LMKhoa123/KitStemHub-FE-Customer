@@ -5,7 +5,6 @@ import api from "../../../../config/axios";
 
 function ProfileMyLab({ orderId }) {
   const [labData, setLabData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [supportStatus, setSupportStatus] = useState({});
   const [shippingStatus, setShippingStatus] = useState(""); // Thêm state cho trạng thái giao hàng
 
@@ -39,10 +38,8 @@ function ProfileMyLab({ orderId }) {
 
       setSupportStatus(initialSupportStatus);
       setLabData(labSupports);
-      setLoading(false);
     } catch (error) {
-      console.error("Error fetching lab data:", error);
-      setLoading(false);
+      console.error(error.response.data.details.message);
     }
   };
 
@@ -63,7 +60,6 @@ function ProfileMyLab({ orderId }) {
       const response = await api.post(
         `labsupports/orders/${orderId}/packages/${packageId}/labs/${labId}`
       );
-      console.log("ho troj: ", response.data);
 
       notification.success({
         message: response.data.detailss.message,
@@ -77,9 +73,6 @@ function ProfileMyLab({ orderId }) {
           "Bạn đã gửi yêu cầu hổ trợ cho bài lab này!",
         duration: 3,
       });
-      console.log(
-        error?.response.data?.detailss?.errors["invalid-credentials"]
-      );
       // Nếu có lỗi, phục hồi trạng thái ban đầu
       setSupportStatus((prevStatus) => ({
         ...prevStatus,
@@ -149,7 +142,6 @@ function ProfileMyLab({ orderId }) {
       dataSource={labData}
       columns={columns}
       rowKey="lab.id"
-      loading={loading}
       pagination={false}
     />
   );

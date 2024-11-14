@@ -6,7 +6,6 @@ import ProfileMyLab from "../../profilelab/profilemylab/ProfileMyLab";
 
 function CartMyProfile() {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [isLabModalVisible, setIsLabModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedNote, setSelectedNote] = useState(null);
@@ -22,41 +21,36 @@ function CartMyProfile() {
 
   // Gọi API để lấy dữ liệu đơn hàng
   const fetchOrders = async (page = 1) => {
-    setLoading(true);
     try {
       const params = {
         page: page - 1,
       };
-      // Conditionally add `created-from` and `created-to` if they are defined
+
       if (filters.createdFrom) {
         params["created-from"] = filters.createdFrom.format("YYYY-MM-DD");
       }
       if (filters.createdTo) {
         params["created-to"] = filters.createdTo.format("YYYY-MM-DD");
       }
-      // Lấy dữ liệu từ API, giảm `page` để phù hợp với zero-based indexing của API
+
       const response = await api.get("orders/customers", { params });
-      console.log(response.data);
+
       const { data } = response.data.details;
 
       if (data.orders && data.orders.length > 0) {
-        setOrders(data.orders); // Cập nhật danh sách đơn hàng
-        setTotalPages(data["total-pages"]); // Cập nhật tổng số trang từ API
-        setCurrentPage(data["current-page"] + 1); // Điều chỉnh `current-page` để phù hợp với giao diện
-        console.log("Updated currentPage:", data["current-page"] + 1);
+        setOrders(data.orders);
+        setTotalPages(data["total-pages"]);
+        setCurrentPage(data["current-page"] + 1);
       } else {
         setOrders([]);
       }
-
-      setLoading(false);
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      setLoading(false);
+      console.error(error.response.data.details.message);
     }
   };
 
   useEffect(() => {
-    fetchOrders(currentPage); // Gọi API khi trang hiện tại thay đổi
+    fetchOrders(currentPage);
   }, [currentPage, filters]);
 
   const handleTableChange = (pagination) => {
@@ -217,7 +211,6 @@ function CartMyProfile() {
         dataSource={orders} // Hiển thị danh sách đơn hàng
         columns={columns}
         rowKey="id"
-        loading={loading}
         pagination={{
           current: currentPage,
           total: totalPages * pageSize,
