@@ -50,7 +50,7 @@ function LoginInput() {
 
   useEffect(() => {
     const urlParams = window.location.search.substring(1).split("&");
-    console.log(urlParams);
+    //console.log(urlParams);
     let email, token;
 
     urlParams.forEach((param) => {
@@ -109,7 +109,7 @@ function LoginInput() {
       const result = await signInWithPopup(auth, googleProvider);
       // This gives you a Google Access Token. You can use it to access the Google API.
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      console.log("Credential: ", JSON.stringify(credential));
+      // console.log("Credential: ", JSON.stringify(credential));
       const accessToken = credential.accessToken;
       // console.log("acc " + accessToken);
       const idToken = credential.idToken;
@@ -211,8 +211,8 @@ function LoginInput() {
             }
           : values
       );
-      console.log("Response:", response);
-      console.log("Response data:", response?.data);
+      // console.log("Response:", response);
+      // console.log("Response data:", response?.data);
 
       if (response.data.status === "success") {
         if (isSignUpMode) {
@@ -400,7 +400,7 @@ function LoginInput() {
     const parts = [specificAddress, ward, district, province].filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : "";
   };
-  console.log(buildFullAddress);
+  // console.log(buildFullAddress);
   useEffect(() => {
     if (isSignUpMode) {
       const newAddress = buildFullAddress();
