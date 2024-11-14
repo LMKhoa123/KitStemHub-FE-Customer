@@ -126,13 +126,18 @@ function FormMyProfile() {
     const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})\b/; // phải là số theo đầu số việt nam
     const newErrors = {};
 
-    if (!nameRegex.test(profileData.lastName)) {
-      newErrors.firstName =
+    if (!profileData.lastName.trim()) {
+      newErrors.lastName = "Vui lòng nhập họ của bạn.";
+    } else if (!nameRegex.test(profileData.lastName)) {
+      newErrors.lastName =
         "Họ chỉ được chứa chữ cái và không có ký tự đặc biệt.";
     }
 
-    if (!nameRegex.test(profileData.firstName)) {
-      newErrors.lastName =
+    // Kiểm tra tên
+    if (!profileData.firstName.trim()) {
+      newErrors.firstName = "Vui lòng nhập tên của bạn.";
+    } else if (!nameRegex.test(profileData.firstName)) {
+      newErrors.firstName =
         "Tên chỉ được chứa chữ cái và không có ký tự đặc biệt.";
     }
 
