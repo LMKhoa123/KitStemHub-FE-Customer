@@ -7,11 +7,11 @@ function NavbarEx({ childrenItem }) {
       <header className="py-6 mx-10">
         <nav className="flex flex-row justify-between items-center">
           <div className="logo basis-1/6 text-center text-xl font-semibold cursor-pointer">
-            <NavLink to="/">KitStemHub</NavLink>
+            <NavLink to="/home">KitStemHub</NavLink>
           </div>
           <ul className=" basis-2/5 flex items-center justify-between text-md font-normal text-gray-400">
             <li className="kt-menu-item">
-              <NavLink to="/">Trang Chủ</NavLink>
+              <NavLink to="/home">Trang Chủ</NavLink>
             </li>
             <li className="kt-menu-item">
               <NavLink to="/contact">Liên Hệ</NavLink>
